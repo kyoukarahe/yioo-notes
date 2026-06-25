@@ -36,3 +36,11 @@ future phases.
   `/notes/*` behaviors pointing at S3 origin `s3-yioo-notes`.
 - The notes bucket remains private; direct S3 access returns `403`, and
   CloudFront access will return `403` until Phase 6 uploads `dist/notes/...`.
+- Phase 6 deployed live notes objects under `s3://yioo-notes/notes/...`; both
+  `/notes` and `/notes/` resolve to the notes index through the CloudFront
+  Function.
+- HTML/JSON/XML uploads need explicit content type metadata in the deploy
+  script; otherwise S3 may serve HTML without `charset=utf-8`.
+- The shared `yioo-link-main-static-security-20260518` response headers policy
+  needed `https://www.google.com` in `connect-src` for GA's live
+  `www.google.com/g/collect` request.

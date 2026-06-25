@@ -8,12 +8,12 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 5. AWS notes origin
+Phase: 6. Deploy test build
 Status: verified
-Last safe state: Phase 4 local visual QA fixes were committed and pushed to
-`origin/main`; Phase 5 AWS notes origin changes are applied, verified,
+Last safe state: Phase 5 AWS notes origin changes are applied, verified,
 committed, and pushed, with no EC2, mail-service, or yioo-tools changes.
-Next step: Start Phase 6 deploy test build.
+Next step: Commit and push Phase 6 deploy script/progress, then start Phase 7
+`yioo-link` sitemap coordination.
 
 ## Phase Log
 
@@ -388,6 +388,84 @@ Errors encountered:
 | --- | --- | --- |
 | PowerShell `ConvertFrom-Json -Depth` was not supported in this environment. | Tried to generate the updated CloudFront config with PowerShell JSON parsing. | Switched to a Node script for config generation. |
 | Node JSON parsing failed on the CloudFront backup because `Out-File` wrote a UTF-8 BOM. | Tried to parse the backup JSON directly. | Stripped the BOM before JSON.parse and regenerated the updated config. |
+
+### Phase 6. Deploy test build
+
+Status: verified
+Started: 2026-06-26
+Finished: 2026-06-26
+Scope: Upload the verified notes build to `s3://yioo-notes/notes/...`, create a
+CloudFront invalidation, and confirm live `/notes/` routes work.
+Files changed:
+
+- `scripts/deploy.ps1`
+- `docs/progress.md`
+
+Commands run:
+
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\deploy.ps1 -DryRun`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\deploy.ps1`
+- `aws cloudfront wait invalidation-completed --distribution-id EWYEJXEIKC81C --id I4G27ZPK71ZQYYJ9804I9VLJ6F`
+- `aws s3 ls s3://yioo-notes/notes/ --recursive`
+- `curl.exe -I https://yioo.link/notes`
+- `curl.exe -I https://yioo.link/notes/`
+- `curl.exe -I https://yioo.link/notes/2026-06-26-test-note/`
+- `curl.exe -I https://yioo.link/notes/assets/posts/2026-06-26-test-note/test-image.webp`
+- `curl.exe -I https://yioo.link/notes/posts.manifest.json`
+- `curl.exe -I https://yioo.link/notes/sitemap.xml`
+- `curl.exe -s https://yioo.link/notes/2026-06-26-test-note/`
+- `curl.exe -s https://yioo.link/notes/sitemap.xml`
+- Existing route checks for root, `/api/health`, `/healthz`, `/tools/`, and
+  `https://tools.yioo.link/tools/ko/`.
+- `aws cloudfront update-response-headers-policy --id 8e1c7af3-7749-449b-a437-2938e261c9b9`
+- `aws cloudfront create-invalidation --distribution-id EWYEJXEIKC81C --paths "/notes*" "/notes/*"`
+- `aws cloudfront wait invalidation-completed --distribution-id EWYEJXEIKC81C --id ICCQB9V48Y9IWA0RWTKUBWGCB9`
+- Playwright live browser checks for `/notes/` and
+  `/notes/2026-06-26-test-note/`.
+
+Verification:
+
+- Dry-run deploy produced the expected six notes uploads.
+- Real deploy uploaded:
+  - `notes/index.html`
+  - `notes/2026-06-26-test-note/index.html`
+  - `notes/assets/posts/2026-06-26-test-note/test-image.webp`
+  - `notes/favicon.svg`
+  - `notes/posts.manifest.json`
+  - `notes/sitemap.xml`
+- First deploy invalidation completed: `I4G27ZPK71ZQYYJ9804I9VLJ6F`.
+- HTML metadata was corrected to `Content-Type: text/html; charset=utf-8`.
+- JSON metadata was corrected to `Content-Type: application/json; charset=utf-8`.
+- XML metadata was corrected to `Content-Type: application/xml; charset=utf-8`.
+- Second invalidation completed after metadata/CSP fixes:
+  `ICCQB9V48Y9IWA0RWTKUBWGCB9`.
+- `https://yioo.link/notes` and `https://yioo.link/notes/` return `200`.
+- `https://yioo.link/notes/2026-06-26-test-note/` returns `200`.
+- The test image returns `200`, `Content-Type: image/webp`, and long-cache
+  headers.
+- Manifest and sitemap return `200` and include the test post URL.
+- Live post HTML includes canonical URL, `og:url`, and test image references.
+- Root, `/api/health`, `/healthz`, `/tools/`, and
+  `https://tools.yioo.link/tools/ko/` still return `200`.
+- Playwright live post console check returned 0 errors and 0 warnings after the
+  CSP `connect-src` update.
+
+Commit:
+Push:
+Deployment/invalidation: S3 upload completed. Invalidation IDs:
+`I4G27ZPK71ZQYYJ9804I9VLJ6F`, `I4S3XVMYHHKE6W0M1LX1U71IXZ`, and
+`ICCQB9V48Y9IWA0RWTKUBWGCB9`.
+Rollback state: Restore previous S3 object versions or delete uploaded
+`notes/` objects, then invalidate `/notes*` and `/notes/*`.
+Next step: Commit and push Phase 6 deploy script/progress, then start Phase 7
+`yioo-link` sitemap coordination.
+
+Errors encountered:
+
+| Error | Attempt | Resolution |
+| --- | --- | --- |
+| First live deploy served HTML as `text/html` without `charset=utf-8`. | Checked live `curl -I` headers after deploy. | Updated `scripts/deploy.ps1` to rewrite HTML/JSON/XML content types explicitly and redeployed. |
+| Live Playwright post check saw GA CSP errors for `https://www.google.com/g/collect`. | Opened live post with Playwright. | Updated shared response headers policy `8e1c7af3-7749-449b-a437-2938e261c9b9` to include `https://www.google.com` in `connect-src`, invalidated `/notes*`, and rechecked console. |
 
 Errors encountered:
 
