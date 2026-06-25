@@ -30,3 +30,9 @@ future phases.
   because the notes repo does not serve the root yioo-link asset. The notes
   layout now injects that loader only on `yioo.link` or subdomains.
 - Keep `output/` and `.playwright-cli/` untracked; they are local QA artifacts.
+- Phase 5 created notes OAC `E3GOFI784M6TJF` and CloudFront Function
+  `yioo-notes-uri-rewrite`.
+- The main CloudFront distribution `EWYEJXEIKC81C` now has `/notes` and
+  `/notes/*` behaviors pointing at S3 origin `s3-yioo-notes`.
+- The notes bucket remains private; direct S3 access returns `403`, and
+  CloudFront access will return `403` until Phase 6 uploads `dist/notes/...`.

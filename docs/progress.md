@@ -8,13 +8,14 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 4. Local visual QA
-Status: verified
-Last safe state: Phase 3 SEO/manifest implementation was committed and pushed
-to `origin/main`; Phase 4 local visual QA fixes were committed and pushed to
-`origin/main`, with no runtime AWS or application changes.
-Next step: Begin Phase 5 AWS notes origin only after re-checking live root, API,
-health, and tools routes.
+Phase: 5. AWS notes origin
+Status: in-progress
+Last safe state: Phase 4 local visual QA fixes were committed and pushed to
+`origin/main`; Phase 5 AWS notes origin changes are applied and verified in
+AWS, with no EC2, mail-service, or yioo-tools changes. Phase 5 still needs its
+repo commit and push.
+Next step: Commit and push the Phase 5 infra files and progress notes, then
+start Phase 6 deploy test build.
 
 ## Phase Log
 
@@ -303,13 +304,92 @@ Verification:
   article/text/image elements.
 - The post cover image was complete with natural width 1200.
 
-Commit:
 Commit: `dff98e5` (`fix: complete local visual QA`)
 Push: Success to `origin/main` using the registered `yioo-notes` deploy key.
 Deployment/invalidation: none
 Rollback state: Revert only Phase 4 QA doc/ignore changes if needed; no runtime
 rollback is required.
 Next step: Start Phase 5 AWS notes origin.
+
+### Phase 5. AWS notes origin
+
+Status: in-progress
+Started: 2026-06-26
+Finished: 2026-06-26
+Scope: Configure the `yioo-notes` private S3 bucket and main `yioo.link`
+CloudFront distribution so `/notes` and `/notes/*` can serve notes static
+objects without changing EC2, mail-service, or yioo-tools routing.
+Files changed:
+
+- `infra/cloudfront/yioo-notes-uri-rewrite.js`
+- `infra/aws/yioo-notes-bucket-policy.json`
+- `docs/progress.md`
+
+Commands run:
+
+- `aws --version`
+- `aws sts get-caller-identity`
+- `curl.exe -I https://yioo.link/`
+- `curl.exe -I https://yioo.link/api/health`
+- `curl.exe -I https://yioo.link/healthz`
+- `curl.exe -I https://yioo.link/tools/`
+- `aws cloudfront get-distribution-config --id EWYEJXEIKC81C`
+- `aws s3api get-bucket-location --bucket yioo-notes`
+- `aws s3api get-public-access-block --bucket yioo-notes`
+- `aws s3api get-bucket-versioning --bucket yioo-notes`
+- `aws s3api get-bucket-encryption --bucket yioo-notes`
+- `aws s3api get-bucket-policy --bucket yioo-notes`
+- `aws s3api list-objects-v2 --bucket yioo-notes --max-items 5`
+- `aws cloudfront list-origin-access-controls`
+- `aws cloudfront create-origin-access-control`
+- `aws cloudfront create-function --name yioo-notes-uri-rewrite`
+- `aws cloudfront publish-function --name yioo-notes-uri-rewrite`
+- `aws s3api put-bucket-versioning --bucket yioo-notes --versioning-configuration Status=Enabled`
+- `aws s3api put-bucket-tagging --bucket yioo-notes`
+- `aws s3api put-bucket-policy --bucket yioo-notes`
+- `aws cloudfront update-distribution --id EWYEJXEIKC81C`
+- `aws cloudfront wait distribution-deployed --id EWYEJXEIKC81C`
+- Post-change route and AWS verification commands.
+
+Verification:
+
+- Pre-change `https://yioo.link/`, `/api/health`, `/healthz`, and `/tools/`
+  returned `200`.
+- Pre-change CloudFront config was backed up locally to
+  `output/aws/phase5-cloudfront-before.json`.
+- S3 bucket `yioo-notes` is in `ap-northeast-1`, public access block remains
+  fully enabled, and direct S3 object access returns `403`.
+- S3 bucket versioning is enabled.
+- S3 bucket tags are set: `Project=yioo`, `App=yioo-notes`,
+  `Purpose=notes-static`.
+- S3 bucket policy allows `s3:GetObject` only from CloudFront distribution
+  `EWYEJXEIKC81C`.
+- Created notes OAC `E3GOFI784M6TJF`.
+- Created and published CloudFront Function `yioo-notes-uri-rewrite`.
+- Updated CloudFront distribution `EWYEJXEIKC81C`; deployed status confirmed.
+- CloudFront now has `s3-yioo-notes` origin pointing to
+  `yioo-notes.s3.ap-northeast-1.amazonaws.com` with OAC `E3GOFI784M6TJF`.
+- CloudFront now has `/notes` and `/notes/*` behaviors targeting
+  `s3-yioo-notes`, each with one viewer-request Function association.
+- Post-change `https://yioo.link/`, `/api/health`, `/healthz`, and `/tools/`
+  returned `200`.
+- `https://yioo.link/notes/` returned `403`, which is expected until Phase 6
+  uploads the notes build objects.
+
+Commit:
+Push:
+Deployment/invalidation: CloudFront distribution update deployed. Current
+CloudFront config ETag after Phase 5 is `EN1VRQENFRJN5`.
+Rollback state: Restore the pre-change CloudFront distribution config, remove
+the notes bucket policy/OAC additions if applied, and leave EC2 untouched.
+Next step: Commit and push Phase 5 infra files and progress notes.
+
+Errors encountered:
+
+| Error | Attempt | Resolution |
+| --- | --- | --- |
+| PowerShell `ConvertFrom-Json -Depth` was not supported in this environment. | Tried to generate the updated CloudFront config with PowerShell JSON parsing. | Switched to a Node script for config generation. |
+| Node JSON parsing failed on the CloudFront backup because `Out-File` wrote a UTF-8 BOM. | Tried to parse the backup JSON directly. | Stripped the BOM before JSON.parse and regenerated the updated config. |
 
 Errors encountered:
 
