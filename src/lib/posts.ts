@@ -22,7 +22,27 @@ export type Post = PostFrontmatter & {
   body: string;
   html: string;
   url: string;
+  canonicalUrl: string;
+  coverUrl?: string;
 };
+
+export type PublicPostManifestItem = {
+  slug: string;
+  title: string;
+  date: string;
+  updated?: string;
+  tags: string[];
+  summary: string;
+  cover?: string;
+  url: string;
+  canonicalUrl: string;
+};
+
+const siteUrl = "https://yioo.link";
+
+export function absoluteUrl(pathname: string): string {
+  return new URL(pathname, siteUrl).toString();
+}
 
 const postsDirectory = path.join(process.cwd(), "content", "posts");
 
@@ -64,6 +84,8 @@ function readPost(filePath: string): Post {
   const slug = assertString(data.slug, "slug", filePath);
   const status = data.status === "draft" ? "draft" : "published";
   const url = `/notes/${slug}/`;
+  const canonicalPath = typeof data.canonical === "string" ? data.canonical : url;
+  const cover = typeof data.cover === "string" ? data.cover : undefined;
 
   return {
     title: assertString(data.title, "title", filePath),
@@ -73,12 +95,14 @@ function readPost(filePath: string): Post {
     status,
     tags: normalizeTags(data.tags),
     summary: assertString(data.summary, "summary", filePath),
-    cover: typeof data.cover === "string" ? data.cover : undefined,
-    canonical: typeof data.canonical === "string" ? data.canonical : undefined,
+    cover,
+    canonical: canonicalPath,
     sourcePath: filePath,
     body: parsed.content,
     html: marked.parse(parsed.content, { async: false }) as string,
     url,
+    canonicalUrl: absoluteUrl(canonicalPath),
+    coverUrl: cover ? absoluteUrl(cover) : undefined,
   };
 }
 
@@ -91,4 +115,18 @@ export function getAllPosts(): Post[] {
 
 export function getPostBySlug(slug: string): Post | undefined {
   return getAllPosts().find((post) => post.slug === slug);
+}
+
+export function getPublicPostManifest(): PublicPostManifestItem[] {
+  return getAllPosts().map((post) => ({
+    slug: post.slug,
+    title: post.title,
+    date: post.date,
+    updated: post.updated,
+    tags: post.tags,
+    summary: post.summary,
+    cover: post.cover,
+    url: post.url,
+    canonicalUrl: post.canonicalUrl,
+  }));
 }

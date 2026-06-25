@@ -16,9 +16,34 @@ if (!post) {
 }
 
 const canonicalPath = post.canonical ?? post.url;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.title,
+  description: post.summary,
+  url: post.canonicalUrl,
+  datePublished: post.date,
+  dateModified: post.updated ?? post.date,
+  author: {
+    "@type": "Person",
+    name: "yioo",
+  },
+  image: post.coverUrl ? [post.coverUrl] : undefined,
+  keywords: post.tags,
+};
 ---
 
-<BaseLayout title={post.title} description={post.summary} canonicalPath={canonicalPath}>
+<BaseLayout
+  title={post.title}
+  description={post.summary}
+  canonicalPath={canonicalPath}
+  ogType="article"
+  imagePath={post.cover}
+  publishedTime={post.date}
+  modifiedTime={post.updated ?? post.date}
+  tags={post.tags}
+  structuredData={structuredData}
+>
   <article class="article">
     <header class="article-header">
       <a class="back-link" href="/notes/">Notes</a>

@@ -8,14 +8,13 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 2. Test content
+Phase: 3. SEO and manifest
 Status: in-progress
-Last safe state: Phase 1 Astro scaffold was committed and pushed to
-`origin/main`; Phase 2 test content is being added locally with no runtime AWS
-or application changes.
-Next step: Add the required published test post and WebP asset, then verify the
-index page, post page, image path, manifest, and sitemap once Phase 3 generation
-is in place.
+Last safe state: Phase 2 test content was committed and pushed to
+`origin/main`; Phase 3 SEO/manifest implementation is being added locally with
+no runtime AWS or application changes.
+Next step: Add generated post manifest, notes sitemap, article metadata, and
+stronger build verification.
 
 ## Phase Log
 
@@ -133,9 +132,9 @@ Errors encountered:
 
 ### Phase 2. Test content
 
-Status: in-progress
+Status: verified
 Started: 2026-06-26
-Finished:
+Finished: 2026-06-26
 Scope: Add one published test note and one real post-scoped WebP image asset.
 Files changed:
 
@@ -169,14 +168,15 @@ Verification:
 - Local preview returned `200` for `/notes/2026-06-26-test-note/`.
 - Local preview returned `200` and `Content-Type: image/webp` for the test
   image.
-- Manifest and sitemap inclusion remain pending until Phase 3 generation is
-  implemented.
+- Phase 3 generation verified that the test post appears in
+  `posts.manifest.json`.
+- Phase 3 generation verified that the test post appears in `sitemap.xml`.
 
-Commit:
-Push:
+Commit: `cbec9d5` (`feat: add notes test post`)
+Push: Success to `origin/main` using the registered `yioo-notes` deploy key.
 Deployment/invalidation: none
 Rollback state: Remove the test post and asset folder, then rebuild.
-Next step: Generate the WebP test image, build, and verify local routes.
+Next step: Continue Phase 3 SEO and manifest implementation.
 
 Errors encountered:
 
@@ -184,3 +184,64 @@ Errors encountered:
 | --- | --- | --- |
 | No local `magick`, `cwebp`, or `ffmpeg` command was available for WebP generation. | Checked local image tooling. | Used temporary `sharp` installation with `--no-save`. |
 | First Node/sharp one-liner failed because PowerShell quoting stripped JS string quotes. | Tried to generate WebP with `node -e`. | Passed the JS code through stdin to `node -`, then generated the image successfully. |
+
+### Phase 3. SEO and manifest
+
+Status: in-progress
+Started: 2026-06-26
+Finished:
+Scope: Add generated post manifest, generated notes sitemap, article/index SEO
+metadata, structured data, and stronger build verification.
+Files changed:
+
+- `src/lib/posts.ts`
+- `src/layouts/BaseLayout.astro`
+- `src/pages/notes/index.astro`
+- `src/pages/notes/[slug]/index.astro`
+- `src/pages/notes/posts.manifest.json.ts`
+- `src/pages/notes/sitemap.xml.ts`
+- `scripts/verify-build.mjs`
+- `docs/progress.md`
+
+Commands run:
+
+- `npm.cmd run check`
+- `npm.cmd run build`
+- `npm.cmd run verify:build`
+- `Get-ChildItem -Recurse -File dist/notes`
+- `Get-Content -Raw dist/notes/posts.manifest.json`
+- `Get-Content -Raw dist/notes/sitemap.xml`
+- `npm.cmd run preview -- --port 4321`
+- `curl.exe -I http://127.0.0.1:4321/notes/posts.manifest.json`
+- `curl.exe -I http://127.0.0.1:4321/notes/sitemap.xml`
+- `curl.exe -s http://127.0.0.1:4321/notes/posts.manifest.json`
+- `curl.exe -s http://127.0.0.1:4321/notes/sitemap.xml`
+- `curl.exe -s http://127.0.0.1:4321/notes/2026-06-26-test-note/`
+
+Verification:
+
+- `npm.cmd run check` passed with 0 errors, 0 warnings, and 0 hints.
+- Build generated:
+  - `dist/notes/index.html`
+  - `dist/notes/2026-06-26-test-note/index.html`
+  - `dist/notes/assets/posts/2026-06-26-test-note/test-image.webp`
+  - `dist/notes/posts.manifest.json`
+  - `dist/notes/sitemap.xml`
+- `npm.cmd run verify:build` verified the test post, image asset, generated
+  manifest, generated sitemap, canonical URL, `og:url`, and absence of
+  draft/private output.
+- Manifest includes `2026-06-26-test-note` with canonical URL
+  `https://yioo.link/notes/2026-06-26-test-note/`.
+- Sitemap includes `https://yioo.link/notes/` and
+  `https://yioo.link/notes/2026-06-26-test-note/`.
+- Local preview returned `200` for `/notes/posts.manifest.json`.
+- Local preview returned `200` for `/notes/sitemap.xml`.
+- Post HTML includes article Open Graph metadata, Twitter large-image metadata,
+  and JSON-LD `BlogPosting` structured data.
+
+Commit:
+Push:
+Deployment/invalidation: none
+Rollback state: Revert Phase 3 SEO/manifest files; keep Phase 2 content source
+untouched unless content metadata is proven invalid.
+Next step: Implement endpoints and run check/build/verify.

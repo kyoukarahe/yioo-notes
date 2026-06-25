@@ -15,3 +15,14 @@ future phases.
   test post and one real image asset.
 - Design work happens after the blog pipeline is live and must pass screenshot,
   vision, and 90/100 scorecard checks before adoption.
+
+## 2026-06-26 Implementation
+
+- Placing Astro pages under `src/pages/notes/` generates deploy-ready output
+  under `dist/notes/...` without needing Astro `base`.
+- Local Astro preview serves `/notes/` but not `/notes`; exact `/notes` to
+  `/notes/` behavior still belongs to the CloudFront routing phase.
+- The test post fixture slug is `2026-06-26-test-note`.
+- The generated notes manifest path is `/notes/posts.manifest.json`.
+- The generated notes sitemap path is `/notes/sitemap.xml`; `yioo-link` still
+  needs to reference or merge it before root sitemap publication.

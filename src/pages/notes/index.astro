@@ -2,11 +2,26 @@
 import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getAllPosts } from "../../lib/posts";
+import siteConfig from "../../config/site.config.json";
 
 const posts = getAllPosts();
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: siteConfig.title,
+  description: siteConfig.description,
+  url: `${siteConfig.baseUrl}/notes/`,
+  hasPart: posts.map((post) => ({
+    "@type": "BlogPosting",
+    headline: post.title,
+    url: post.canonicalUrl,
+    datePublished: post.date,
+    dateModified: post.updated ?? post.date,
+  })),
+};
 ---
 
-<BaseLayout canonicalPath="/notes/">
+<BaseLayout canonicalPath="/notes/" structuredData={structuredData}>
   <section class="intro">
     <p class="eyebrow">Notes</p>
     <h1>Yioo Notes</h1>
