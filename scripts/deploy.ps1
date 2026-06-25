@@ -44,6 +44,12 @@ if (Test-Path $assetsPath) {
   & aws s3 cp $assetsPath "$destination/assets" --recursive --cache-control "public,max-age=31536000,immutable" @commonArgs
 }
 
+$astroAssetsPath = Join-Path $distNotes "_astro"
+if (Test-Path $astroAssetsPath) {
+  & aws s3 cp $astroAssetsPath "$destination/_astro" --recursive --cache-control "public,max-age=31536000,immutable" @commonArgs
+  & aws s3 cp $astroAssetsPath "$destination/_astro" --recursive --exclude "*" --include "*.css" --cache-control "public,max-age=31536000,immutable" --content-type "text/css; charset=utf-8" @commonArgs
+}
+
 $faviconPath = Join-Path $distNotes "favicon.svg"
 if (Test-Path $faviconPath) {
   & aws s3 cp $faviconPath "$destination/favicon.svg" --cache-control "public,max-age=31536000,immutable" --content-type "image/svg+xml" @commonArgs
