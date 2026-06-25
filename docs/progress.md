@@ -9,12 +9,11 @@ and deployment interruptions.
 ## Current Status
 
 Phase: 3. SEO and manifest
-Status: in-progress
-Last safe state: Phase 2 test content was committed and pushed to
-`origin/main`; Phase 3 SEO/manifest implementation is being added locally with
-no runtime AWS or application changes.
-Next step: Add generated post manifest, notes sitemap, article metadata, and
-stronger build verification.
+Status: verified
+Last safe state: Phase 3 SEO/manifest implementation was committed and pushed
+to `origin/main`; no runtime AWS or application changes have been made.
+Next step: Begin Phase 4 local visual QA before any AWS routing or deployment
+work.
 
 ## Phase Log
 
@@ -187,9 +186,9 @@ Errors encountered:
 
 ### Phase 3. SEO and manifest
 
-Status: in-progress
+Status: verified
 Started: 2026-06-26
-Finished:
+Finished: 2026-06-26
 Scope: Add generated post manifest, generated notes sitemap, article/index SEO
 metadata, structured data, and stronger build verification.
 Files changed:
@@ -217,6 +216,9 @@ Commands run:
 - `curl.exe -s http://127.0.0.1:4321/notes/posts.manifest.json`
 - `curl.exe -s http://127.0.0.1:4321/notes/sitemap.xml`
 - `curl.exe -s http://127.0.0.1:4321/notes/2026-06-26-test-note/`
+- `git diff --cached --check`
+- `git commit -m "feat: add notes SEO manifest"`
+- `git push` with the registered `yioo-notes` deploy key
 
 Verification:
 
@@ -238,10 +240,11 @@ Verification:
 - Local preview returned `200` for `/notes/sitemap.xml`.
 - Post HTML includes article Open Graph metadata, Twitter large-image metadata,
   and JSON-LD `BlogPosting` structured data.
+- `git diff --cached --check` passed before commit.
 
-Commit:
-Push:
+Commit: `e4231fc` (`feat: add notes SEO manifest`)
+Push: Success to `origin/main` using the registered `yioo-notes` deploy key.
 Deployment/invalidation: none
 Rollback state: Revert Phase 3 SEO/manifest files; keep Phase 2 content source
 untouched unless content metadata is proven invalid.
-Next step: Implement endpoints and run check/build/verify.
+Next step: Start Phase 4 local visual QA.
