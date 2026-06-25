@@ -8,11 +8,11 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 6. Deploy test build
+Phase: 7. yioo-link SEO
 Status: verified
-Last safe state: Phase 5 AWS notes origin changes are applied, verified,
-committed, and pushed, with no EC2, mail-service, or yioo-tools changes.
-Next step: Start Phase 7 `yioo-link` sitemap coordination.
+Last safe state: Phase 7 `yioo-link` sitemap/docs changes are committed,
+pushed, deployed, and verified, with notes/root/API/tools routes still healthy.
+Next step: Start Phase 8 live acceptance.
 
 ## Phase Log
 
@@ -465,10 +465,63 @@ Errors encountered:
 | First live deploy served HTML as `text/html` without `charset=utf-8`. | Checked live `curl -I` headers after deploy. | Updated `scripts/deploy.ps1` to rewrite HTML/JSON/XML content types explicitly and redeployed. |
 | Live Playwright post check saw GA CSP errors for `https://www.google.com/g/collect`. | Opened live post with Playwright. | Updated shared response headers policy `8e1c7af3-7749-449b-a437-2938e261c9b9` to include `https://www.google.com` in `connect-src`, invalidated `/notes*`, and rechecked console. |
 
+### Phase 7. yioo-link SEO
+
+Status: verified
+Started: 2026-06-26
+Finished: 2026-06-26
+Scope: Coordinate root SEO ownership in `yioo-link` by adding public notes URLs
+to the root sitemap and documenting notes routing/ownership in the live
+architecture doc.
+Files changed:
+
+- `C:\repos\yioo\yioo-link\apps\public-pages\sitemap.xml`
+- `C:\repos\yioo\yioo-link\docs\ops\current-yioo-link-architecture.md`
+- `docs/progress.md`
+- `docs/findings.md`
+
+Commands run:
+
+- `aws s3 cp apps/public-pages/sitemap.xml s3://yioo-link-mail-static/sitemap.xml --content-type "application/xml; charset=utf-8" --cache-control "no-cache"`
+- `aws cloudfront create-invalidation --distribution-id EWYEJXEIKC81C --paths "/sitemap.xml"`
+- `aws cloudfront wait invalidation-completed --distribution-id EWYEJXEIKC81C --id IAO942HX0VG98LO6IS9ZYMYZOM`
+- `curl.exe -s -I https://yioo.link/sitemap.xml`
+- `curl.exe -s https://yioo.link/sitemap.xml`
+- `curl.exe -s https://yioo.link/robots.txt`
+- `curl.exe -s -o NUL -w "notes %{http_code}\n" https://yioo.link/notes/`
+- `curl.exe -s -o NUL -w "api %{http_code}\n" https://yioo.link/api/health`
+- `curl.exe -s -o NUL -w "tools %{http_code}\n" https://yioo.link/tools/`
+- `[xml](Get-Content -LiteralPath 'apps/public-pages/sitemap.xml' -Raw)`
+- `git diff --check`
+- `git commit -m "docs: document notes routing and sitemap"` in `yioo-link`
+- `git push origin main` in `yioo-link`
+
+Verification:
+
+- Root sitemap returns `200` with `Content-Type: application/xml; charset=utf-8`.
+- Root sitemap includes `https://yioo.link/notes/`.
+- Root sitemap includes
+  `https://yioo.link/notes/2026-06-26-test-note/`.
+- `robots.txt` still has `Allow: /` and `Disallow: /api/`, so `/notes/`
+  is not blocked.
+- Local `yioo-link` sitemap XML parses successfully with 41 URL entries.
+- `https://yioo.link/notes/` returned `200` after the sitemap deploy.
+- `https://yioo.link/api/health` returned `200` after the sitemap deploy.
+- `https://yioo.link/tools/` returned `200` after the sitemap deploy.
+- `git diff --check` passed in `yioo-link`.
+
+Commit: `8632142` in `yioo-link` (`docs: document notes routing and sitemap`)
+Push: Success to `kyoukarahe/yioo-link.git` `main`.
+Deployment/invalidation: Root sitemap uploaded to `s3://yioo-link-mail-static`
+and CloudFront invalidation `IAO942HX0VG98LO6IS9ZYMYZOM` completed.
+Rollback state: Revert `yioo-link` commit `8632142`, upload the previous
+`apps/public-pages/sitemap.xml` to `s3://yioo-link-mail-static/sitemap.xml`,
+and invalidate `/sitemap.xml`. Leave notes S3 and `/notes` routing online
+unless a notes-specific issue is found.
+Next step: Start Phase 8 live acceptance.
+
 Errors encountered:
 
 | Error | Attempt | Resolution |
 | --- | --- | --- |
-| Local preview reported 404 console errors for `/analytics-loader.js` and `/favicon.ico`. | Opened `/notes/` with Playwright. | Added a host-gated analytics loader script and a notes favicon. |
-| Desktop screenshot showed mojibake in the index intro text. | Inspected `phase4-index-desktop.png`. | Replaced the corrupted intro copy with ASCII text and rebuilt. |
-| First Playwright `run-code` screenshot command failed because it was not passed as a function. | Tried `await page.screenshot(...)` directly. | Re-ran with `async (page) => { ... }`. |
+| XML verification command failed because nested PowerShell quoting removed `$xml` from the expression. | Ran a nested `powershell -Command` one-liner. | Re-ran the XML parse as a direct PowerShell block and confirmed `url-count=41`. |

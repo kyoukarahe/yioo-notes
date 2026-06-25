@@ -44,3 +44,7 @@ future phases.
 - The shared `yioo-link-main-static-security-20260518` response headers policy
   needed `https://www.google.com` in `connect-src` for GA's live
   `www.google.com/g/collect` request.
+- Phase 7 updated the root `yioo-link` sitemap to include
+  `https://yioo.link/notes/` and
+  `https://yioo.link/notes/2026-06-26-test-note/`; the source commit is
+  `yioo-link` `8632142`.
