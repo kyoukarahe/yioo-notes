@@ -8,11 +8,13 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 7. yioo-link SEO
+Phase: 8. Live acceptance
 Status: verified
-Last safe state: Phase 7 `yioo-link` sitemap/docs changes are committed,
-pushed, deployed, and verified, with notes/root/API/tools routes still healthy.
-Next step: Start Phase 8 live acceptance.
+Last safe state: Phase 8 live acceptance passed. `/notes`, `/notes/`, the test
+post, image, manifest, notes sitemap, root sitemap, root page, API health, and
+tools route are verified live with no EC2, mail-service, or yioo-tools changes.
+Next step: Start Phase 9 design research/subagent pass if visual refinement is
+still in scope.
 
 ## Phase Log
 
@@ -525,3 +527,93 @@ Errors encountered:
 | Error | Attempt | Resolution |
 | --- | --- | --- |
 | XML verification command failed because nested PowerShell quoting removed `$xml` from the expression. | Ran a nested `powershell -Command` one-liner. | Re-ran the XML parse as a direct PowerShell block and confirmed `url-count=41`. |
+| First `yioo-notes` docs push after Phase 7 failed because the deploy key path was passed with backslashes inside `GIT_SSH_COMMAND`. | Ran `git push` with `C:\...` key path in the SSH command. | Re-ran with forward slashes (`C:/repos/.../yioo-notes-deploy-20260626`) and pushed successfully. |
+
+### Phase 8. Live acceptance
+
+Status: verified
+Started: 2026-06-26
+Finished: 2026-06-26
+Scope: Confirm the deployed notes site is publicly reachable end to end and
+that existing yioo.link root/API/tools routes still work after notes routing,
+notes deploy, CSP update, and root sitemap deployment.
+Files changed:
+
+- `docs/progress.md`
+- `docs/findings.md`
+
+Commands run:
+
+- `curl.exe -s -o NUL -w "notes-noslash %{http_code} %{content_type}\n" https://yioo.link/notes`
+- `curl.exe -s -o NUL -w "notes-slash %{http_code} %{content_type}\n" https://yioo.link/notes/`
+- `curl.exe -s -o NUL -w "post %{http_code} %{content_type}\n" https://yioo.link/notes/2026-06-26-test-note/`
+- `curl.exe -s -o NUL -w "image %{http_code} %{content_type}\n" https://yioo.link/notes/assets/posts/2026-06-26-test-note/test-image.webp`
+- `curl.exe -s -o NUL -w "manifest %{http_code} %{content_type}\n" https://yioo.link/notes/posts.manifest.json`
+- `curl.exe -s -o NUL -w "notes-sitemap %{http_code} %{content_type}\n" https://yioo.link/notes/sitemap.xml`
+- `curl.exe -s -o NUL -w "root %{http_code} %{content_type}\n" https://yioo.link/`
+- `curl.exe -s -o NUL -w "api-health %{http_code} %{content_type}\n" https://yioo.link/api/health`
+- `curl.exe -s -o NUL -w "tools %{http_code} %{content_type}\n" https://yioo.link/tools/`
+- `curl.exe -s https://yioo.link/notes/2026-06-26-test-note/`
+- `curl.exe -s https://yioo.link/notes/posts.manifest.json`
+- `curl.exe -s https://yioo.link/notes/sitemap.xml`
+- `curl.exe -s https://yioo.link/sitemap.xml`
+- `curl.exe -s https://yioo.link/robots.txt`
+- `curl.exe -s -I https://yioo.link/notes/assets/posts/2026-06-26-test-note/test-image.webp`
+- `npx.cmd --yes --package @playwright/cli playwright-cli open https://yioo.link/notes/`
+- Playwright desktop screenshots for live index/post:
+  - `output/playwright/phase8-live-index-desktop.png`
+  - `output/playwright/phase8-live-post-desktop.png`
+- Playwright mobile screenshots for live index/post:
+  - `output/playwright/phase8-live-index-mobile.png`
+  - `output/playwright/phase8-live-post-mobile.png`
+- Playwright console checks for live index/post on desktop and mobile.
+- Playwright DOM checks for mobile horizontal overflow and image load state.
+- `npx.cmd --yes --package @playwright/cli playwright-cli close`
+
+Verification:
+
+- `https://yioo.link/notes` returns `200` and `text/html; charset=utf-8`.
+- `https://yioo.link/notes/` returns `200` and `text/html; charset=utf-8`.
+- `https://yioo.link/notes/2026-06-26-test-note/` returns `200` and
+  `text/html; charset=utf-8`.
+- Test image returns `200`, `Content-Type: image/webp`, and
+  `Cache-Control: public,max-age=31536000,immutable`.
+- `https://yioo.link/notes/posts.manifest.json` returns `200` and
+  `application/json; charset=utf-8`.
+- `https://yioo.link/notes/sitemap.xml` returns `200` and
+  `application/xml; charset=utf-8`.
+- Root `https://yioo.link/sitemap.xml` includes the notes index and test post
+  URLs.
+- `robots.txt` still allows `/` and disallows only `/api/`.
+- Live post HTML includes canonical URL, `og:url`, title text, and
+  `test-image.webp` references.
+- Live manifest includes `2026-06-26-test-note` and the expected canonical URL.
+- Live notes sitemap includes the notes index and test post URLs.
+- Existing `https://yioo.link/`, `https://yioo.link/api/health`, and
+  `https://yioo.link/tools/` routes returned `200`.
+- Playwright opened the live notes index and test post with the expected page
+  titles.
+- Playwright console checks returned 0 errors and 0 warnings for live index and
+  test post on desktop/mobile.
+- Playwright confirmed both test post image instances are complete with natural
+  size 1200x630.
+- Playwright confirmed no document-level horizontal overflow at 390px width.
+- Vision inspection of Phase 8 screenshots found no visible overlap, missing
+  post image, or obvious live rendering breakage.
+
+Commit: Docs-only acceptance record (`docs: record phase 8 acceptance`).
+Push: Success to `origin/main` after this documentation update is pushed.
+Deployment/invalidation: none in Phase 8. Phase 8 verifies the already deployed
+Phase 6 notes objects, Phase 6 CSP update, and Phase 7 root sitemap deployment.
+Rollback state: If notes-only checks fail later, redeploy a previous
+`yioo-notes` commit or restore previous S3 object versions and invalidate
+`/notes*` and `/notes/*`. If root/API/tools regress, restore the prior
+CloudFront distribution config before changing EC2.
+Next step: Start Phase 9 design research/subagent pass if the design
+refinement requirement remains in scope.
+
+Errors encountered:
+
+| Error | Attempt | Resolution |
+| --- | --- | --- |
+| None. | Phase 8 live acceptance checks. | All checks passed. |

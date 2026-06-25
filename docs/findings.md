@@ -48,3 +48,7 @@ future phases.
   `https://yioo.link/notes/` and
   `https://yioo.link/notes/2026-06-26-test-note/`; the source commit is
   `yioo-link` `8632142`.
+- Phase 8 live acceptance verified `/notes`, `/notes/`, the test post, test
+  image, manifest, notes sitemap, root sitemap, root page, API health, and
+  tools route. Playwright screenshots are local QA artifacts under
+  `output/playwright/phase8-live-*.png` and are intentionally ignored by Git.
