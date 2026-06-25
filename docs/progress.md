@@ -8,12 +8,12 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 3. SEO and manifest
+Phase: 4. Local visual QA
 Status: verified
 Last safe state: Phase 3 SEO/manifest implementation was committed and pushed
-to `origin/main`; no runtime AWS or application changes have been made.
-Next step: Begin Phase 4 local visual QA before any AWS routing or deployment
-work.
+to `origin/main`; Phase 4 local visual QA fixes are complete locally, with no
+runtime AWS or application changes.
+Next step: Commit and push Phase 4 local visual QA fixes and evidence notes.
 
 ## Phase Log
 
@@ -248,3 +248,71 @@ Deployment/invalidation: none
 Rollback state: Revert Phase 3 SEO/manifest files; keep Phase 2 content source
 untouched unless content metadata is proven invalid.
 Next step: Start Phase 4 local visual QA.
+
+### Phase 4. Local visual QA
+
+Status: verified
+Started: 2026-06-26
+Finished: 2026-06-26
+Scope: Verify the simple first layout locally before any AWS work, including
+desktop/mobile screenshots, rendered post image, console output, and obvious
+layout overlap checks.
+Files changed:
+
+- `.gitignore`
+- `src/layouts/BaseLayout.astro`
+- `src/pages/notes/index.astro`
+- `public/notes/favicon.svg`
+- `docs/progress.md`
+
+Commands run:
+
+- `npx.cmd --version`
+- `npx.cmd --yes --package @playwright/cli playwright-cli --help`
+- `npm.cmd run check`
+- `npm.cmd run build`
+- `npm.cmd run verify:build`
+- `npm.cmd run preview -- --port 4321`
+- `npx.cmd --yes --package @playwright/cli playwright-cli open http://127.0.0.1:4321/notes/`
+- `npx.cmd --yes --package @playwright/cli playwright-cli console`
+- `npx.cmd --yes --package @playwright/cli playwright-cli resize 1440 1000`
+- `npx.cmd --yes --package @playwright/cli playwright-cli resize 390 844`
+- Playwright screenshot commands for:
+  - `output/playwright/phase4-index-desktop.png`
+  - `output/playwright/phase4-post-desktop.png`
+  - `output/playwright/phase4-index-mobile.png`
+  - `output/playwright/phase4-post-mobile.png`
+- Playwright DOM overflow and image load check.
+
+Verification:
+
+- `npm.cmd run check` passed with 0 errors, 0 warnings, and 0 hints.
+- `npm.cmd run build` passed.
+- `npm.cmd run verify:build` passed.
+- Playwright console check returned 0 errors and 0 warnings after fixes.
+- Desktop screenshots were captured for `/notes/` and
+  `/notes/2026-06-26-test-note/`.
+- Mobile screenshots were captured at 390x844 for `/notes/` and
+  `/notes/2026-06-26-test-note/`.
+- Vision inspection confirmed the desktop and mobile index pages no longer have
+  mojibake text and do not show overlapping UI.
+- Vision inspection confirmed the desktop and mobile post pages render the test
+  image and article body without visible overlap.
+- DOM check at 390px width found no horizontally overflowing header/nav/main/
+  article/text/image elements.
+- The post cover image was complete with natural width 1200.
+
+Commit:
+Push:
+Deployment/invalidation: none
+Rollback state: Revert only Phase 4 QA doc/ignore changes if needed; no runtime
+rollback is required.
+Next step: Commit and push Phase 4 local visual QA fixes.
+
+Errors encountered:
+
+| Error | Attempt | Resolution |
+| --- | --- | --- |
+| Local preview reported 404 console errors for `/analytics-loader.js` and `/favicon.ico`. | Opened `/notes/` with Playwright. | Added a host-gated analytics loader script and a notes favicon. |
+| Desktop screenshot showed mojibake in the index intro text. | Inspected `phase4-index-desktop.png`. | Replaced the corrupted intro copy with ASCII text and rebuilt. |
+| First Playwright `run-code` screenshot command failed because it was not passed as a function. | Tried `await page.screenshot(...)` directly. | Re-ran with `async (page) => { ... }`. |

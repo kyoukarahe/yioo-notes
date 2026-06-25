@@ -26,3 +26,7 @@ future phases.
 - The generated notes manifest path is `/notes/posts.manifest.json`.
 - The generated notes sitemap path is `/notes/sitemap.xml`; `yioo-link` still
   needs to reference or merge it before root sitemap publication.
+- In local preview, a root-relative `/analytics-loader.js` script causes a 404
+  because the notes repo does not serve the root yioo-link asset. The notes
+  layout now injects that loader only on `yioo.link` or subdomains.
+- Keep `output/` and `.playwright-cli/` untracked; they are local QA artifacts.
