@@ -9,13 +9,11 @@ and deployment interruptions.
 ## Current Status
 
 Phase: 5. AWS notes origin
-Status: in-progress
+Status: verified
 Last safe state: Phase 4 local visual QA fixes were committed and pushed to
-`origin/main`; Phase 5 AWS notes origin changes are applied and verified in
-AWS, with no EC2, mail-service, or yioo-tools changes. Phase 5 still needs its
-repo commit and push.
-Next step: Commit and push the Phase 5 infra files and progress notes, then
-start Phase 6 deploy test build.
+`origin/main`; Phase 5 AWS notes origin changes are applied, verified,
+committed, and pushed, with no EC2, mail-service, or yioo-tools changes.
+Next step: Start Phase 6 deploy test build.
 
 ## Phase Log
 
@@ -313,7 +311,7 @@ Next step: Start Phase 5 AWS notes origin.
 
 ### Phase 5. AWS notes origin
 
-Status: in-progress
+Status: verified
 Started: 2026-06-26
 Finished: 2026-06-26
 Scope: Configure the `yioo-notes` private S3 bucket and main `yioo.link`
@@ -376,13 +374,13 @@ Verification:
 - `https://yioo.link/notes/` returned `403`, which is expected until Phase 6
   uploads the notes build objects.
 
-Commit:
-Push:
+Commit: `42afd98` (`chore: add notes AWS routing assets`)
+Push: Success to `origin/main` using the registered `yioo-notes` deploy key.
 Deployment/invalidation: CloudFront distribution update deployed. Current
 CloudFront config ETag after Phase 5 is `EN1VRQENFRJN5`.
 Rollback state: Restore the pre-change CloudFront distribution config, remove
 the notes bucket policy/OAC additions if applied, and leave EC2 untouched.
-Next step: Commit and push Phase 5 infra files and progress notes.
+Next step: Start Phase 6 deploy test build.
 
 Errors encountered:
 
