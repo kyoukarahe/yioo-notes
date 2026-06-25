@@ -8,12 +8,14 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 1. Blog scaffold
-Status: verified
+Phase: 2. Test content
+Status: in-progress
 Last safe state: Phase 1 Astro scaffold was committed and pushed to
-`origin/main`; no runtime AWS or application changes have been made.
-Next step: Begin Phase 2 test content after re-reading the plan, progress, and
-findings documents.
+`origin/main`; Phase 2 test content is being added locally with no runtime AWS
+or application changes.
+Next step: Add the required published test post and WebP asset, then verify the
+index page, post page, image path, manifest, and sitemap once Phase 3 generation
+is in place.
 
 ## Phase Log
 
@@ -128,3 +130,57 @@ Errors encountered:
 | Astro hinted that the analytics loader script should be explicitly inline. | Ran `npm.cmd run check`. | Added `is:inline` to the external analytics loader script tag. |
 | `git diff --cached --check` reported extra blank lines at EOF. | Checked staged Phase 1 files before commit. | Removed the trailing blank lines and re-ran the staged diff check successfully. |
 | `npm.cmd install` reported 9 dependency audit findings. | Installed Astro dependencies. | Left unresolved for now because `npm audit fix --force` may introduce breaking changes; revisit before production acceptance. |
+
+### Phase 2. Test content
+
+Status: in-progress
+Started: 2026-06-26
+Finished:
+Scope: Add one published test note and one real post-scoped WebP image asset.
+Files changed:
+
+- `content/posts/2026-06-26-test-note.md`
+- `public/notes/assets/posts/2026-06-26-test-note/test-image.webp`
+- `docs/progress.md`
+
+Commands run:
+
+- `Get-Command magick`
+- `Get-Command cwebp`
+- `Get-Command ffmpeg`
+- `npm.cmd install sharp --no-save`
+- Node/sharp WebP generation command
+- `npm.cmd run check`
+- `npm.cmd run build`
+- `npm.cmd run verify:build`
+- `npm.cmd run preview -- --port 4321`
+- `curl.exe -I http://127.0.0.1:4321/notes/`
+- `curl.exe -I http://127.0.0.1:4321/notes/2026-06-26-test-note/`
+- `curl.exe -I http://127.0.0.1:4321/notes/assets/posts/2026-06-26-test-note/test-image.webp`
+
+Verification:
+
+- Test image was generated as a real WebP asset at 1200x630.
+- `npm.cmd run check` passed with 0 errors, 0 warnings, and 0 hints.
+- Build succeeded and generated the notes index plus
+  `dist/notes/2026-06-26-test-note/index.html`.
+- `npm.cmd run verify:build` confirmed draft/private output is absent.
+- Local preview returned `200` for `/notes/`.
+- Local preview returned `200` for `/notes/2026-06-26-test-note/`.
+- Local preview returned `200` and `Content-Type: image/webp` for the test
+  image.
+- Manifest and sitemap inclusion remain pending until Phase 3 generation is
+  implemented.
+
+Commit:
+Push:
+Deployment/invalidation: none
+Rollback state: Remove the test post and asset folder, then rebuild.
+Next step: Generate the WebP test image, build, and verify local routes.
+
+Errors encountered:
+
+| Error | Attempt | Resolution |
+| --- | --- | --- |
+| No local `magick`, `cwebp`, or `ffmpeg` command was available for WebP generation. | Checked local image tooling. | Used temporary `sharp` installation with `--no-save`. |
+| First Node/sharp one-liner failed because PowerShell quoting stripped JS string quotes. | Tried to generate WebP with `node -e`. | Passed the JS code through stdin to `node -`, then generated the image successfully. |
