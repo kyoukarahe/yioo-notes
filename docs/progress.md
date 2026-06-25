@@ -9,12 +9,11 @@ and deployment interruptions.
 ## Current Status
 
 Phase: 1. Blog scaffold
-Status: in-progress
-Last safe state: Phase 0 planning documents were committed and pushed to
-`origin/main`; Phase 1 source scaffold files have been added locally, with no
-runtime AWS or application changes.
-Next step: Install dependencies, build, verify `dist/notes/index.html`, and run
-local preview route checks.
+Status: verified
+Last safe state: Phase 1 Astro scaffold was committed and pushed to
+`origin/main`; no runtime AWS or application changes have been made.
+Next step: Begin Phase 2 test content after re-reading the plan, progress, and
+findings documents.
 
 ## Phase Log
 
@@ -62,9 +61,9 @@ Errors encountered:
 
 ### Phase 1. Blog scaffold
 
-Status: in-progress
+Status: verified
 Started: 2026-06-26
-Finished:
+Finished: 2026-06-26
 Scope: Create the static generator scaffold, `/notes/` route, layout/content
 folders, site config, and local build verification script.
 Files changed:
@@ -99,6 +98,9 @@ Commands run:
 - `curl.exe -I http://127.0.0.1:4321/notes/`
 - `curl.exe -I http://127.0.0.1:4321/notes`
 - `npm.cmd run check`
+- `git diff --cached --check`
+- `git commit -m "feat: scaffold notes static site"`
+- `git push` with the registered `yioo-notes` deploy key
 
 Verification:
 
@@ -108,14 +110,14 @@ Verification:
 - Local preview returned `200` for `/notes/`.
 - Local preview returned `404` for `/notes`; this remains a later CloudFront
   exact route redirect concern, not a Phase 1 blocker.
-- `npm.cmd run check` initially failed on missing Node type definitions,
-  optional `tags` typing, and an Astro inline script hint; fixes are in progress.
+- `npm.cmd run check` passed with 0 errors, 0 warnings, and 0 hints after fixes.
+- `git diff --cached --check` passed after removing extra blank lines at EOF.
 
-Commit:
-Push:
+Commit: `ffc6c89` (`feat: scaffold notes static site`)
+Push: Success to `origin/main` using the registered `yioo-notes` deploy key.
 Deployment/invalidation: none
 Rollback state: Revert the Phase 1 scaffold commit before any deploy.
-Next step: Run dependency installation, build, and local route checks.
+Next step: Start Phase 2 test content.
 
 Errors encountered:
 
@@ -124,3 +126,5 @@ Errors encountered:
 | `astro check` failed because Node globals/modules had no type definitions. | Ran `npm.cmd run check`. | Added `@types/node` as a dev dependency. |
 | `astro check` treated `post.tags` as possibly undefined. | Ran `npm.cmd run check`. | Made the normalized `Post.tags` field required. |
 | Astro hinted that the analytics loader script should be explicitly inline. | Ran `npm.cmd run check`. | Added `is:inline` to the external analytics loader script tag. |
+| `git diff --cached --check` reported extra blank lines at EOF. | Checked staged Phase 1 files before commit. | Removed the trailing blank lines and re-ran the staged diff check successfully. |
+| `npm.cmd install` reported 9 dependency audit findings. | Installed Astro dependencies. | Left unresolved for now because `npm audit fix --force` may introduce breaking changes; revisit before production acceptance. |
