@@ -86,8 +86,15 @@ Follow-up candidates:
 
 Commit:
 
-- Pending implementation commit.
+- `9cdbf69` (`feat: refine notes workbench design`)
+- `a3596a9` (`fix: serve notes astro assets under notes path`)
 
 Deployment/invalidation:
 
-- Pending deployment after implementation commit and push.
+- First design deploy created invalidation `I8CL4OW1G6T0O559MUPJZ7XGP7`, but
+  live browser verification caught a root `/_astro` stylesheet path problem.
+- Final fixed deploy created invalidation `IERJALDF76M2KTATHYLGI79Z5V` and
+  verified live CSS at `/notes/_astro/index.Cz73WjMw.css` with
+  `Content-Type: text/css; charset=utf-8`.
+- Final live Playwright checks passed with 0 console errors/warnings,
+  no desktop/mobile horizontal overflow, and both test images loaded.

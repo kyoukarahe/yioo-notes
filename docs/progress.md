@@ -9,11 +9,11 @@ and deployment interruptions.
 ## Current Status
 
 Phase: 9. Design pass
-Status: in-progress
-Last safe state: Phase 9 design candidate is locally verified, vision-reviewed,
-and scored 94/100. No deploy has been made for the design candidate yet.
-Next step: Commit and push the design implementation, then deploy and verify
-live.
+Status: verified
+Last safe state: Phase 9 design candidate is committed, pushed, deployed, and
+verified live. `/notes`, the test post, CSS asset, root/API/tools routes, and
+mobile/desktop browser checks are healthy.
+Next step: Optional future content publishing or a separate design/content pass.
 
 ## Phase Log
 
@@ -679,15 +679,28 @@ Verification:
 - Design candidate `Workbench Notes` scored 94/100 in
   `docs/design-scorecard.md`, so it is eligible for deployment.
 
-Commit: Research documentation commit `1442d1a`
-(`docs: add phase 9 design research`). Design implementation commit pending.
-Push: Research documentation pushed to `origin/main`. Design implementation
-push pending.
-Deployment/invalidation: none for the design candidate yet.
+Commit:
+
+- `1442d1a` (`docs: add phase 9 design research`)
+- `9cdbf69` (`feat: refine notes workbench design`)
+- `a3596a9` (`fix: serve notes astro assets under notes path`)
+
+Push: All Phase 9 implementation/fix commits pushed to `origin/main`.
+Deployment/invalidation:
+
+- First design deploy completed and created invalidation
+  `I8CL4OW1G6T0O559MUPJZ7XGP7`.
+- Final fixed deploy completed and created invalidation
+  `IERJALDF76M2KTATHYLGI79Z5V`.
+- Final invalidation `IERJALDF76M2KTATHYLGI79Z5V` completed.
+
 Rollback state: Revert Phase 9 design docs and design-owned source files only.
 Do not roll back Phase 5/6/7 routing or sitemap work for a design-only issue.
-Next step: Commit and push the design implementation, then deploy and verify
-live.
+If the final asset path fix must be rolled back, also confirm CSS still loads
+from `/notes/_astro/...` before redeploying. For a deployed design-only issue,
+redeploy the previous known-good commit and invalidate `/notes*` and
+`/notes/*`.
+Next step: Optional future content publishing or a separate design/content pass.
 
 Errors encountered:
 
@@ -696,3 +709,30 @@ Errors encountered:
 | First local `npm.cmd run build` after the design patch completed output generation but exited with a Windows/Node `UV_HANDLE_CLOSING` assertion. | Ran the build in parallel with a git diff status check. | Confirmed generated output with `verify:build`, reran `npm.cmd run build` alone, and it completed normally. |
 | Local Astro preview listened on `[::1]:4321` even though the test attempted `127.0.0.1:4321`. | Opened `http://127.0.0.1:4321/notes/` with Playwright. | Reopened with `http://localhost:4321/notes/`, which resolved to the active preview server. |
 | The exec backend did not support sending Ctrl-C to stop the preview session. | Tried to interrupt the preview process via `write_stdin`. | Identified the listening Node PID with `netstat`/`Get-Process` and stopped that preview process only. |
+| First live design deploy loaded HTML but the stylesheet URL was `/_astro/index.Cz73WjMw.css`; root CloudFront served an XML error response as `application/xml`, so the browser refused to apply the stylesheet. | Opened live `/notes/` after invalidation `I8CL4OW1G6T0O559MUPJZ7XGP7`. | Set `build.assets` to `notes/_astro`, taught `verify-build` to reject root `/_astro` links, updated deploy metadata for `_astro` CSS, committed `a3596a9`, redeployed, and verified `https://yioo.link/notes/_astro/index.Cz73WjMw.css` returns `text/css; charset=utf-8`. |
+
+Final live verification:
+
+- `https://yioo.link/notes` returns `200` and `text/html; charset=utf-8`.
+- `https://yioo.link/notes/` returns `200` and `text/html; charset=utf-8`.
+- `https://yioo.link/notes/2026-06-26-test-note/` returns `200` and
+  `text/html; charset=utf-8`.
+- `https://yioo.link/notes/_astro/index.Cz73WjMw.css` returns `200`,
+  `text/css; charset=utf-8`, and long-cache headers.
+- Live HTML references `/notes/_astro/index.Cz73WjMw.css`, not `/_astro/...`.
+- `https://yioo.link/`, `https://yioo.link/api/health`, and
+  `https://yioo.link/tools/` returned `200` after the final deploy.
+- Live Playwright screenshots:
+  - `output/playwright/phase9-live-index-desktop.png`
+  - `output/playwright/phase9-live-post-desktop.png`
+  - `output/playwright/phase9-live-index-mobile.png`
+  - `output/playwright/phase9-live-post-mobile.png`
+- Live Playwright console checks returned 0 errors and 0 warnings for
+  index/post on desktop/mobile after the asset path fix.
+- Live Playwright confirmed no document-level horizontal overflow at 1440px or
+  390px.
+- Live Playwright confirmed the stylesheet loaded from
+  `https://yioo.link/notes/_astro/index.Cz73WjMw.css`.
+- Live Playwright confirmed both post image instances load at 1200x630.
+- Final vision inspection found the deployed design matches the accepted
+  `Workbench Notes` candidate with no visible overlap or missing image.

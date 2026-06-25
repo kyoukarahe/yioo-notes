@@ -57,3 +57,7 @@ future phases.
   inspection. The design changed only layout/component/style files and preserved
   content, canonical URLs, manifest, sitemap, deploy script, AWS routing,
   `yioo-link`, mail-service, and `yioo-tools` boundaries.
+- Astro-generated CSS/assets must live under `/notes/_astro/...`, not
+  `/_astro/...`, because the main CloudFront distribution routes `/notes/*` to
+  the `yioo-notes` S3 origin while root `/_astro` belongs to the root site
+  behavior. `verify-build` now rejects root `/_astro` links.
