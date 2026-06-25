@@ -8,13 +8,12 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 8. Live acceptance
-Status: verified
-Last safe state: Phase 8 live acceptance passed. `/notes`, `/notes/`, the test
-post, image, manifest, notes sitemap, root sitemap, root page, API health, and
-tools route are verified live with no EC2, mail-service, or yioo-tools changes.
-Next step: Start Phase 9 design research/subagent pass if visual refinement is
-still in scope.
+Phase: 9. Design pass
+Status: in-progress
+Last safe state: Phase 8 live acceptance passed and both `yioo-notes` and
+`yioo-link` were clean at `origin/main` before design research started.
+Next step: Commit Phase 9 design research/brief, then run the scoped design
+worker.
 
 ## Phase Log
 
@@ -617,3 +616,38 @@ Errors encountered:
 | Error | Attempt | Resolution |
 | --- | --- | --- |
 | None. | Phase 8 live acceptance checks. | All checks passed. |
+
+### Phase 9. Design pass
+
+Status: in-progress
+Started: 2026-06-26
+Finished:
+Scope: Research Codex/frontend design references, run a scoped subagent-style
+design implementation, verify with Playwright screenshots and vision, score the
+candidate, then deploy only if the score is 90 or higher.
+Files changed so far:
+
+- `docs/design-research.md`
+- `docs/progress.md`
+
+Commands run so far:
+
+- Web research for current Codex/frontend design references.
+- `tool_search` for multi-agent tooling.
+
+Verification so far:
+
+- Multi-agent tooling is available through `multi_agent_v1`.
+- Design research and implementation brief are recorded in
+  `docs/design-research.md`.
+- Phase 9 scope is limited to design-owned files and docs. Content, SEO route
+  generation, deploy scripts, AWS routing, `yioo-link`, mail-service, and
+  `yioo-tools` are out of scope unless a separate defect is found.
+
+Commit: Research documentation commit (`docs: add phase 9 design research`).
+Push: Success to `origin/main` after this documentation update is pushed.
+Deployment/invalidation: none so far.
+Rollback state: Revert Phase 9 design docs and design-owned source files only.
+Do not roll back Phase 5/6/7 routing or sitemap work for a design-only issue.
+Next step: Spawn the scoped design worker after this research state is
+committed.
