@@ -28,6 +28,9 @@ const {
 const canonicalUrl = new URL(canonicalPath, siteConfig.baseUrl).toString();
 const imageUrl = imagePath ? new URL(imagePath, siteConfig.baseUrl).toString() : undefined;
 const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.title}`;
+const currentPath = Astro.url.pathname;
+const isCurrentNavItem = (href: string) =>
+  href === "/" ? currentPath === href : currentPath === href || currentPath.startsWith(href);
 ---
 
 <!doctype html>
@@ -68,9 +71,18 @@ const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.
     <a class="skip-link" href="#content">Skip to content</a>
     <header class="site-header">
       <nav class="site-nav" aria-label="Primary">
-        <a class="brand" href="/notes/">{siteConfig.title}</a>
+        <a class="brand" href="/notes/">
+          <span class="brand-mark" aria-hidden="true">Y</span>
+          <span>{siteConfig.title}</span>
+        </a>
         <div class="nav-links">
-          {siteConfig.nav.map((item) => <a href={item.href}>{item.label}</a>)}
+          {
+            siteConfig.nav.map((item) => (
+              <a class={isCurrentNavItem(item.href) ? "is-active" : undefined} href={item.href} aria-current={isCurrentNavItem(item.href) ? "page" : undefined}>
+                {item.label}
+              </a>
+            ))
+          }
         </div>
       </nav>
     </header>

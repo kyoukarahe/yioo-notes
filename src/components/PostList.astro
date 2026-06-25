@@ -10,15 +10,23 @@ const { posts } = Astro.props;
 
 {
   posts.length > 0 ? (
-    <ol class="post-list">
+    <ol class="post-list" aria-label="Published notes">
       {posts.map((post) => (
         <li class="post-list-item">
-          <a href={post.url}>
-            <span class="post-title">{post.title}</span>
-            <span class="post-summary">{post.summary}</span>
-            <span class="post-meta">
+          <a class="post-list-link" href={post.url}>
+            <span class="post-date">
               <time datetime={post.date}>{post.date}</time>
-              {post.tags.length > 0 && <span>{post.tags.join(", ")}</span>}
+            </span>
+            <span class="post-copy">
+              <span class="post-title">{post.title}</span>
+              <span class="post-summary">{post.summary}</span>
+              {post.tags.length > 0 && (
+                <span class="post-tags" aria-label="Tags">
+                  {post.tags.map((tag) => (
+                    <span class="post-tag">{tag}</span>
+                  ))}
+                </span>
+              )}
             </span>
           </a>
         </li>

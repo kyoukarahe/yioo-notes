@@ -10,10 +10,10 @@ and deployment interruptions.
 
 Phase: 9. Design pass
 Status: in-progress
-Last safe state: Phase 8 live acceptance passed and both `yioo-notes` and
-`yioo-link` were clean at `origin/main` before design research started.
-Next step: Commit Phase 9 design research/brief, then run the scoped design
-worker.
+Last safe state: Phase 9 design candidate is locally verified, vision-reviewed,
+and scored 94/100. No deploy has been made for the design candidate yet.
+Next step: Commit and push the design implementation, then deploy and verify
+live.
 
 ## Phase Log
 
@@ -625,17 +625,38 @@ Finished:
 Scope: Research Codex/frontend design references, run a scoped subagent-style
 design implementation, verify with Playwright screenshots and vision, score the
 candidate, then deploy only if the score is 90 or higher.
-Files changed so far:
+Files changed:
 
 - `docs/design-research.md`
+- `docs/design-scorecard.md`
 - `docs/progress.md`
+- `docs/findings.md`
+- `src/layouts/BaseLayout.astro`
+- `src/components/PostList.astro`
+- `src/styles/global.css`
 
-Commands run so far:
+Commands run:
 
 - Web research for current Codex/frontend design references.
 - `tool_search` for multi-agent tooling.
+- `multi_agent_v1.spawn_agent` for the scoped design worker.
+- `multi_agent_v1.wait_agent`
+- `npm.cmd run check`
+- `npm.cmd run build`
+- `npm.cmd run verify:build`
+- `npm.cmd run preview -- --host 127.0.0.1 --port 4321`
+- Playwright local checks for `/notes/` and
+  `/notes/2026-06-26-test-note/` at 1440x1000 and 390x844.
+- Playwright screenshots:
+  - `output/playwright/phase9-design-index-desktop.png`
+  - `output/playwright/phase9-design-post-desktop.png`
+  - `output/playwright/phase9-design-index-mobile.png`
+  - `output/playwright/phase9-design-post-mobile.png`
+- Playwright console, overflow, and image natural-size checks.
+- Vision inspection of the four Phase 9 screenshots.
+- `git diff --check`
 
-Verification so far:
+Verification:
 
 - Multi-agent tooling is available through `multi_agent_v1`.
 - Design research and implementation brief are recorded in
@@ -643,11 +664,35 @@ Verification so far:
 - Phase 9 scope is limited to design-owned files and docs. Content, SEO route
   generation, deploy scripts, AWS routing, `yioo-link`, mail-service, and
   `yioo-tools` are out of scope unless a separate defect is found.
+- The design worker changed only `src/layouts/BaseLayout.astro`,
+  `src/components/PostList.astro`, and `src/styles/global.css`.
+- `npm.cmd run check` passed with 0 errors, 0 warnings, and 0 hints.
+- `npm.cmd run build` passed on rerun.
+- `npm.cmd run verify:build` passed.
+- Local Playwright console checks returned 0 errors and 0 warnings for
+  index/post on desktop/mobile.
+- Local Playwright confirmed no document-level horizontal overflow at 1440px or
+  390px.
+- Local Playwright confirmed both post image instances load at 1200x630.
+- Vision inspection found no visible overlap, missing image, or text clipping
+  in the four Phase 9 screenshots.
+- Design candidate `Workbench Notes` scored 94/100 in
+  `docs/design-scorecard.md`, so it is eligible for deployment.
 
-Commit: Research documentation commit (`docs: add phase 9 design research`).
-Push: Success to `origin/main` after this documentation update is pushed.
-Deployment/invalidation: none so far.
+Commit: Research documentation commit `1442d1a`
+(`docs: add phase 9 design research`). Design implementation commit pending.
+Push: Research documentation pushed to `origin/main`. Design implementation
+push pending.
+Deployment/invalidation: none for the design candidate yet.
 Rollback state: Revert Phase 9 design docs and design-owned source files only.
 Do not roll back Phase 5/6/7 routing or sitemap work for a design-only issue.
-Next step: Spawn the scoped design worker after this research state is
-committed.
+Next step: Commit and push the design implementation, then deploy and verify
+live.
+
+Errors encountered:
+
+| Error | Attempt | Resolution |
+| --- | --- | --- |
+| First local `npm.cmd run build` after the design patch completed output generation but exited with a Windows/Node `UV_HANDLE_CLOSING` assertion. | Ran the build in parallel with a git diff status check. | Confirmed generated output with `verify:build`, reran `npm.cmd run build` alone, and it completed normally. |
+| Local Astro preview listened on `[::1]:4321` even though the test attempted `127.0.0.1:4321`. | Opened `http://127.0.0.1:4321/notes/` with Playwright. | Reopened with `http://localhost:4321/notes/`, which resolved to the active preview server. |
+| The exec backend did not support sending Ctrl-C to stop the preview session. | Tried to interrupt the preview process via `write_stdin`. | Identified the listening Node PID with `netstat`/`Get-Process` and stopped that preview process only. |

@@ -52,3 +52,8 @@ future phases.
   image, manifest, notes sitemap, root sitemap, root page, API health, and
   tools route. Playwright screenshots are local QA artifacts under
   `output/playwright/phase8-live-*.png` and are intentionally ignored by Git.
+- Phase 9 design candidate `Workbench Notes` was implemented by a scoped
+  subagent-style worker and scored 94/100 after main-agent Playwright and vision
+  inspection. The design changed only layout/component/style files and preserved
+  content, canonical URLs, manifest, sitemap, deploy script, AWS routing,
+  `yioo-link`, mail-service, and `yioo-tools` boundaries.
