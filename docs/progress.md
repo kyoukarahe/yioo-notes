@@ -11,9 +11,10 @@ and deployment interruptions.
 Phase: 4. Local visual QA
 Status: verified
 Last safe state: Phase 3 SEO/manifest implementation was committed and pushed
-to `origin/main`; Phase 4 local visual QA fixes are complete locally, with no
-runtime AWS or application changes.
-Next step: Commit and push Phase 4 local visual QA fixes and evidence notes.
+to `origin/main`; Phase 4 local visual QA fixes were committed and pushed to
+`origin/main`, with no runtime AWS or application changes.
+Next step: Begin Phase 5 AWS notes origin only after re-checking live root, API,
+health, and tools routes.
 
 ## Phase Log
 
@@ -303,11 +304,12 @@ Verification:
 - The post cover image was complete with natural width 1200.
 
 Commit:
-Push:
+Commit: `dff98e5` (`fix: complete local visual QA`)
+Push: Success to `origin/main` using the registered `yioo-notes` deploy key.
 Deployment/invalidation: none
 Rollback state: Revert only Phase 4 QA doc/ignore changes if needed; no runtime
 rollback is required.
-Next step: Commit and push Phase 4 local visual QA fixes.
+Next step: Start Phase 5 AWS notes origin.
 
 Errors encountered:
 
