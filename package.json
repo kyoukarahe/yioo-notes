@@ -1,0 +1,23 @@
+{
+  "name": "yioo-notes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build",
+    "check": "astro check",
+    "preview": "astro preview --host 127.0.0.1",
+    "verify:build": "node scripts/verify-build.mjs"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "astro": "^5.13.11",
+    "gray-matter": "^4.0.3",
+    "marked": "^15.0.12",
+    "typescript": "^5.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.10"
+  }
+}

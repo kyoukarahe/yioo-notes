@@ -1,0 +1,49 @@
+---
+import siteConfig from "../config/site.config.json";
+import "../styles/global.css";
+
+type Props = {
+  title?: string;
+  description?: string;
+  canonicalPath?: string;
+};
+
+const {
+  title = siteConfig.title,
+  description = siteConfig.description,
+  canonicalPath = siteConfig.notesPath,
+} = Astro.props;
+const canonicalUrl = new URL(canonicalPath, siteConfig.baseUrl).toString();
+const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.title}`;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary" />
+    <script is:inline defer src="/analytics-loader.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <nav class="site-nav" aria-label="Primary">
+        <a class="brand" href="/notes/">{siteConfig.title}</a>
+        <div class="nav-links">
+          {siteConfig.nav.map((item) => <a href={item.href}>{item.label}</a>)}
+        </div>
+      </nav>
+    </header>
+    <main id="content" class="page-shell">
+      <slot />
+    </main>
+  </body>
+</html>

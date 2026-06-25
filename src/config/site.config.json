@@ -1,0 +1,21 @@
+{
+  "title": "Yioo Notes",
+  "description": "Personal notes, essays, research, and implementation logs from yioo.",
+  "baseUrl": "https://yioo.link",
+  "notesPath": "/notes/",
+  "author": "yioo",
+  "nav": [
+    {
+      "label": "Home",
+      "href": "/"
+    },
+    {
+      "label": "Tools",
+      "href": "/tools/"
+    },
+    {
+      "label": "Notes",
+      "href": "/notes/"
+    }
+  ]
+}

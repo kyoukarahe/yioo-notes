@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getAllPosts, getPostBySlug } from "../../../lib/posts";
+
+export function getStaticPaths() {
+  return getAllPosts().map((post) => ({
+    params: { slug: post.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const post = slug ? getPostBySlug(slug) : undefined;
+
+if (!post) {
+  throw new Error(`Post not found: ${slug}`);
+}
+
+const canonicalPath = post.canonical ?? post.url;
+---
+
+<BaseLayout title={post.title} description={post.summary} canonicalPath={canonicalPath}>
+  <article class="article">
+    <header class="article-header">
+      <a class="back-link" href="/notes/">Notes</a>
+      <h1>{post.title}</h1>
+      <p>{post.summary}</p>
+      <div class="article-meta">
+        <time datetime={post.date}>{post.date}</time>
+        {post.tags.length > 0 && <span>{post.tags.join(", ")}</span>}
+      </div>
+    </header>
+    {post.cover && <img class="cover-image" src={post.cover} alt="" loading="eager" />}
+    <div class="article-content" set:html={post.html} />
+  </article>
+</BaseLayout>

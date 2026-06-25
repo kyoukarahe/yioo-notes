@@ -1,0 +1,30 @@
+---
+import type { Post } from "../lib/posts";
+
+type Props = {
+  posts: Post[];
+};
+
+const { posts } = Astro.props;
+---
+
+{
+  posts.length > 0 ? (
+    <ol class="post-list">
+      {posts.map((post) => (
+        <li class="post-list-item">
+          <a href={post.url}>
+            <span class="post-title">{post.title}</span>
+            <span class="post-summary">{post.summary}</span>
+            <span class="post-meta">
+              <time datetime={post.date}>{post.date}</time>
+              {post.tags.length > 0 && <span>{post.tags.join(", ")}</span>}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  ) : (
+    <p class="empty-state">Published notes will appear here.</p>
+  )
+}
