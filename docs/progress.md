@@ -12,8 +12,7 @@ Phase: 6. Deploy test build
 Status: verified
 Last safe state: Phase 5 AWS notes origin changes are applied, verified,
 committed, and pushed, with no EC2, mail-service, or yioo-tools changes.
-Next step: Commit and push Phase 6 deploy script/progress, then start Phase 7
-`yioo-link` sitemap coordination.
+Next step: Start Phase 7 `yioo-link` sitemap coordination.
 
 ## Phase Log
 
@@ -450,15 +449,14 @@ Verification:
 - Playwright live post console check returned 0 errors and 0 warnings after the
   CSP `connect-src` update.
 
-Commit:
-Push:
+Commit: `201db15` (`chore: add notes deploy script`)
+Push: Success to `origin/main` using the registered `yioo-notes` deploy key.
 Deployment/invalidation: S3 upload completed. Invalidation IDs:
 `I4G27ZPK71ZQYYJ9804I9VLJ6F`, `I4S3XVMYHHKE6W0M1LX1U71IXZ`, and
 `ICCQB9V48Y9IWA0RWTKUBWGCB9`.
 Rollback state: Restore previous S3 object versions or delete uploaded
 `notes/` objects, then invalidate `/notes*` and `/notes/*`.
-Next step: Commit and push Phase 6 deploy script/progress, then start Phase 7
-`yioo-link` sitemap coordination.
+Next step: Start Phase 7 `yioo-link` sitemap coordination.
 
 Errors encountered:
 
