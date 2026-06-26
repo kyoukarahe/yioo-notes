@@ -836,8 +836,13 @@ Verification:
   `https://yioo.link/tools/` routes returned `200` after notes deployment and
   robots deployment.
 
-Commit: pending
-Push: pending
+Commit:
+
+- `49c6d3f` (`feat: add notes content publisher`) in `yioo-notes`
+- Related SEO discovery commit: `e736f73` (`chore: advertise notes sitemap`) in
+  `yioo-link`
+
+Push: Both commits pushed to their `origin/main` remotes.
 Deployment/invalidation:
 
 - Notes publish script uploaded `dist/notes/...` to `s3://yioo-notes/notes/...`
