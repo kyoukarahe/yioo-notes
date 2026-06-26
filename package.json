@@ -4,9 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev --host 127.0.0.1",
-    "build": "astro build",
+    "dev": "npm run sync:styles && astro dev --host 127.0.0.1",
+    "sync:styles": "node scripts/sync-styles.mjs",
+    "prebuild": "npm run sync:styles",
+    "build": "node scripts/astro-build.mjs",
     "check": "astro check",
+    "publish:posts": "node scripts/publish-posts.mjs",
     "preview": "astro preview --host 127.0.0.1",
     "verify:build": "node scripts/verify-build.mjs"
   },

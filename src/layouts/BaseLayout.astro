@@ -1,6 +1,5 @@
 ---
 import siteConfig from "../config/site.config.json";
-import "../styles/global.css";
 
 type Props = {
   title?: string;
@@ -54,6 +53,7 @@ const isCurrentNavItem = (href: string) =>
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
+    <link rel="stylesheet" href="/notes/styles.css" />
     {structuredData && <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />}
     <script is:inline>
       (() => {

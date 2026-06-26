@@ -8,12 +8,14 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 9. Design pass
+Phase: 10. Content publish script
 Status: verified
-Last safe state: Phase 9 design candidate is committed, pushed, deployed, and
-verified live. `/notes`, the test post, CSS asset, root/API/tools routes, and
-mobile/desktop browser checks are healthy.
-Next step: Optional future content publishing or a separate design/content pass.
+Last safe state: Phase 10 content publisher is implemented, deployed, and
+verified live. `/notes`, the new script-publish test post, image asset,
+`/notes/styles.css`, notes manifest, notes sitemap, root/API/tools routes, and
+robots sitemap discovery are healthy.
+Next step: Use `npm.cmd run publish:posts -- --slug {slug}` for routine post
+reflection, or run the full build path for layout/design changes.
 
 ## Phase Log
 
@@ -736,3 +738,119 @@ Final live verification:
 - Live Playwright confirmed both post image instances load at 1200x630.
 - Final vision inspection found the deployed design matches the accepted
   `Workbench Notes` candidate with no visible overlap or missing image.
+
+### Phase 10. Content publish script
+
+Status: verified
+Started: 2026-06-26
+Finished: 2026-06-26
+Scope: Make post reflection possible without a full Astro build by introducing
+a content publishing script, moving the notes stylesheet to a stable
+`/notes/styles.css` path, quarantining local generated artifacts outside the
+repository, and validating the workflow with a new image-backed test post.
+Files changed:
+
+- `package.json`
+- `src/layouts/BaseLayout.astro`
+- `public/notes/styles.css`
+- `scripts/astro-build.mjs`
+- `scripts/sync-styles.mjs`
+- `scripts/publish-posts.mjs`
+- `scripts/verify-build.mjs`
+- `scripts/deploy.ps1`
+- `content/posts/2026-06-26-script-publish-test.md`
+- `public/notes/assets/posts/2026-06-26-script-publish-test/script-publish-flow.svg`
+- `docs/progress.md`
+- `docs/findings.md`
+
+Related `yioo-link` files changed for sitemap discovery:
+
+- `C:\repos\yioo\yioo-link\apps\public-pages\robots.txt`
+- `C:\repos\yioo\yioo-link\docs\ops\current-yioo-link-architecture.md`
+
+Commands run:
+
+- `git status --short --branch`
+- `rg --files`
+- `npm.cmd run sync:styles`
+- `npm.cmd run check`
+- `npm.cmd run build`
+- `$env:ASTRO_TELEMETRY_DISABLED='1'; npm.cmd run build`
+- `npm.cmd run verify:build`
+- `npm.cmd run publish:posts -- --no-upload`
+- `npm.cmd run publish:posts -- --slug 2026-06-26-script-publish-test --no-upload`
+- Local generated-output inspection for fixed CSS, manifest, sitemap, and post
+  image paths.
+- `npm.cmd run publish:posts -- --slug 2026-06-26-script-publish-test`
+- Live `curl.exe` checks for `/notes/`, the new post, the new image,
+  `/notes/styles.css`, manifest, notes sitemap, root, `/api/health`, and
+  `/tools/`.
+- `aws s3 ls s3://yioo-notes/notes/ --recursive`
+- `aws s3 cp apps/public-pages/robots.txt s3://yioo-link-mail-static/robots.txt`
+- `aws cloudfront create-invalidation --distribution-id EWYEJXEIKC81C --paths "/robots.txt"`
+- `aws cloudfront wait invalidation-completed --distribution-id EWYEJXEIKC81C --id I3GURMMAZEH1K2IBP8G2KPLGFG`
+
+Verification:
+
+- Local generated artifacts `.astro`, `.playwright-cli`, `dist`, and `output`
+  were moved to `C:\repos\yioo\_local-quarantine\yioo-notes-20260626-094242`
+  instead of being deleted.
+- `npm.cmd run check` passed with 0 errors, 0 warnings, and 0 hints.
+- `npm.cmd run build` passed and now syncs `src/styles/global.css` to
+  `public/notes/styles.css` before build.
+- `npm.cmd run verify:build` passed for Astro output and for
+  `publish:posts --no-upload` output.
+- `publish:posts --no-upload` rendered two published posts to `dist/notes`.
+- The new test post appears in `dist/notes/index.html`,
+  `dist/notes/posts.manifest.json`, and `dist/notes/sitemap.xml`.
+- The new SVG image appears under
+  `dist/notes/assets/posts/2026-06-26-script-publish-test/`.
+- Generated HTML references `/notes/styles.css` and does not reference
+  `/_astro/...` or `/notes/_astro/...` stylesheet assets.
+- First plain `astro build` attempts generated output but exited with a
+  Windows/Node `UV_HANDLE_CLOSING` assertion after completion. Setting
+  `ASTRO_TELEMETRY_DISABLED=1` fixed the exit state, so
+  `scripts/astro-build.mjs` now runs Astro with telemetry disabled.
+- The final default `npm.cmd run build` passed through `scripts/astro-build.mjs`.
+- Live `https://yioo.link/notes/` returns `200` and
+  `text/html; charset=utf-8`.
+- Live
+  `https://yioo.link/notes/2026-06-26-script-publish-test/` returns `200` and
+  `text/html; charset=utf-8`.
+- Live
+  `https://yioo.link/notes/assets/posts/2026-06-26-script-publish-test/script-publish-flow.svg`
+  returns `200` and `image/svg+xml`.
+- Live `https://yioo.link/notes/styles.css` returns `200` and
+  `text/css; charset=utf-8`.
+- Live `https://yioo.link/notes/posts.manifest.json` includes
+  `2026-06-26-script-publish-test`.
+- Live `https://yioo.link/notes/sitemap.xml` includes
+  `https://yioo.link/notes/2026-06-26-script-publish-test/`.
+- Live post HTML includes the correct canonical URL, `og:url`, fixed CSS path,
+  and SVG image references.
+- Live `https://yioo.link/robots.txt` advertises both
+  `https://yioo.link/sitemap.xml` and
+  `https://yioo.link/notes/sitemap.xml`, so future notes sitemap updates do not
+  require per-post `yioo-link` edits.
+- Existing `https://yioo.link/`, `https://yioo.link/api/health`, and
+  `https://yioo.link/tools/` routes returned `200` after notes deployment and
+  robots deployment.
+
+Commit: pending
+Push: pending
+Deployment/invalidation:
+
+- Notes publish script uploaded `dist/notes/...` to `s3://yioo-notes/notes/...`
+  and deleted the old `notes/_astro/index.Cz73WjMw.css` object.
+- Notes CloudFront invalidation `I4SR75IEVON7ZDXJQYGT7UH4C2` completed.
+- `yioo-link` robots update invalidation `I3GURMMAZEH1K2IBP8G2KPLGFG`
+  completed.
+
+Rollback state: Restore the previous commit, run `npm.cmd run build`, redeploy
+the previous `dist/notes` or restore S3 object versions, then invalidate
+`/notes*` and `/notes/*`. For the robots-only SEO discovery change, revert
+`yioo-link` commit `e736f73`, re-upload `apps/public-pages/robots.txt`, and
+invalidate `/robots.txt`. The quarantined local artifacts can be deleted by the
+user after this phase is verified.
+Next step: Commit and push this phase, then use `publish:posts` for routine
+post reflection.

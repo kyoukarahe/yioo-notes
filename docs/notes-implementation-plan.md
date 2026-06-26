@@ -29,6 +29,10 @@ Required SEO rules:
 - `og:url` and structured data URLs must match the canonical URL.
 - Root `https://yioo.link/sitemap.xml` must include public notes URLs, or the
   root sitemap must reference a dedicated notes sitemap.
+- `https://yioo.link/robots.txt` may also advertise
+  `https://yioo.link/notes/sitemap.xml` as a dedicated notes sitemap so routine
+  notes posts can update the notes-owned sitemap without editing the root
+  sitemap for every post.
 - Do not redirect public notes pages to `notes.yioo.link`.
 - Do not use a proxy setup where the source site emits conflicting canonical
   URLs.
@@ -392,7 +396,7 @@ Deployment/invalidation:
 
 No CRUD app is planned for the first version.
 
-Publishing flow:
+Full build publishing flow:
 
 ```text
 1. Write or edit Markdown in content/posts/{slug}.md
@@ -406,6 +410,27 @@ Publishing flow:
 
 The user-facing act of "uploading a post" is therefore a static publishing
 operation, not runtime CRUD.
+
+Content-only publishing flow:
+
+```text
+1. Write or edit Markdown in content/posts/{slug}.md
+2. Add images under public/notes/assets/posts/{slug}/
+3. Run npm.cmd run publish:posts
+4. Script regenerates dist/notes/index.html, post pages, manifest, sitemap,
+   fixed CSS, favicon, and post assets
+5. Script uploads dist/notes/... to s3://yioo-notes/notes/...
+6. Script invalidates /notes* and /notes/*
+```
+
+This path is intended for post-writing agents and routine content maintenance.
+It keeps one post as one URL (`https://yioo.link/notes/{slug}/`) while avoiding
+a full Astro build for ordinary post reflection. Layout/design changes should
+still use the full local verification path before deployment.
+
+For indexing, the script updates `https://yioo.link/notes/sitemap.xml`. The
+root `robots.txt` advertises that notes sitemap, so routine post publishing does
+not need a `yioo-link` change unless the root sitemap policy itself changes.
 
 ## Test Post Requirement
 
@@ -457,7 +482,9 @@ Recommended asset rules:
 - Add descriptive alt text for every meaningful image.
 - Keep assets under `/notes/assets/...` rather than a root-level
   `/notes-assets/...` path so ownership stays obvious.
-- Use long-cache headers for hashed or stable assets.
+- Use no-cache headers for post-scoped assets that may be replaced during
+  content maintenance.
+- Use long-cache headers only for hashed or immutable assets.
 - Use no-cache headers for HTML and generated manifests.
 
 ## Routing Plan

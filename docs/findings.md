@@ -61,3 +61,31 @@ future phases.
   `/_astro/...`, because the main CloudFront distribution routes `/notes/*` to
   the `yioo-notes` S3 origin while root `/_astro` belongs to the root site
   behavior. `verify-build` now rejects root `/_astro` links.
+- Phase 10 replaced generated stylesheet URLs with the stable public path
+  `/notes/styles.css`. `scripts/sync-styles.mjs` copies
+  `src/styles/global.css` to `public/notes/styles.css`, and
+  `BaseLayout.astro` references the fixed stylesheet path directly.
+- `scripts/publish-posts.mjs` can regenerate and upload notes HTML, post pages,
+  `posts.manifest.json`, `sitemap.xml`, fixed CSS, favicon, and post assets
+  without running a full Astro build. It still reads the same Markdown
+  frontmatter from `content/posts/`.
+- The content-only publish workflow intentionally regenerates the index,
+  manifest, and sitemap together with the changed post. This preserves one URL
+  per post while allowing a future post-writing agent to publish through a
+  script instead of editing layout or build internals.
+- Post assets remain post-scoped under
+  `public/notes/assets/posts/{slug}/`. A post-writing agent should place images
+  there before publishing, then reference them with root-relative
+  `/notes/assets/posts/{slug}/...` URLs in Markdown frontmatter/body.
+- Phase 10 changed notes asset uploads in `scripts/deploy.ps1` to `no-cache`
+  because post images may be replaced during content maintenance. Existing
+  root/API/tools/mail-service routing remains out of scope for notes content
+  publishing.
+- On Node v24.13.1 for Windows, Astro completed output generation but sometimes
+  exited with a `UV_HANDLE_CLOSING` assertion unless telemetry was disabled.
+  `scripts/astro-build.mjs` now sets `ASTRO_TELEMETRY_DISABLED=1` before
+  running `astro build`, and `npm.cmd run build` uses that wrapper.
+- `yioo-link` commit `e736f73` added
+  `Sitemap: https://yioo.link/notes/sitemap.xml` to live `robots.txt`. Future
+  notes post publishing can update the notes-owned sitemap without editing the
+  root sitemap for every post.

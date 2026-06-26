@@ -6,7 +6,7 @@ const dist = path.join(root, "dist");
 const notesIndex = path.join(dist, "notes", "index.html");
 const manifestPath = path.join(dist, "notes", "posts.manifest.json");
 const sitemapPath = path.join(dist, "notes", "sitemap.xml");
-const astroAssetsPath = path.join(dist, "notes", "_astro");
+const stylesPath = path.join(dist, "notes", "styles.css");
 const testSlug = "2026-06-26-test-note";
 const testPost = path.join(dist, "notes", testSlug, "index.html");
 const testImage = path.join(
@@ -18,6 +18,17 @@ const testImage = path.join(
   "test-image.webp",
 );
 const testCanonical = `https://yioo.link/notes/${testSlug}/`;
+const scriptTestSlug = "2026-06-26-script-publish-test";
+const scriptTestPost = path.join(dist, "notes", scriptTestSlug, "index.html");
+const scriptTestImage = path.join(
+  dist,
+  "notes",
+  "assets",
+  "posts",
+  scriptTestSlug,
+  "script-publish-flow.svg",
+);
+const scriptTestCanonical = `https://yioo.link/notes/${scriptTestSlug}/`;
 const forbiddenSegments = [
   `${path.sep}drafts${path.sep}`,
   `${path.sep}private${path.sep}`,
@@ -47,8 +58,16 @@ if (!fs.existsSync(testPost)) {
   fail(`dist/notes/${testSlug}/index.html is missing`);
 }
 
+if (!fs.existsSync(scriptTestPost)) {
+  fail(`dist/notes/${scriptTestSlug}/index.html is missing`);
+}
+
 if (!fs.existsSync(testImage)) {
   fail(`dist/notes/assets/posts/${testSlug}/test-image.webp is missing`);
+}
+
+if (!fs.existsSync(scriptTestImage)) {
+  fail(`dist/notes/assets/posts/${scriptTestSlug}/script-publish-flow.svg is missing`);
 }
 
 if (!fs.existsSync(manifestPath)) {
@@ -59,12 +78,8 @@ if (!fs.existsSync(sitemapPath)) {
   fail("dist/notes/sitemap.xml is missing");
 }
 
-if (!fs.existsSync(astroAssetsPath)) {
-  fail("dist/notes/_astro is missing");
-}
-
-if (!walk(astroAssetsPath).some((filePath) => filePath.endsWith(".css"))) {
-  fail("dist/notes/_astro CSS asset is missing");
+if (!fs.existsSync(stylesPath)) {
+  fail("dist/notes/styles.css is missing");
 }
 
 for (const filePath of walk(dist)) {
@@ -75,42 +90,60 @@ for (const filePath of walk(dist)) {
   }
 }
 
-if (fs.existsSync(testPost)) {
-  const postHtml = fs.readFileSync(testPost, "utf8");
-  if (!postHtml.includes(`<link rel="canonical" href="${testCanonical}">`)) {
-    fail("test post canonical URL is missing or incorrect");
+function verifyPostHtml(postPath, slug, canonical, imagePath) {
+  if (!fs.existsSync(postPath)) {
+    return;
   }
-  if (!postHtml.includes(`<meta property="og:url" content="${testCanonical}">`)) {
-    fail("test post og:url is missing or incorrect");
+
+  const postHtml = fs.readFileSync(postPath, "utf8");
+  if (!postHtml.includes(`<link rel="canonical" href="${canonical}">`)) {
+    fail(`${slug} canonical URL is missing or incorrect`);
   }
-  if (!postHtml.includes(`/notes/assets/posts/${testSlug}/test-image.webp`)) {
-    fail("test post image path is missing");
+  if (!postHtml.includes(`<meta property="og:url" content="${canonical}">`)) {
+    fail(`${slug} og:url is missing or incorrect`);
   }
-  if (postHtml.includes('href="/_astro/')) {
-    fail('test post references root /_astro assets instead of /notes/_astro');
+  if (!postHtml.includes(imagePath)) {
+    fail(`${slug} image path is missing`);
   }
-  if (!postHtml.includes('href="/notes/_astro/')) {
-    fail("test post /notes/_astro stylesheet reference is missing");
+  if (postHtml.includes('href="/_astro/') || postHtml.includes('href="/notes/_astro/')) {
+    fail(`${slug} references generated _astro stylesheet assets instead of /notes/styles.css`);
+  }
+  if (!postHtml.includes('href="/notes/styles.css"')) {
+    fail(`${slug} /notes/styles.css stylesheet reference is missing`);
   }
 }
 
+verifyPostHtml(testPost, testSlug, testCanonical, `/notes/assets/posts/${testSlug}/test-image.webp`);
+verifyPostHtml(
+  scriptTestPost,
+  scriptTestSlug,
+  scriptTestCanonical,
+  `/notes/assets/posts/${scriptTestSlug}/script-publish-flow.svg`,
+);
+
 if (fs.existsSync(notesIndex)) {
   const indexHtml = fs.readFileSync(notesIndex, "utf8");
-  if (indexHtml.includes('href="/_astro/')) {
-    fail('notes index references root /_astro assets instead of /notes/_astro');
+  if (indexHtml.includes('href="/_astro/') || indexHtml.includes('href="/notes/_astro/')) {
+    fail("notes index references generated _astro stylesheet assets instead of /notes/styles.css");
   }
-  if (!indexHtml.includes('href="/notes/_astro/')) {
-    fail("notes index /notes/_astro stylesheet reference is missing");
+  if (!indexHtml.includes('href="/notes/styles.css"')) {
+    fail("notes index /notes/styles.css stylesheet reference is missing");
   }
 }
 
 if (fs.existsSync(manifestPath)) {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const post = manifest.posts?.find((item) => item.slug === testSlug);
+  const scriptPost = manifest.posts?.find((item) => item.slug === scriptTestSlug);
   if (!post) {
     fail("test post is missing from posts.manifest.json");
   } else if (post.canonicalUrl !== testCanonical) {
     fail("test post manifest canonicalUrl is incorrect");
+  }
+  if (!scriptPost) {
+    fail("script publish test post is missing from posts.manifest.json");
+  } else if (scriptPost.canonicalUrl !== scriptTestCanonical) {
+    fail("script publish test post manifest canonicalUrl is incorrect");
   }
 }
 
@@ -122,6 +155,9 @@ if (fs.existsSync(sitemapPath)) {
   if (!sitemap.includes(`<loc>${testCanonical}</loc>`)) {
     fail("test post is missing from sitemap.xml");
   }
+  if (!sitemap.includes(`<loc>${scriptTestCanonical}</loc>`)) {
+    fail("script publish test post is missing from sitemap.xml");
+  }
 }
 
 if (process.exitCode) {
@@ -129,5 +165,5 @@ if (process.exitCode) {
 }
 
 console.log(
-  "[verify-build] dist/notes, test post, assets, manifest, sitemap, and SEO URLs verified",
+  "[verify-build] dist/notes, test posts, assets, manifest, sitemap, and SEO URLs verified",
 );

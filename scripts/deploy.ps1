@@ -41,7 +41,12 @@ if (-not (Test-Path $distNotes)) {
 
 $assetsPath = Join-Path $distNotes "assets"
 if (Test-Path $assetsPath) {
-  & aws s3 cp $assetsPath "$destination/assets" --recursive --cache-control "public,max-age=31536000,immutable" @commonArgs
+  & aws s3 cp $assetsPath "$destination/assets" --recursive --cache-control "no-cache" @commonArgs
+}
+
+$stylesPath = Join-Path $distNotes "styles.css"
+if (Test-Path $stylesPath) {
+  & aws s3 cp $stylesPath "$destination/styles.css" --cache-control "no-cache" --content-type "text/css; charset=utf-8" @commonArgs
 }
 
 $astroAssetsPath = Join-Path $distNotes "_astro"

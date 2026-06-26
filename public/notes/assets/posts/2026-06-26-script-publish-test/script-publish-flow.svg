@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Yioo Notes script publish flow</title>
+  <desc id="desc">A simple flow from Markdown and assets to the publish script, S3, CloudFront, and yioo.link notes pages.</desc>
+  <rect width="1200" height="630" fill="#f6f4ee"/>
+  <rect x="58" y="58" width="1084" height="514" rx="24" fill="#ffffff" stroke="#1f2937" stroke-width="3"/>
+  <text x="96" y="132" fill="#111827" font-family="Arial, sans-serif" font-size="44" font-weight="700">Yioo Notes Publish Test</text>
+  <text x="96" y="178" fill="#4b5563" font-family="Arial, sans-serif" font-size="24">Markdown and assets reflected without a full Astro build</text>
+
+  <g font-family="Arial, sans-serif" text-anchor="middle">
+    <rect x="110" y="280" width="180" height="112" rx="14" fill="#e0f2fe" stroke="#0369a1" stroke-width="2"/>
+    <text x="200" y="326" fill="#0c4a6e" font-size="24" font-weight="700">Post</text>
+    <text x="200" y="358" fill="#075985" font-size="18">Markdown</text>
+
+    <rect x="366" y="280" width="180" height="112" rx="14" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+    <text x="456" y="326" fill="#14532d" font-size="24" font-weight="700">Assets</text>
+    <text x="456" y="358" fill="#166534" font-size="18">Images</text>
+
+    <rect x="622" y="280" width="180" height="112" rx="14" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+    <text x="712" y="326" fill="#78350f" font-size="24" font-weight="700">Script</text>
+    <text x="712" y="358" fill="#92400e" font-size="18">publish:posts</text>
+
+    <rect x="878" y="280" width="180" height="112" rx="14" fill="#ede9fe" stroke="#6d28d9" stroke-width="2"/>
+    <text x="968" y="326" fill="#4c1d95" font-size="24" font-weight="700">Live</text>
+    <text x="968" y="358" fill="#5b21b6" font-size="18">/notes/{slug}</text>
+  </g>
+
+  <g stroke="#374151" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M298 336h60"/>
+    <path d="M348 326l12 10-12 10"/>
+    <path d="M554 336h60"/>
+    <path d="M604 326l12 10-12 10"/>
+    <path d="M810 336h60"/>
+    <path d="M860 326l12 10-12 10"/>
+  </g>
+
+  <text x="96" y="498" fill="#374151" font-family="Arial, sans-serif" font-size="22">Generated for deployment verification on 2026-06-26.</text>
+</svg>
