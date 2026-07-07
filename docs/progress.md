@@ -911,8 +911,8 @@ Verification:
 - Contrast spot check found `--quiet` on `--background` at 2.94:1, which should
   be improved before future metadata-heavy design work.
 
-Commit: not committed in this phase yet.
-Push: not pushed in this phase yet.
+Commit: `085ebfc` (`feat: add notes categories and design guidance`)
+Push: Success to `origin/main` with the follow-up progress record commit.
 Deployment/invalidation: none; documentation and audit only.
 Rollback state: Revert the Phase 11 docs and `AGENTS.md` guidance changes only.
 No runtime rollback is required.
@@ -987,12 +987,12 @@ Verification:
 - The `implementation` category page includes both existing test posts.
 - The `yioo-notes-apply` skill validates after adding category workflow rules.
 
-Commit: not committed in this phase yet.
-Push: not pushed in this phase yet.
+Commit: `085ebfc` (`feat: add notes categories and design guidance`)
+Push: Success to `origin/main` with the follow-up progress record commit.
 Deployment/invalidation: none; Phase 12 was locally verified only.
 Rollback state: Revert Phase 12 category source files and post frontmatter
 changes, rebuild `dist/notes`, and keep Phase 11 design guidance untouched.
 Because no deployment was made, no S3 or CloudFront rollback is required.
-Next step: Commit/push Phase 12 when the current mixed worktree scope is
-confirmed, or deploy separately with `publish:posts` if category pages should
-go live.
+Next step: Deploy separately with `publish:posts` if category pages should go
+live, then verify `/notes/categories/` and
+`/notes/categories/implementation/`.
