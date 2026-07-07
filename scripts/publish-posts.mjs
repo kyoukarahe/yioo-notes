@@ -8,9 +8,11 @@ import { syncStyles } from "./sync-styles.mjs";
 
 const root = process.cwd();
 const siteConfig = JSON.parse(fs.readFileSync(path.join(root, "src", "config", "site.config.json"), "utf8"));
+const categoriesConfigPath = path.join(root, "src", "config", "categories.json");
 const postsDirectory = path.join(root, "content", "posts");
 const publicNotesDirectory = path.join(root, "public", "notes");
 const distNotesDirectory = path.join(root, "dist", "notes");
+const categoryIdPattern = /^[a-z0-9][a-z0-9-]*$/;
 
 function parseArgs(argv) {
   const options = {
@@ -115,6 +117,58 @@ function normalizeTags(value) {
     .filter(Boolean);
 }
 
+function readCategories() {
+  const parsed = JSON.parse(fs.readFileSync(categoriesConfigPath, "utf8"));
+  if (!Array.isArray(parsed.categories)) {
+    throw new Error("src/config/categories.json must contain a categories array");
+  }
+
+  const seen = new Set();
+  return parsed.categories
+    .map((category, index) => {
+      const id = assertString(category.id, "id", categoriesConfigPath);
+      if (!categoryIdPattern.test(id)) {
+        throw new Error(`src/config/categories.json category ${index} has an invalid id: ${id}`);
+      }
+      if (seen.has(id)) {
+        throw new Error(`src/config/categories.json has a duplicate category id: ${id}`);
+      }
+      seen.add(id);
+
+      const url = `/notes/categories/${id}/`;
+      return {
+        canonicalUrl: absoluteUrl(url),
+        description: assertString(category.description, "description", categoriesConfigPath),
+        id,
+        label: assertString(category.label, "label", categoriesConfigPath),
+        sort: typeof category.sort === "number" && Number.isFinite(category.sort) ? category.sort : 1000,
+        status: category.status === "inactive" ? "inactive" : "active",
+        url,
+      };
+    })
+    .sort((a, b) => a.sort - b.sort || a.label.localeCompare(b.label) || a.id.localeCompare(b.id));
+}
+
+function activeCategories() {
+  return readCategories().filter((category) => category.status === "active");
+}
+
+function assertActiveCategory(id, filePath) {
+  if (!categoryIdPattern.test(id)) {
+    throw new Error(`${path.relative(root, filePath)} has an invalid category id: ${id}`);
+  }
+
+  const category = readCategories().find((item) => item.id === id);
+  if (!category) {
+    throw new Error(`${path.relative(root, filePath)} references unknown category: ${id}`);
+  }
+  if (category.status !== "active") {
+    throw new Error(`${path.relative(root, filePath)} references inactive category: ${id}`);
+  }
+
+  return category;
+}
+
 function markdownFiles(directory) {
   if (!fs.existsSync(directory)) {
     return [];
@@ -142,11 +196,13 @@ function readPost(filePath) {
   const canonicalPath = typeof data.canonical === "string" ? data.canonical : url;
   const cover = typeof data.cover === "string" ? data.cover : undefined;
   const updated = typeof data.updated === "string" ? data.updated : undefined;
+  const categoryId = assertString(data.category, "category", filePath);
 
   return {
     body: parsed.content,
     canonical: canonicalPath,
     canonicalUrl: absoluteUrl(canonicalPath),
+    category: assertActiveCategory(categoryId, filePath),
     cover,
     coverUrl: cover ? absoluteUrl(cover) : undefined,
     date: assertString(data.date, "date", filePath),
@@ -167,6 +223,15 @@ function getAllPosts() {
     .map(readPost)
     .filter((post) => post.status === "published")
     .sort((a, b) => b.date.localeCompare(a.date) || b.slug.localeCompare(a.slug));
+}
+
+function categoriesWithPosts(posts) {
+  return activeCategories()
+    .map((category) => ({
+      ...category,
+      posts: posts.filter((post) => post.category.id === category.id),
+    }))
+    .filter((category) => category.posts.length > 0);
 }
 
 function renderJsonLd(data) {
@@ -280,13 +345,16 @@ ${posts
       <span class="post-copy">
         <span class="post-title">${escapeHtml(post.title)}</span>
         <span class="post-summary">${escapeHtml(post.summary)}</span>
-        ${
-          post.tags.length > 0
-            ? `<span class="post-tags" aria-label="Tags">${post.tags
-                .map((tag) => `<span class="post-tag">${escapeHtml(tag)}</span>`)
-                .join("")}</span>`
-            : ""
-        }
+        <span class="post-taxonomy">
+          <span class="post-category">${escapeHtml(post.category.label)}</span>
+          ${
+            post.tags.length > 0
+              ? `<span class="post-tags" aria-label="Tags for ${escapeHtml(post.title)}">${post.tags
+                  .map((tag) => `<span class="post-tag">${escapeHtml(tag)}</span>`)
+                  .join("")}</span>`
+              : ""
+          }
+        </span>
       </span>
     </a>
   </li>`,
@@ -296,6 +364,7 @@ ${posts
 }
 
 function renderIndex(posts) {
+  const categories = categoriesWithPosts(posts);
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -315,6 +384,15 @@ function renderIndex(posts) {
   <h1>Yioo Notes</h1>
   <p>Essays, research notes, and implementation thoughts collected as static documents under yioo.link.</p>
 </section>
+<nav class="category-strip" aria-label="Note categories">
+  <a href="/notes/categories/">Categories</a>
+  ${categories
+    .map(
+      (category) =>
+        `<a href="${escapeHtml(category.url)}">${escapeHtml(category.label)}<span>${escapeHtml(category.posts.length)}</span></a>`,
+    )
+    .join("")}
+</nav>
 ${renderPostList(posts)}`;
 
   return renderLayout({
@@ -322,6 +400,83 @@ ${renderPostList(posts)}`;
     canonicalPath: "/notes/",
     currentPath: "/notes/",
     structuredData,
+  });
+}
+
+function renderCategoryIndex(posts) {
+  const categories = categoriesWithPosts(posts);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    description: "Primary sections for Yioo Notes posts.",
+    hasPart: categories.map((category) => ({
+      "@type": "CollectionPage",
+      name: category.label,
+      url: category.canonicalUrl,
+    })),
+    name: "Yioo Notes Categories",
+    url: `${siteConfig.baseUrl}/notes/categories/`,
+  };
+  const body = `<section class="intro">
+  <p class="eyebrow">Categories</p>
+  <h1>Note Categories</h1>
+  <p>Stable primary sections for published notes.</p>
+</section>
+<ol class="category-list" aria-label="Note categories">
+${categories
+  .map(
+    (category) => `  <li>
+    <a class="category-list-link" href="${escapeHtml(category.url)}">
+      <span>
+        <span class="category-title">${escapeHtml(category.label)}</span>
+        <span class="category-description">${escapeHtml(category.description)}</span>
+      </span>
+      <span class="category-count">${escapeHtml(category.posts.length)}</span>
+    </a>
+  </li>`,
+  )
+  .join("\n")}
+</ol>`;
+
+  return renderLayout({
+    body,
+    canonicalPath: "/notes/categories/",
+    currentPath: "/notes/categories/",
+    description: "Primary sections for Yioo Notes posts.",
+    structuredData,
+    title: "Categories",
+  });
+}
+
+function renderCategoryPage(category) {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    description: category.description,
+    hasPart: category.posts.map((post) => ({
+      "@type": "BlogPosting",
+      dateModified: post.updated ?? post.date,
+      datePublished: post.date,
+      headline: post.title,
+      url: post.canonicalUrl,
+    })),
+    name: `${category.label} | Yioo Notes`,
+    url: category.canonicalUrl,
+  };
+  const body = `<section class="intro">
+  <p class="eyebrow">Category</p>
+  <h1>${escapeHtml(category.label)}</h1>
+  <p>${escapeHtml(category.description)}</p>
+</section>
+${renderPostList(category.posts)}`;
+
+  return renderLayout({
+    body,
+    canonicalPath: category.url,
+    currentPath: category.url,
+    description: category.description,
+    structuredData,
+    title: category.label,
   });
 }
 
@@ -348,6 +503,7 @@ function renderPost(post) {
     <p>${escapeHtml(post.summary)}</p>
     <div class="article-meta">
       <time datetime="${escapeHtml(post.date)}">${escapeHtml(post.date)}</time>
+      <a href="${escapeHtml(post.category.url)}">${escapeHtml(post.category.label)}</a>
       ${post.tags.length > 0 ? `<span>${escapeHtml(post.tags.join(", "))}</span>` : ""}
     </div>
   </header>
@@ -376,6 +532,12 @@ function renderManifest(posts) {
       generatedAt: new Date().toISOString(),
       posts: posts.map((post) => ({
         canonicalUrl: post.canonicalUrl,
+        category: {
+          canonicalUrl: post.category.canonicalUrl,
+          id: post.category.id,
+          label: post.category.label,
+          url: post.category.url,
+        },
         cover: post.cover,
         date: post.date,
         slug: post.slug,
@@ -392,11 +554,20 @@ function renderManifest(posts) {
 }
 
 function renderSitemap(posts) {
+  const categories = categoriesWithPosts(posts);
   const urls = [
     {
       lastmod: posts[0]?.updated ?? posts[0]?.date ?? new Date().toISOString().slice(0, 10),
       loc: absoluteUrl("/notes/"),
     },
+    {
+      lastmod: posts[0]?.updated ?? posts[0]?.date ?? new Date().toISOString().slice(0, 10),
+      loc: absoluteUrl("/notes/categories/"),
+    },
+    ...categories.map((category) => ({
+      lastmod: category.posts[0]?.updated ?? category.posts[0]?.date ?? new Date().toISOString().slice(0, 10),
+      loc: category.canonicalUrl,
+    })),
     ...posts.map((post) => ({
       lastmod: post.updated ?? post.date,
       loc: post.canonicalUrl,
@@ -562,6 +733,10 @@ export function renderPublishOutput(options = parseArgs([])) {
   fs.cpSync(publicNotesDirectory, distNotesDirectory, { recursive: true });
 
   writeFile("index.html", renderIndex(posts));
+  writeFile(path.join("categories", "index.html"), renderCategoryIndex(posts));
+  for (const category of categoriesWithPosts(posts)) {
+    writeFile(path.join("categories", category.id, "index.html"), renderCategoryPage(category));
+  }
   for (const post of posts) {
     writeFile(path.join(post.slug, "index.html"), renderPost(post));
   }

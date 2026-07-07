@@ -4,6 +4,8 @@ import path from "node:path";
 const root = process.cwd();
 const dist = path.join(root, "dist");
 const notesIndex = path.join(dist, "notes", "index.html");
+const categoriesIndex = path.join(dist, "notes", "categories", "index.html");
+const implementationCategory = path.join(dist, "notes", "categories", "implementation", "index.html");
 const manifestPath = path.join(dist, "notes", "posts.manifest.json");
 const sitemapPath = path.join(dist, "notes", "sitemap.xml");
 const stylesPath = path.join(dist, "notes", "styles.css");
@@ -56,6 +58,14 @@ if (!fs.existsSync(notesIndex)) {
 
 if (!fs.existsSync(testPost)) {
   fail(`dist/notes/${testSlug}/index.html is missing`);
+}
+
+if (!fs.existsSync(categoriesIndex)) {
+  fail("dist/notes/categories/index.html is missing");
+}
+
+if (!fs.existsSync(implementationCategory)) {
+  fail("dist/notes/categories/implementation/index.html is missing");
 }
 
 if (!fs.existsSync(scriptTestPost)) {
@@ -129,6 +139,29 @@ if (fs.existsSync(notesIndex)) {
   if (!indexHtml.includes('href="/notes/styles.css"')) {
     fail("notes index /notes/styles.css stylesheet reference is missing");
   }
+  if (!indexHtml.includes('/notes/categories/implementation/')) {
+    fail("notes index category link is missing");
+  }
+}
+
+if (fs.existsSync(categoriesIndex)) {
+  const categoryIndexHtml = fs.readFileSync(categoriesIndex, "utf8");
+  if (!categoryIndexHtml.includes('href="/notes/styles.css"')) {
+    fail("category index /notes/styles.css stylesheet reference is missing");
+  }
+  if (!categoryIndexHtml.includes('/notes/categories/implementation/')) {
+    fail("implementation category link is missing from category index");
+  }
+}
+
+if (fs.existsSync(implementationCategory)) {
+  const categoryHtml = fs.readFileSync(implementationCategory, "utf8");
+  if (!categoryHtml.includes('<link rel="canonical" href="https://yioo.link/notes/categories/implementation/">')) {
+    fail("implementation category canonical URL is missing or incorrect");
+  }
+  if (!categoryHtml.includes(testCanonical) || !categoryHtml.includes(scriptTestCanonical)) {
+    fail("implementation category page does not include both test posts");
+  }
 }
 
 if (fs.existsSync(manifestPath)) {
@@ -139,11 +172,15 @@ if (fs.existsSync(manifestPath)) {
     fail("test post is missing from posts.manifest.json");
   } else if (post.canonicalUrl !== testCanonical) {
     fail("test post manifest canonicalUrl is incorrect");
+  } else if (post.category?.id !== "implementation") {
+    fail("test post manifest category is incorrect");
   }
   if (!scriptPost) {
     fail("script publish test post is missing from posts.manifest.json");
   } else if (scriptPost.canonicalUrl !== scriptTestCanonical) {
     fail("script publish test post manifest canonicalUrl is incorrect");
+  } else if (scriptPost.category?.id !== "implementation") {
+    fail("script publish test post manifest category is incorrect");
   }
 }
 
@@ -151,6 +188,12 @@ if (fs.existsSync(sitemapPath)) {
   const sitemap = fs.readFileSync(sitemapPath, "utf8");
   if (!sitemap.includes("<loc>https://yioo.link/notes/</loc>")) {
     fail("notes index is missing from sitemap.xml");
+  }
+  if (!sitemap.includes("<loc>https://yioo.link/notes/categories/</loc>")) {
+    fail("category index is missing from sitemap.xml");
+  }
+  if (!sitemap.includes("<loc>https://yioo.link/notes/categories/implementation/</loc>")) {
+    fail("implementation category page is missing from sitemap.xml");
   }
   if (!sitemap.includes(`<loc>${testCanonical}</loc>`)) {
     fail("test post is missing from sitemap.xml");

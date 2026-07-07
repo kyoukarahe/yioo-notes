@@ -8,14 +8,14 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 10. Content publish script
+Phase: 12. Category implementation
 Status: verified
-Last safe state: Phase 10 content publisher is implemented, deployed, and
-verified live. `/notes`, the new script-publish test post, image asset,
-`/notes/styles.css`, notes manifest, notes sitemap, root/API/tools routes, and
-robots sitemap discovery are healthy.
-Next step: Use `npm.cmd run publish:posts -- --slug {slug}` for routine post
-reflection, or run the full build path for layout/design changes.
+Last safe state: Phase 12 added registry-backed categories, generated category
+archive pages in both the Astro build path and content-only publish path, and
+verified the two existing test posts under the `implementation` category.
+Next step: Before adding or changing categories, update
+`src/config/categories.json` first, then run `npm.cmd run publish:posts -- --no-upload`
+and `npm.cmd run verify:build`.
 
 ## Phase Log
 
@@ -859,3 +859,140 @@ invalidate `/robots.txt`. The quarantined local artifacts can be deleted by the
 user after this phase is verified.
 Next step: Commit and push this phase, then use `publish:posts` for routine
 post reflection.
+
+### Phase 11. Design guidance and current audit
+
+Status: verified
+Started: 2026-06-28
+Finished: 2026-06-28
+Scope: Add current design guidance, make mobile design verification explicitly
+mandatory, evaluate the current deployed design, and record pre-implementation
+research for future advanced design work.
+Files changed:
+
+- `AGENTS.md`
+- `docs/notes-implementation-plan.md`
+- `docs/progress.md`
+- `docs/findings.md`
+- `design-docs/README.md`
+- `design-docs/design-guidelines.md`
+- `design-docs/current-design-evaluation-2026-06-28.md`
+- `design-docs/design-advancement-research-2026-06-28.md`
+
+Commands run:
+
+- `npx.cmd --version`
+- `npm.cmd run check`
+- `npm.cmd run build`
+- Web research against W3C/WAI, MDN, web.dev, and Material Design references
+- Playwright live browser checks for `https://yioo.link/notes/` and
+  `https://yioo.link/notes/2026-06-26-test-note/`
+- Playwright screenshots:
+  - `output/playwright/phase11-current-index-desktop.png`
+  - `output/playwright/phase11-current-post-desktop.png`
+  - `output/playwright/phase11-current-index-mobile.png`
+  - `output/playwright/phase11-current-post-mobile.png`
+- Playwright console and DOM checks for mobile overflow and image load state
+- Node contrast spot-check script against current CSS color variables
+- `git diff`
+- `git status --short --branch`
+
+Verification:
+
+- `npm.cmd run check` passed with 0 errors, 0 warnings, and 0 hints.
+- `npm.cmd run build` passed.
+- Live Playwright console check returned 0 errors and 0 warnings.
+- Mobile index and representative post at 390x844 had no document-level
+  horizontal overflow.
+- Representative post images were complete with 1200x630 natural size.
+- Desktop and mobile screenshots were inspected.
+- Current design was recorded as an acceptable baseline with a 2026-06-28
+  maintenance review score of 88/100.
+- Contrast spot check found `--quiet` on `--background` at 2.94:1, which should
+  be improved before future metadata-heavy design work.
+
+Commit: not committed in this phase yet.
+Push: not pushed in this phase yet.
+Deployment/invalidation: none; documentation and audit only.
+Rollback state: Revert the Phase 11 docs and `AGENTS.md` guidance changes only.
+No runtime rollback is required.
+Next step: Use `design-docs/` as the source of truth for future design guidance
+and run mobile verification for every design change.
+
+### Phase 12. Category implementation
+
+Status: verified
+Started: 2026-06-28
+Finished: 2026-06-28
+Scope: Implement one required category per published post, keep categories in
+an editable registry, generate category archive pages, and verify the existing
+two test posts through both rendering paths.
+Files changed:
+
+- `README.md`
+- `content/posts/2026-06-26-script-publish-test.md`
+- `content/posts/2026-06-26-test-note.md`
+- `docs/category-strategy.md`
+- `docs/findings.md`
+- `docs/progress.md`
+- `public/notes/styles.css`
+- `scripts/publish-posts.mjs`
+- `scripts/verify-build.mjs`
+- `src/components/PostList.astro`
+- `src/config/categories.json`
+- `src/lib/categories.ts`
+- `src/lib/posts.ts`
+- `src/pages/notes/[slug]/index.astro`
+- `src/pages/notes/categories/index.astro`
+- `src/pages/notes/categories/[category]/index.astro`
+- `src/pages/notes/index.astro`
+- `src/pages/notes/sitemap.xml.ts`
+- `src/styles/global.css`
+
+Related skill update:
+
+- `C:\Users\love_\.codex\skills\yioo-notes-apply\SKILL.md`
+
+Commands run:
+
+- `npm.cmd run check`
+- `npm.cmd run build`
+- `npm.cmd run verify:build`
+- `npm.cmd run publish:posts -- --no-upload`
+- `npm.cmd run verify:build`
+- Generated output inspections for:
+  - `dist/notes/posts.manifest.json`
+  - `dist/notes/sitemap.xml`
+  - `dist/notes/categories/index.html`
+  - `dist/notes/categories/implementation/index.html`
+- `python C:\Users\love_\.codex\skills\.system\skill-creator\scripts\quick_validate.py C:\Users\love_\.codex\skills\yioo-notes-apply`
+
+Verification:
+
+- `npm.cmd run check` passed with 0 errors, 0 warnings, and 0 hints.
+- `npm.cmd run build` passed and generated:
+  - `/notes/categories/`
+  - `/notes/categories/implementation/`
+  - the two existing test post pages
+  - `posts.manifest.json`
+  - `sitemap.xml`
+- `npm.cmd run verify:build` passed after the Astro build.
+- `npm.cmd run publish:posts -- --no-upload` rendered two published posts to
+  `dist/notes` without uploading.
+- `npm.cmd run verify:build` passed after the content-only publish output.
+- `posts.manifest.json` includes resolved category metadata for both test posts:
+  `id`, `label`, `url`, and `canonicalUrl`.
+- `sitemap.xml` includes `https://yioo.link/notes/categories/` and
+  `https://yioo.link/notes/categories/implementation/`.
+- The `implementation` category page includes both existing test posts.
+- The `yioo-notes-apply` skill validates after adding category workflow rules.
+
+Commit: not committed in this phase yet.
+Push: not pushed in this phase yet.
+Deployment/invalidation: none; Phase 12 was locally verified only.
+Rollback state: Revert Phase 12 category source files and post frontmatter
+changes, rebuild `dist/notes`, and keep Phase 11 design guidance untouched.
+Because no deployment was made, no S3 or CloudFront rollback is required.
+Next step: Commit/push Phase 12 when the current mixed worktree scope is
+confirmed, or deploy separately with `publish:posts` if category pages should
+go live.

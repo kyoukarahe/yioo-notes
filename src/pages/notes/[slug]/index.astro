@@ -51,6 +51,7 @@ const structuredData = {
       <p>{post.summary}</p>
       <div class="article-meta">
         <time datetime={post.date}>{post.date}</time>
+        <a href={post.category.url}>{post.category.label}</a>
         {post.tags.length > 0 && <span>{post.tags.join(", ")}</span>}
       </div>
     </header>

@@ -1,0 +1,46 @@
+---
+import PostList from "../../../../components/PostList.astro";
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import { getActiveCategories } from "../../../../lib/categories";
+import { getPostsByCategoryId } from "../../../../lib/posts";
+
+export function getStaticPaths() {
+  return getActiveCategories()
+    .filter((category) => getPostsByCategoryId(category.id).length > 0)
+    .map((category) => ({
+      params: { category: category.id },
+    }));
+}
+
+const { category: categoryId } = Astro.params;
+const category = getActiveCategories().find((item) => item.id === categoryId);
+
+if (!category) {
+  throw new Error(`Category not found: ${categoryId}`);
+}
+
+const posts = getPostsByCategoryId(category.id);
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: `${category.label} | Yioo Notes`,
+  description: category.description,
+  url: category.canonicalUrl,
+  hasPart: posts.map((post) => ({
+    "@type": "BlogPosting",
+    headline: post.title,
+    url: post.canonicalUrl,
+    datePublished: post.date,
+    dateModified: post.updated ?? post.date,
+  })),
+};
+---
+
+<BaseLayout title={category.label} description={category.description} canonicalPath={category.url} structuredData={structuredData}>
+  <section class="intro">
+    <p class="eyebrow">Category</p>
+    <h1>{category.label}</h1>
+    <p>{category.description}</p>
+  </section>
+  <PostList posts={posts} />
+</BaseLayout>

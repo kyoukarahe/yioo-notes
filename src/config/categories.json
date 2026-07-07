@@ -1,0 +1,11 @@
+{
+  "categories": [
+    {
+      "id": "implementation",
+      "label": "Implementation",
+      "description": "Implementation notes, publishing pipeline checks, and operational test posts.",
+      "status": "active",
+      "sort": 10
+    }
+  ]
+}

@@ -4,6 +4,7 @@ slug: "2026-06-26-script-publish-test"
 date: "2026-06-26"
 updated: "2026-06-26"
 status: "published"
+category: "implementation"
 tags:
   - notes
   - publish

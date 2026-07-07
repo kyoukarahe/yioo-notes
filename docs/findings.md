@@ -89,3 +89,44 @@ future phases.
   `Sitemap: https://yioo.link/notes/sitemap.xml` to live `robots.txt`. Future
   notes post publishing can update the notes-owned sitemap without editing the
   root sitemap for every post.
+
+## 2026-06-28 Design Guidance
+
+- New forward-looking design guidance and audits live under `design-docs/`.
+  Historical Phase 9 design research and scorecards under `docs/` remain
+  evidence, but future design work should record new guidance, research, and
+  scorecards in `design-docs/`.
+- Mobile verification is mandatory for every design change. At minimum, capture
+  and inspect the notes index and one representative post at desktop width and
+  mobile 390x844. Add a narrower mobile viewport when navigation, typography,
+  article width, post-list density, code wrapping, tables, or image treatment
+  changes.
+- The 2026-06-28 live design audit found the current `Workbench Notes` design
+  acceptable as a baseline but not yet an advanced long-term target. The
+  maintenance review score is 88/100, mainly because the desktop index can feel
+  sparse and the `--quiet` metadata color contrast is too low for normal-size
+  text.
+- Current CSS contrast spot check: `--quiet` on `--background` is 2.94:1. Most
+  other checked text roles pass AA normal text contrast, including `--text`,
+  `--body-text`, `--muted`, `--accent-strong`, code text, and preformatted
+  text.
+- Future design passes should use a stress fixture before visual adoption. The
+  current two test posts do not cover long titles, Korean paragraphs, long code
+  paths, tables, blockquotes, or mixed image aspect ratios.
+- Structural design changes must keep Astro components and
+  `scripts/publish-posts.mjs` aligned, because the content-only publish script
+  manually renders the same layout surface.
+
+## 2026-06-28 Category Analysis
+
+- Category support is implemented with one required `category` frontmatter
+  value per published post.
+- Category rationale, impact scope, operational effects, SEO implications, and
+  open decisions are documented in `docs/category-strategy.md`.
+- `src/config/categories.json` is the editable category registry.
+  `posts.manifest.json` remains generated-only.
+- The Astro build path and `scripts/publish-posts.mjs` both generate
+  `/notes/categories/` and `/notes/categories/implementation/`.
+- The current verification contract checks category pages, manifest category
+  metadata, notes sitemap category URLs, and both existing test posts under the
+  `implementation` category.

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { marked } from "marked";
+import { assertActiveCategory, type Category } from "./categories";
 
 export type PostFrontmatter = {
   title: string;
@@ -9,14 +10,16 @@ export type PostFrontmatter = {
   date: string;
   updated?: string;
   status?: "published" | "draft";
+  category: string;
   tags?: string[];
   summary: string;
   cover?: string;
   canonical?: string;
 };
 
-export type Post = PostFrontmatter & {
+export type Post = Omit<PostFrontmatter, "category"> & {
   status: "published" | "draft";
+  category: Category;
   tags: string[];
   sourcePath: string;
   body: string;
@@ -31,6 +34,12 @@ export type PublicPostManifestItem = {
   title: string;
   date: string;
   updated?: string;
+  category: {
+    id: string;
+    label: string;
+    url: string;
+    canonicalUrl: string;
+  };
   tags: string[];
   summary: string;
   cover?: string;
@@ -86,6 +95,7 @@ function readPost(filePath: string): Post {
   const url = `/notes/${slug}/`;
   const canonicalPath = typeof data.canonical === "string" ? data.canonical : url;
   const cover = typeof data.cover === "string" ? data.cover : undefined;
+  const categoryId = assertString(data.category, "category", filePath);
 
   return {
     title: assertString(data.title, "title", filePath),
@@ -93,6 +103,7 @@ function readPost(filePath: string): Post {
     date: assertString(data.date, "date", filePath),
     updated: typeof data.updated === "string" ? data.updated : undefined,
     status,
+    category: assertActiveCategory(categoryId, filePath),
     tags: normalizeTags(data.tags),
     summary: assertString(data.summary, "summary", filePath),
     cover,
@@ -110,11 +121,15 @@ export function getAllPosts(): Post[] {
   return markdownFiles(postsDirectory)
     .map(readPost)
     .filter((post) => post.status === "published")
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort((a, b) => b.date.localeCompare(a.date) || b.slug.localeCompare(a.slug));
 }
 
 export function getPostBySlug(slug: string): Post | undefined {
   return getAllPosts().find((post) => post.slug === slug);
+}
+
+export function getPostsByCategoryId(categoryId: string): Post[] {
+  return getAllPosts().filter((post) => post.category.id === categoryId);
 }
 
 export function getPublicPostManifest(): PublicPostManifestItem[] {
@@ -123,6 +138,12 @@ export function getPublicPostManifest(): PublicPostManifestItem[] {
     title: post.title,
     date: post.date,
     updated: post.updated,
+    category: {
+      id: post.category.id,
+      label: post.category.label,
+      url: post.category.url,
+      canonicalUrl: post.category.canonicalUrl,
+    },
     tags: post.tags,
     summary: post.summary,
     cover: post.cover,

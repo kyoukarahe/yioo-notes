@@ -1,0 +1,49 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getActiveCategories } from "../../../lib/categories";
+import { getAllPosts } from "../../../lib/posts";
+import siteConfig from "../../../config/site.config.json";
+
+const posts = getAllPosts();
+const categories = getActiveCategories()
+  .map((category) => ({
+    ...category,
+    count: posts.filter((post) => post.category.id === category.id).length,
+  }))
+  .filter((category) => category.count > 0);
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Yioo Notes Categories",
+  description: "Primary sections for Yioo Notes posts.",
+  url: `${siteConfig.baseUrl}/notes/categories/`,
+  hasPart: categories.map((category) => ({
+    "@type": "CollectionPage",
+    name: category.label,
+    url: category.canonicalUrl,
+  })),
+};
+---
+
+<BaseLayout title="Categories" description="Primary sections for Yioo Notes posts." canonicalPath="/notes/categories/" structuredData={structuredData}>
+  <section class="intro">
+    <p class="eyebrow">Categories</p>
+    <h1>Note Categories</h1>
+    <p>Stable primary sections for published notes.</p>
+  </section>
+  <ol class="category-list" aria-label="Note categories">
+    {
+      categories.map((category) => (
+        <li>
+          <a class="category-list-link" href={category.url}>
+            <span>
+              <span class="category-title">{category.label}</span>
+              <span class="category-description">{category.description}</span>
+            </span>
+            <span class="category-count">{category.count}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</BaseLayout>

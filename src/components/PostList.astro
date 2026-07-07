@@ -20,13 +20,16 @@ const { posts } = Astro.props;
             <span class="post-copy">
               <span class="post-title">{post.title}</span>
               <span class="post-summary">{post.summary}</span>
-              {post.tags.length > 0 && (
-                <span class="post-tags" aria-label="Tags">
-                  {post.tags.map((tag) => (
-                    <span class="post-tag">{tag}</span>
-                  ))}
-                </span>
-              )}
+              <span class="post-taxonomy">
+                <span class="post-category">{post.category.label}</span>
+                {post.tags.length > 0 && (
+                  <span class="post-tags" aria-label={`Tags for ${post.title}`}>
+                    {post.tags.map((tag) => (
+                      <span class="post-tag">{tag}</span>
+                    ))}
+                  </span>
+                )}
+              </span>
             </span>
           </a>
         </li>

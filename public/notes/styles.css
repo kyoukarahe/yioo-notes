@@ -320,12 +320,28 @@ h1 {
   line-height: 1.6;
 }
 
+.post-taxonomy,
 .post-tags,
 .article-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem 0.8rem;
   align-items: center;
+}
+
+.post-taxonomy {
+  gap: 0.5rem;
+}
+
+.post-category {
+  border: 1px solid rgba(15, 116, 107, 0.3);
+  border-radius: 4px;
+  background: rgba(15, 116, 107, 0.08);
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 720;
+  line-height: 1.4;
+  padding: 0.12rem 0.42rem;
 }
 
 .post-tag {
@@ -348,6 +364,83 @@ h1 {
   color: var(--muted);
   border-top: 1px solid var(--line);
   padding-top: 1.2rem;
+}
+
+.category-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  border-top: 1px solid var(--line);
+  margin: -1.4rem 0 2.4rem;
+  padding-top: 1rem;
+}
+
+.category-strip a,
+.category-list-link {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 251, 0.7);
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+.category-strip a {
+  display: inline-flex;
+  gap: 0.38rem;
+  align-items: center;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 0.38rem 0.55rem;
+}
+
+.category-strip span,
+.category-count {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+.category-list {
+  display: grid;
+  gap: 0.85rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.category-list-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.category-list-link:hover,
+.category-list-link:focus-visible,
+.category-strip a:hover,
+.category-strip a:focus-visible {
+  border-color: rgba(15, 116, 107, 0.42);
+  background: rgba(15, 116, 107, 0.06);
+}
+
+.category-title,
+.category-description {
+  display: block;
+}
+
+.category-title {
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.category-description {
+  color: var(--muted);
+  line-height: 1.55;
+  margin-top: 0.22rem;
 }
 
 .article {

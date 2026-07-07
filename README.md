@@ -29,8 +29,12 @@ files.
 - Published Markdown posts live in `content/posts/`.
 - Drafts and private notes live in `content/drafts/` and `content/private/` and
   are not read by the build.
+- Published posts must include one `category` frontmatter value from
+  `src/config/categories.json`.
 - Public post assets live under `public/notes/assets/posts/{slug}/`.
 - Markdown should reference images with `/notes/assets/posts/{slug}/...` paths.
+- Category pages are generated at `/notes/categories/` and
+  `/notes/categories/{category-id}/`.
 
 ## Project State
 

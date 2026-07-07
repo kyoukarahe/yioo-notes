@@ -2,9 +2,14 @@
 import PostList from "../../components/PostList.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getAllPosts } from "../../lib/posts";
+import { getActiveCategories } from "../../lib/categories";
 import siteConfig from "../../config/site.config.json";
 
 const posts = getAllPosts();
+const categories = getActiveCategories().map((category) => ({
+  ...category,
+  count: posts.filter((post) => post.category.id === category.id).length,
+}));
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
@@ -30,5 +35,18 @@ const structuredData = {
       documents under yioo.link.
     </p>
   </section>
+  <nav class="category-strip" aria-label="Note categories">
+    <a href="/notes/categories/">Categories</a>
+    {
+      categories
+        .filter((category) => category.count > 0)
+        .map((category) => (
+          <a href={category.url}>
+            {category.label}
+            <span>{category.count}</span>
+          </a>
+        ))
+    }
+  </nav>
   <PostList posts={posts} />
 </BaseLayout>
