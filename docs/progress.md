@@ -996,3 +996,54 @@ Because no deployment was made, no S3 or CloudFront rollback is required.
 Next step: Deploy separately with `publish:posts` if category pages should go
 live, then verify `/notes/categories/` and
 `/notes/categories/implementation/`.
+
+### Phase 14. Publish the LLM Wiki research essay
+
+Status: published and live-verified
+Started: 2026-08-12
+Finished: 2026-08-12
+Operation: New post
+Slug: `2026-08-11-how-to-use-llm-wiki`
+Live URL: `https://yioo.link/notes/2026-08-11-how-to-use-llm-wiki/`
+Scope: Publish the explicitly approved Korean research essay and only its two
+approved WebP assets. Keep the source ledger and SVG authoring files private.
+Files published:
+
+- `content/posts/2026-08-11-how-to-use-llm-wiki.md`
+- `public/notes/assets/posts/2026-08-11-how-to-use-llm-wiki/cover.webp`
+- `public/notes/assets/posts/2026-08-11-how-to-use-llm-wiki/memory-layers.webp`
+
+Commands run:
+
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --slug 2026-08-11-how-to-use-llm-wiki --no-upload`
+- `npm.cmd run verify:build`
+- `npm.cmd run publish:posts -- --slug 2026-08-11-how-to-use-llm-wiki`
+- Live HTTP readback for the post, both images, notes index, manifest, sitemap,
+  implementation category, stylesheet, root, API health, and tools page
+- Playwright desktop and 390px mobile checks for the live index and post
+
+Verification:
+
+- The repository check passed with 0 errors, 0 warnings, and 0 hints.
+- The content-only renderer produced three published posts, and
+  `verify:build` passed for HTML, assets, manifest, sitemap, and SEO routes.
+- The live post, both WebP assets, notes index, manifest, sitemap,
+  implementation category, stylesheet, site root, API health, and tools page
+  all returned HTTP 200 with the expected content types.
+- Live index, manifest, sitemap, category archive, post HTML, cover reference,
+  and body-diagram reference all contain the expected slug or canonical URL.
+- Live desktop and 390px mobile browser checks showed no horizontal overflow;
+  both images loaded at their expected natural dimensions, and the browser
+  console reported 0 errors and 0 warnings.
+- The source ledger and SVG authoring sources remain under `content/drafts/`
+  and were not uploaded to public paths.
+
+Deployment/invalidation: Uploaded through the repository publishing script to
+`s3://yioo-notes/notes`; CloudFront distribution `EWYEJXEIKC81C` invalidation
+`I1J86V6VUQI7190CQKD990MRFF` completed successfully.
+Rollback state: Remove the post Markdown and its slug-scoped public asset
+directory, rerun the publishing script so generated indexes and S3 reflect the
+removal, invalidate `/notes*` and `/notes/*`, and verify the post and both asset
+URLs are absent while the notes index, manifest, sitemap, and category remain
+valid.
