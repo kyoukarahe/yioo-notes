@@ -3,7 +3,7 @@ title: "Script Publish Test Note"
 slug: "2026-06-26-script-publish-test"
 date: "2026-06-26"
 updated: "2026-06-26"
-status: "published"
+status: "draft"
 category: "implementation"
 tags:
   - notes

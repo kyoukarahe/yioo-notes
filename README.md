@@ -17,7 +17,7 @@ For content-only publishing without a full Astro build:
 
 ```powershell
 npm.cmd run publish:posts -- --no-upload
-npm.cmd run publish:posts -- --slug 2026-06-26-script-publish-test
+npm.cmd run publish:posts -- --slug 2026-08-11-how-to-use-llm-wiki
 ```
 
 The publish script regenerates the notes index, post pages, manifest, sitemap,

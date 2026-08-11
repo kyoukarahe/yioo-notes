@@ -1047,3 +1047,53 @@ directory, rerun the publishing script so generated indexes and S3 reflect the
 removal, invalidate `/notes*` and `/notes/*`, and verify the post and both asset
 URLs are absent while the notes index, manifest, sitemap, and category remain
 valid.
+
+### Phase 15. Unpublish and privately archive legacy test notes
+
+Status: unpublished and live-verified
+Started: 2026-08-12
+Finished: 2026-08-12
+Operation: Unpublish two legacy test posts with recoverable private archival
+Slugs: `2026-06-26-test-note`, `2026-06-26-script-publish-test`
+Scope: Remove both test posts and their scoped assets from the public build and
+live Notes surface so `2026-08-11-how-to-use-llm-wiki` is the first and only
+published note. Retain the test sources and assets under `content/private/`.
+Files changed:
+
+- `content/posts/2026-06-26-test-note.md` moved to `content/private/`
+- `content/posts/2026-06-26-script-publish-test.md` moved to `content/private/`
+- Both test asset folders moved from `public/notes/assets/posts/` to
+  `content/private/assets/`
+- `scripts/verify-build.mjs`
+- `README.md`
+
+Commands run:
+
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --no-upload`
+- `npm.cmd run verify:build`
+- Generated manifest/index/category/sitemap and archive-integrity assertions
+- `npm.cmd run publish:posts`
+- Live HTTP and S3 object readback for removed and retained surfaces
+
+Verification:
+
+- The repository check passed with 0 errors, 0 warnings, and 0 hints.
+- The full no-upload publisher rendered exactly one post, and the build
+  verifier passed using the remaining LLM Wiki post and its two images.
+- Generated and live manifest data contain exactly one post with slug
+  `2026-08-11-how-to-use-llm-wiki`; index, category, and sitemap contain that
+  slug and neither legacy slug.
+- Both old live post URLs and both old asset URLs return 403 after invalidation.
+- Authoritative S3 readback returns zero keys for all four legacy prefixes.
+- The LLM Wiki post, both images, notes/discovery pages, root, API health, and
+  tools page all return 200.
+- Archived asset Git blob hashes match their formerly public versions.
+
+Deployment/invalidation: Full notes sync to `s3://yioo-notes/notes` deleted the
+four legacy objects; CloudFront distribution `EWYEJXEIKC81C` invalidation
+`ICAFF6OSAGI0CBVRYQJSSZ0V1K` completed successfully.
+Rollback state: Move both Markdown files and both asset folders back to their
+original public paths, restore `status: published`, revert the verifier/README
+fixture updates, run `npm.cmd run publish:posts`, and verify both slugs return
+to the manifest, sitemap, category archive, S3, and live URLs.
