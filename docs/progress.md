@@ -8,15 +8,13 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 17. Publish the approved LLM Wiki revision
+Phase: 18. Use Yioo as the public editorial identity
 Status: published and live-verified
-Last safe state: The revised first post and its exact approved AI disclosure
-are live. Markdown, rendered HTML, S3, and live readback each contain the
-disclosure once; the post, index, manifest, and two images return 200.
-Next step: Use the same draft -> Korean edit -> author feedback -> verified
-revision -> publish approval -> disclosure lifecycle for the next essay. Keep
-drafts, source ledgers, comparison notes, and unrelated research artifacts
-private and untracked.
+Last safe state: The first post's disclosure now ends with `by Yioo` on both
+S3 and the live page. The reusable research-essay skill also uses `Yioo` as
+the default public editorial identity.
+Next step: Keep using the two approval gates and exact-once disclosure checks
+for future essays. Override `Yioo` only with explicit article-level approval.
 
 ## Phase Log
 
@@ -1285,3 +1283,57 @@ Rollback state: Restore the previous Markdown body and `updated: 2026-08-12`,
 remove the single disclosure footer, run the slug-scoped publisher again, and
 verify the old wording and metadata on S3 and the live URL.
 Commit: This phase record is included in the scoped publication commit.
+
+### Phase 18. Use Yioo as the public editorial identity
+
+Status: published and live-verified
+Started: 2026-08-14
+Finished: 2026-08-14
+Scope: Replace the first post's public editorial reviewer name from `Karahe`
+to `Yioo`, preserve the exact-once disclosure contract, and make `Yioo` the
+default public identity in the reusable research-essay skill.
+Approval: The author explicitly approved the wording change and immediate
+publication on 2026-08-14.
+Files changed:
+
+- `content/posts/2026-08-11-how-to-use-llm-wiki.md`
+- `.agents/skills/research-essay-publisher/references/review-publishing.md`
+- `content/drafts/2026-08-11-how-to-use-llm-wiki.sources.md` (private ledger)
+- `docs/post-todos/2026-08-13-llm-wiki-humanize-comparison.md` (private review record)
+- `docs/findings.md`
+- `docs/progress.md`
+
+Commands run:
+
+- Official `quick_validate.py` for `research-essay-publisher`
+- Markdown and rendered-HTML exact-once disclosure validation
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --slug 2026-08-11-how-to-use-llm-wiki --no-upload`
+- `npm.cmd run verify:build`
+- `git diff --check`
+- `npm.cmd run publish:posts -- --slug 2026-08-11-how-to-use-llm-wiki`
+- Live HTTP, S3 object, and CloudFront invalidation readback
+
+Verification:
+
+- The reusable skill passed structural validation and now records `Yioo` as
+  the default editorial reviewer and disclosure identity.
+- Astro check passed with 0 errors, 0 warnings, and 0 hints.
+- The dry-run publisher and build verifier passed for the post, assets,
+  manifest, sitemap, and SEO URLs.
+- The new line appears exactly once in source Markdown, rendered HTML,
+  authoritative S3 HTML, and the live page; the former `Karahe` line is absent
+  from all four surfaces.
+- The post and rendered metadata use `updated: 2026-08-14`, matching the final
+  Korean-time publication date.
+- The live post, notes index, manifest, two images, root site, API health, and
+  tools page all return 200.
+
+Deployment/invalidation: Published to `s3://yioo-notes/notes`; CloudFront
+distribution `EWYEJXEIKC81C` invalidation
+`I96XPY52PJER0N31HDK67G58KP` completed successfully.
+Live URL: `https://yioo.link/notes/2026-08-11-how-to-use-llm-wiki/`
+Rollback state: Restore `Karahe` in the post disclosure and prior skill
+template, run the slug-scoped publisher, and verify the previous line once on
+S3 and the live URL.
+Commit: This phase record is included in the scoped identity-update commit.

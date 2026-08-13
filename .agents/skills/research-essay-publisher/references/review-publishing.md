@@ -25,7 +25,7 @@ At first-draft completion, keep a private record in `content/drafts/{slug}.sourc
 - drafting tool: OpenAI Codex
 - drafting model: {actual model used for the canonical prose draft}
 - reasoning level: {actual level, or omitted when unavailable}
-- editorial reviewer: Karahe
+- editorial reviewer: Yioo
 - proposed public line: {exact proposed sentence}
 - insertion owner: yioo-notes-apply
 ```
@@ -39,10 +39,12 @@ The default public form is:
 
 > **AI disclosure**
 >
-> Researched and drafted with OpenAI Codex using {model and optional reasoning level}. Editorial review and final approval by Karahe.
+> Researched and drafted with OpenAI Codex using {model and optional reasoning level}. Editorial review and final approval by Yioo.
 ```
 
 Use `Editorial review` for the essay-level `감수`. Do not replace it with `Fact-checked by` unless a separate factual verification contract was actually completed. The author may approve a shorter or different line; store and publish the exact approved wording.
+
+Use `Yioo` as the default public editorial identity so the disclosure matches the site byline. Change it only when the author explicitly approves a different public name for that article.
 
 ## Revision and verifier
 

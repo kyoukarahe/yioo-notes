@@ -182,3 +182,6 @@ future phases.
   `SequenceMatcher` similarity, with warning above 30% and abort above 50%.
 - The publishing skill now includes `scripts/verify_ai_disclosure.py` for
   exact-once Markdown, rendered-HTML, and live-URL verification.
+- `Yioo` is the default public editorial identity for research-essay
+  disclosures so the footer matches the site's public byline. A different
+  identity still requires explicit article-level approval.

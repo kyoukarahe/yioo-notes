@@ -2,7 +2,7 @@
 title: "LLM Wiki를 잘 쓰는 사람은 무엇을 저장하지 않을지 먼저 정한다"
 slug: "2026-08-11-how-to-use-llm-wiki"
 date: "2026-08-11"
-updated: "2026-08-13"
+updated: "2026-08-14"
 status: published
 category: implementation
 tags:
@@ -228,4 +228,4 @@ LLM Wiki는 기억 장치이기 전에 편집 시스템이다.
 
 > **AI disclosure**
 >
-> Researched and drafted with OpenAI Codex using GPT‑5.6 Sol (xhigh reasoning). Editorial review and final approval by Karahe.
+> Researched and drafted with OpenAI Codex using GPT‑5.6 Sol (xhigh reasoning). Editorial review and final approval by Yioo.
