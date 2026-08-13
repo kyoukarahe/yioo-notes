@@ -1337,3 +1337,70 @@ Rollback state: Restore `Karahe` in the post disclosure and prior skill
 template, run the slug-scoped publisher, and verify the previous line once on
 S3 and the live URL.
 Commit: This phase record is included in the scoped identity-update commit.
+
+### Phase 19. Publish the agent-completion verification essay
+
+Status: published and live-verified
+Started: 2026-08-14
+Finished: 2026-08-14
+Operation: New post
+Slug: `2026-08-12-how-to-verify-ai-agent-completion`
+Live URL: `https://yioo.link/notes/2026-08-12-how-to-verify-ai-agent-completion/`
+Scope: Publish the explicitly approved Korean research essay, promote only its
+approved WebP diagram, add the approved AI disclosure exactly once, and keep
+the private source ledger and SVG authoring source out of public paths.
+Approval: The author explicitly sent `게시 승인` on 2026-08-14.
+Files published:
+
+- `content/posts/2026-08-12-how-to-verify-ai-agent-completion.md`
+- `public/notes/assets/posts/2026-08-12-how-to-verify-ai-agent-completion/evidence-ladder.webp`
+
+Private provenance updated:
+
+- `content/drafts/2026-08-12-how-to-verify-ai-agent-completion.sources.md`
+- Disclosure line: `Researched and drafted with OpenAI Codex using GPT‑5.6 Sol (xhigh reasoning). Editorial review and final approval by Yioo.`
+
+Commands run:
+
+- Independent read-only final verification after approval
+- Markdown and rendered-HTML exact-once disclosure validation
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --slug 2026-08-12-how-to-verify-ai-agent-completion --no-upload`
+- `npm.cmd run verify:build`
+- `git diff --check`
+- `npm.cmd run publish:posts -- --slug 2026-08-12-how-to-verify-ai-agent-completion`
+- Live HTTP, manifest, sitemap, category, S3 object, and CloudFront invalidation readback
+- Live Chromium checks at 1440×1000 and 390×844
+
+Verification:
+
+- The post-approval independent verifier returned PASS with no P0, P1, or P2;
+  the approved draft SHA-256 remained
+  `bc87b35e34597299bbeb87eacdaad90fe3e9b361225ea1fc8ba54e736beaf5b7`.
+- Astro check passed with 0 errors, 0 warnings, and 0 hints.
+- The dry-run publisher rendered exactly two published posts, and the build
+  verifier passed for HTML, assets, manifest, sitemap, and SEO routes.
+- The approved disclosure appears exactly once at the end of source Markdown,
+  rendered HTML, and the live page.
+- Live post, image, notes index, manifest, sitemap, implementation category,
+  stylesheet, root site, API health, and tools page all returned HTTP 200 with
+  expected content types.
+- Live manifest contains exactly two posts and includes both this post and the
+  existing LLM Wiki post. The sitemap and category archive include the new
+  slug.
+- The public WebP is byte-identical to the approved draft asset and S3 reports
+  `image/webp` with 102,964 bytes. The private source ledger and SVG are absent
+  from the rendered post and public asset directory.
+- Desktop and 390px mobile Chromium checks showed no page-level horizontal
+  overflow, one fully loaded 1200×1040 diagram, one disclosure block, and zero
+  browser console errors or warnings. The long code block uses internal
+  horizontal scrolling on mobile without widening the page.
+
+Deployment/invalidation: Uploaded through the repository publisher to
+`s3://yioo-notes/notes`; CloudFront distribution `EWYEJXEIKC81C` invalidation
+`I47Y5X78WI70925UB33KMP0186` completed successfully.
+Rollback state: Remove the new post Markdown and its slug-scoped public WebP,
+run the full publisher so manifest, sitemap, category pages, and S3 remove the
+slug, invalidate `/notes*` and `/notes/*`, and verify the old URL and asset are
+absent while the existing LLM Wiki post and service boundaries remain healthy.
+Commit: This phase record is included in the scoped publication commit.
