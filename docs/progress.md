@@ -1330,6 +1330,40 @@ publisher, and verify the old wording returns while the disclosure remains
 exactly once.
 Commit: This phase record is included in the scoped wording-update commit.
 
+### Phase 21. Add a plain-Korean gate to research essays
+
+Status: locally verified (instruction change only)
+Started: 2026-08-14
+Finished: 2026-08-14
+Scope: Persist the author's preference for shorter, natural Korean sentences
+and prevent English clause order, stacked modifiers, and abstract-noun chains
+from surviving the Korean editorial and final-verifier stages.
+Files changed:
+
+- `.agents/skills/research-essay-publisher/SKILL.md`
+- `.agents/skills/research-essay-publisher/references/research-editorial.md`
+- `.agents/skills/research-essay-publisher/references/review-publishing.md`
+- `docs/findings.md`
+- `docs/progress.md`
+
+Verification:
+
+- The official skill validator returned `Skill is valid!`.
+- The skill core remains concise at 80 lines, all referenced instruction files
+  exist, and checks found no missing final newline, replacement character,
+  conflict marker, trailing whitespace, or `git diff --check` error.
+- A read-only forward test rewrote one dense definition into three natural
+  Korean sentences. It preserved the required outcome, persistence and
+  authoritative-readback conditions, as well as the exception for low-impact,
+  easily reversible changes.
+- No content post, public asset, generated site, S3 object, CloudFront state,
+  or live page changed.
+
+Deployment/invalidation: none; instruction-only change.
+Rollback state: Revert the Phase 21 skill and documentation changes. No
+runtime or content rollback is required.
+Commit: This phase record is included in the scoped skill-update commit.
+
 ### Phase 18. Use Yioo as the public editorial identity
 
 Status: published and live-verified

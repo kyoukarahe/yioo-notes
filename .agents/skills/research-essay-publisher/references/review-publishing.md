@@ -57,6 +57,7 @@ Resolve the author's feedback into explicit changes, update the one canonical dr
 - privacy, secrets, identifying details, and rights to included media;
 - invented first-person claims or credentials;
 - unfinished TODOs, placeholders, broken Markdown, and inconsistent terms;
+- thesis, summary, and bold conclusions that use stacked modifiers, abstract-noun chains, or translated English clause order and therefore require a second reading;
 - required frontmatter, active category, slug, canonical, summary, and image paths;
 - title/summary accuracy and internal-link validity.
 

@@ -185,3 +185,16 @@ future phases.
 - `Yioo` is the default public editorial identity for research-essay
   disclosures so the footer matches the site's public byline. A different
   identity still requires explicit article-level approval.
+
+## 2026-08-14 Plain Korean preference
+
+- Yioo Notes prose should not preserve English clause order merely because it
+  sounds formal or precise.
+- Thesis, summary, and bold conclusion sentences receive a separate
+  plain-language gate after Korean editing. Stacked modifiers, abstract-noun
+  chains, and a delayed main verb should be split or reordered.
+- Prefer a concrete subject, action, and result that can be understood on the
+  first reading. Keep evidence boundaries, uncertainty, exceptions, dates,
+  numbers, and technical distinctions even when simplifying the syntax.
+- English terms remain acceptable when they are established technical terms or
+  materially improve precision; otherwise introduce natural Korean first.

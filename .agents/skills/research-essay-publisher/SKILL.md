@@ -53,6 +53,8 @@ After the complete first draft, enter `KOREAN_EDIT` and invoke `$humanize-korean
 
 Treat the skill as an editorial lint and rewrite pass, never as a way to conceal AI involvement. Preserve the article's meaning, register, facts, claims, names, dates, numbers, quotations, citations, link targets, code, and table structure. After reconciliation, compare the pre-edit and edited drafts and record the change summary and invariant checks in the private source notes. If author feedback later materially rewrites Korean prose, rerun the pass only on the changed prose and repeat the relevant invariant checks.
 
+Before accepting the Korean edit, run the plain-language gate in `research-editorial.md`. Split sentences that depend on stacked modifiers, abstract nouns, or translated English clause order. Prefer a concrete subject followed by an action and result. Preserve qualifications and technical distinctions instead of deleting them merely to make a sentence shorter.
+
 ## Stop for author feedback
 
 Enter `DRAFT_READY` only after the Korean editorial pass and its invariant checks. Present the complete review package defined in `review-publishing.md`, then enter `WAITING_FOR_AUTHOR_FEEDBACK`. Ask no more than three high-impact questions. Continue only after the author responds or explicitly accepts the draft direction.
