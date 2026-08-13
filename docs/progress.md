@@ -1284,6 +1284,52 @@ remove the single disclosure footer, run the slug-scoped publisher again, and
 verify the old wording and metadata on S3 and the live URL.
 Commit: This phase record is included in the scoped publication commit.
 
+### Phase 20. Simplify the agent-completion definition
+
+Status: published and live-verified
+Started: 2026-08-14
+Finished: 2026-08-14
+Operation: Update post wording
+Slug: `2026-08-12-how-to-verify-ai-agent-completion`
+Scope: Replace one dense thesis sentence with a two-sentence explanation that
+preserves the distinction between agent self-report, the actual result, and
+readback from the user surface or final store. Preserve all metadata, links,
+assets, citations, and the approved disclosure.
+Files changed:
+
+- `content/posts/2026-08-12-how-to-verify-ai-agent-completion.md`
+- `docs/progress.md`
+
+Commands run:
+
+- Markdown and rendered-HTML exact-once disclosure validation
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --slug 2026-08-12-how-to-verify-ai-agent-completion --no-upload`
+- `npm.cmd run verify:build`
+- `git diff --check`
+- `npm.cmd run publish:posts -- --slug 2026-08-12-how-to-verify-ai-agent-completion`
+- Live post, manifest, category, root, API health, tools, and invalidation readback
+
+Verification:
+
+- The replacement sentence appears exactly once in source and rendered HTML;
+  the previous sentence is absent.
+- Astro check passed with 0 errors, 0 warnings, and 0 hints.
+- The dry-run publisher rendered two posts and `verify:build` passed.
+- The approved AI disclosure remains exactly once at the article end in
+  Markdown, rendered HTML, and live HTML.
+- The live post, manifest, category archive, root site, API health, and tools
+  page returned HTTP 200. Manifest and category still include the post.
+
+Deployment/invalidation: Published to `s3://yioo-notes/notes`; CloudFront
+distribution `EWYEJXEIKC81C` invalidation
+`IAVHM8YCM5M54ESIMRUAWUWOFN` completed successfully.
+Live URL: `https://yioo.link/notes/2026-08-12-how-to-verify-ai-agent-completion/`
+Rollback state: Restore the prior thesis sentence, run the slug-scoped
+publisher, and verify the old wording returns while the disclosure remains
+exactly once.
+Commit: This phase record is included in the scoped wording-update commit.
+
 ### Phase 18. Use Yioo as the public editorial identity
 
 Status: published and live-verified
