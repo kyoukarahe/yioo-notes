@@ -20,6 +20,30 @@ This repository owns the static notes/blog implementation for
 - Implementation logs: `docs/progress.md`, `docs/findings.md`
 - Design guidance and design audits: `design-docs/`
 
+## Research Essay Workflow
+
+- For requests to turn a topic, conversation excerpt, memo, research TODO, or
+  existing note into a researched essay, use the repository skill at
+  `.agents/skills/research-essay-publisher/SKILL.md`.
+- Keep working articles under `content/drafts/` and unapproved assets under
+  `content/drafts/assets/{slug}/`. Do not place either in public paths before
+  final approval.
+- After the first complete Korean draft, run `humanize-korean` on the article
+  body before author feedback. Keep frontmatter and the planned AI disclosure
+  outside the humanization input, then recheck claims, links, names, numbers,
+  quotations, code, and tables against the pre-edit draft.
+- Use subagents only for independent topic framing, evidence research,
+  counter-research, and final verification. One primary agent owns all draft
+  edits.
+- Require author feedback after the first complete draft and separate explicit
+  publish approval after the verified revision. Praise alone is not publish
+  approval.
+- Record the actual drafting model and the proposed public AI disclosure in the
+  private source ledger. Show that exact line at the publish-approval gate, but
+  add it to the article only during the approved production handoff.
+- After explicit approval, use `yioo-notes-apply` for production content
+  promotion, deployment, live verification, and its safe git workflow.
+
 ## Design Guidance
 
 - Every design verification must include mobile and desktop checks. Mobile is

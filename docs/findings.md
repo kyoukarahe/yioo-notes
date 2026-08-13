@@ -130,3 +130,55 @@ future phases.
 - The current verification contract checks category pages, manifest category
   metadata, notes sitemap category URLs, and both existing test posts under the
   `implementation` category.
+
+## 2026-08-11 Research Essay Agent Workflow
+
+- Repository-scoped essay instructions now live at
+  `.agents/skills/research-essay-publisher/`. The compact `SKILL.md` controls
+  state and safety gates; four one-level references hold site, research,
+  SEO/image, and review/publishing details.
+- Research work has two deliberate human gates: one after the first complete
+  draft and another after the verified revision. Positive feedback is not
+  treated as authorization to publish.
+- The workflow assigns independent framing, evidence, counter-research, and
+  read-only verification roles while keeping a single primary draft owner.
+  This prevents competing edits and stitched multi-agent prose.
+- Unapproved images must remain under `content/drafts/assets/{slug}/`.
+  `scripts/publish-posts.mjs` copies the public notes tree, so placing draft
+  assets in `public/notes/assets/posts/{slug}/` could expose them during an
+  unrelated deployment.
+- The essay skill does not duplicate production controls. After explicit
+  approval it hands the approved post and assets to `yioo-notes-apply`, which
+  remains authoritative for validation, S3 upload, CloudFront invalidation,
+  live readback, and git delivery.
+- The skill tells agents to inspect `src/config/categories.json` rather than
+  freezing the current `implementation` category as permanent policy.
+- During the first essay run, the skill profile's canonical example was found
+  to conflict with the authoritative renderer and existing posts. The incorrect
+  `/notes/posts/{slug}/` example was corrected to `/notes/{slug}/` before any
+  draft was created; the skill then passed validation again.
+
+## 2026-08-13 Korean editing and AI disclosure lifecycle
+
+- Research essays now separate three concerns: canonical prose drafting,
+  Korean editorial cleanup, and production disclosure insertion.
+- `humanize-korean` runs after the complete first draft and before author
+  feedback. Its input excludes frontmatter, source ledgers, URLs, code,
+  machine-readable metadata, and the pending disclosure. The primary writer
+  reconciles section outputs and rechecks claims, names, dates, numbers,
+  quotations, links, code, and tables.
+- Drafting provenance is captured at first-draft time in the private source
+  ledger. Publication must not substitute the model that happens to execute
+  the later upload task.
+- Disclosure lifecycle states are `proposed -> approved -> applied`. The
+  author sees the proposed exact line at the publish-approval gate; only an
+  explicit publishing instruction advances it to `approved`.
+- `yioo-notes-apply` is the single insertion owner. It appends the approved
+  footer after approval, then verifies exact-once presence in source Markdown,
+  rendered HTML, and the live URL before marking the ledger `applied`.
+- Manual self-reported change rates were insufficient for a durable editorial
+  gate. The installed `humanize-korean` skill now has a deterministic
+  `scripts/verify_change_rate.py` implementation using character-level
+  `SequenceMatcher` similarity, with warning above 30% and abort above 50%.
+- The publishing skill now includes `scripts/verify_ai_disclosure.py` for
+  exact-once Markdown, rendered-HTML, and live-URL verification.

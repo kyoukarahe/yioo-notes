@@ -8,14 +8,15 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 12. Category implementation
-Status: verified
-Last safe state: Phase 12 added registry-backed categories, generated category
-archive pages in both the Astro build path and content-only publish path, and
-verified the two existing test posts under the `implementation` category.
-Next step: Before adding or changing categories, update
-`src/config/categories.json` first, then run `npm.cmd run publish:posts -- --no-upload`
-and `npm.cmd run verify:build`.
+Phase: 17. Publish the approved LLM Wiki revision
+Status: published and live-verified
+Last safe state: The revised first post and its exact approved AI disclosure
+are live. Markdown, rendered HTML, S3, and live readback each contain the
+disclosure once; the post, index, manifest, and two images return 200.
+Next step: Use the same draft -> Korean edit -> author feedback -> verified
+revision -> publish approval -> disclosure lifecycle for the next essay. Keep
+drafts, source ledgers, comparison notes, and unrelated research artifacts
+private and untracked.
 
 ## Phase Log
 
@@ -997,6 +998,61 @@ Next step: Deploy separately with `publish:posts` if category pages should go
 live, then verify `/notes/categories/` and
 `/notes/categories/implementation/`.
 
+### Phase 13. Research essay agent instructions
+
+Status: locally verified (instruction configuration only)
+Started: 2026-08-11
+Finished: 2026-08-11
+Scope: Add a repository-scoped workflow that turns topics, shared
+conversations, research TODOs, and existing notes into evidence-backed Korean
+essay drafts, pauses for author feedback, verifies the revision, and requires
+separate explicit approval before handing production work to the existing
+notes publishing skill.
+Files changed:
+
+- `AGENTS.md`
+- `.agents/skills/research-essay-publisher/SKILL.md`
+- `.agents/skills/research-essay-publisher/agents/openai.yaml`
+- `.agents/skills/research-essay-publisher/references/site-profile.md`
+- `.agents/skills/research-essay-publisher/references/research-editorial.md`
+- `.agents/skills/research-essay-publisher/references/seo-images.md`
+- `.agents/skills/research-essay-publisher/references/review-publishing.md`
+- `docs/findings.md`
+- `docs/progress.md`
+
+Commands run:
+
+- `python %USERPROFILE%\.codex\skills\.system\skill-creator\scripts\init_skill.py research-essay-publisher --path .agents\skills --resources references ...`
+- `$env:PYTHONUTF8='1'; python %USERPROFILE%\.codex\skills\.system\skill-creator\scripts\quick_validate.py .agents\skills\research-essay-publisher`
+- `git diff --check`
+- Reference-file existence and scaffold-marker checks
+
+Verification:
+
+- Official skill validation passed in UTF-8 mode.
+- The core skill is 68 lines and all four referenced guidance files exist.
+- No initializer placeholders remain; intentional uses of the word `TODO`
+  describe research inputs and placeholder checks.
+- `git diff --check` passed.
+- The publish path delegates to `yioo-notes-apply`; no post, generated site
+  artifact, S3 object, CloudFront cache, commit, or remote branch changed.
+- This phase validates instruction structure and safety gates only. A real
+  essay-authoring run and production publication were intentionally not
+  performed.
+- First-run correction on 2026-08-11: the site profile's canonical example was
+  changed from `/notes/posts/{slug}/` to the authoritative `/notes/{slug}/`
+  route after comparison with both renderers, both existing posts, and the
+  implementation plan. UTF-8-mode skill validation passed after correction.
+
+Commit: none.
+Push: none.
+Deployment/invalidation: none; instruction configuration only.
+Rollback state: Remove the new repository skill and the Phase 13 `AGENTS.md`,
+findings, and progress entries. No runtime rollback is required.
+Next step: Invoke `$research-essay-publisher` with a topic or shared research
+source; the workflow should stop at `WAITING_FOR_AUTHOR_FEEDBACK` after staging
+its draft outside public paths.
+
 ### Phase 14. Publish the LLM Wiki research essay
 
 Status: published and live-verified
@@ -1097,3 +1153,135 @@ Rollback state: Move both Markdown files and both asset folders back to their
 original public paths, restore `status: published`, revert the verifier/README
 fixture updates, run `npm.cmd run publish:posts`, and verify both slugs return
 to the manifest, sitemap, category archive, S3, and live URLs.
+
+### Phase 16. Draft humanization and publish-time AI disclosure workflow
+
+Status: locally verified (instruction and validator changes only)
+Started: 2026-08-13
+Finished: 2026-08-13
+Scope: Make Korean research essays run through a post-draft Korean editorial
+pass while keeping the AI disclosure outside the humanization input and
+working article. Add the exact approved disclosure only during the authorized
+production handoff.
+Files changed:
+
+- `AGENTS.md`
+- `.agents/skills/research-essay-publisher/SKILL.md`
+- `.agents/skills/research-essay-publisher/references/review-publishing.md`
+- `%USERPROFILE%\.codex\skills\humanize-korean\SKILL.md`
+- `%USERPROFILE%\.codex\skills\humanize-korean\references\quick-rules.md`
+- `%USERPROFILE%\.codex\skills\humanize-korean\references\quick-rules.header.md`
+- `%USERPROFILE%\.codex\skills\humanize-korean\references\quick-rules.footer.md`
+- `%USERPROFILE%\.codex\skills\humanize-korean\scripts\verify_change_rate.py`
+- `%USERPROFILE%\.codex\skills\yioo-notes-apply\SKILL.md`
+- `%USERPROFILE%\.codex\skills\yioo-notes-apply\scripts\verify_ai_disclosure.py`
+- `content/drafts/2026-08-11-how-to-use-llm-wiki.md`
+- `content/drafts/2026-08-11-how-to-use-llm-wiki.sources.md`
+- `docs/post-todos/2026-08-13-llm-wiki-humanize-comparison.md`
+- `docs/findings.md`
+- `docs/progress.md`
+
+Commands run:
+
+- Official `quick_validate.py` for all three skills
+- Deterministic change-rate verification for the current published and local
+  LLM Wiki article bodies
+- Positive Markdown and HTML exact-once disclosure fixtures
+- Expected-failure disclosure check against the no-disclosure working draft
+- `npm.cmd run check`
+- `git diff --check`
+- Live HTTP readback of the existing LLM Wiki post
+- Independent read-only forward test, followed by a second pass after fixes
+
+Verification:
+
+- All three skills passed official structural validation.
+- `npm.cmd run check` passed with 0 errors, 0 warnings, and 0 hints.
+- The change-rate script returned `pass` for the current conservative edit.
+- The disclosure verifier passed one exact Markdown footer and one rendered
+  HTML disclosure, and correctly rejected a draft with no disclosure.
+- The first independent forward test found four instruction issues: a stale
+  nonexistent change-rate verifier reference, an undefined `REVISION_READY`
+  transition, proposed/approved field ambiguity, and a ledger that would remain
+  pending after publication. All four were corrected.
+- The second independent read-only forward test returned PASS with no new P0,
+  P1, P2, or step-number issue. It also confirmed duplicate HTML disclosure is
+  rejected.
+- The local LLM Wiki working article contains no disclosure. Its private
+  ledger records `status: proposed`, drafting-time model provenance, and the
+  proposed exact public line.
+- `content/posts/` and public post assets were not changed. The live post
+  returned HTTP 200 with its existing wording and no AI disclosure.
+
+Commit: none.
+Push: none.
+Deployment/invalidation: none.
+Rollback state: Revert the Phase 16 instruction and validator changes and keep
+the existing live post untouched. No S3 or CloudFront rollback is required.
+Next step: Use the new lifecycle on the next author-approved essay publish:
+`proposed -> approved -> exact-once insertion -> applied`.
+
+### Phase 17. Publish the approved LLM Wiki revision
+
+Status: published and live-verified
+Started: 2026-08-13
+Finished: 2026-08-13
+Scope: Publish the author-approved Korean editorial revision of the first
+LLM Wiki post, add the approved AI disclosure exactly once during production
+promotion, verify the rendered and live result, and record the publication
+provenance transition.
+Planned production source:
+
+- `content/drafts/2026-08-11-how-to-use-llm-wiki.md`
+- `content/drafts/2026-08-11-how-to-use-llm-wiki.sources.md`
+
+Approval: The author explicitly approved publishing the current changed
+version on 2026-08-13.
+Files changed:
+
+- `content/posts/2026-08-11-how-to-use-llm-wiki.md`
+- `content/drafts/2026-08-11-how-to-use-llm-wiki.sources.md` (private ledger)
+- `docs/post-todos/2026-08-13-llm-wiki-humanize-comparison.md` (private review record)
+- `.agents/skills/research-essay-publisher/references/review-publishing.md`
+- `%USERPROFILE%\.codex\skills\yioo-notes-apply\SKILL.md`
+- `%USERPROFILE%\.codex\skills\yioo-notes-apply\scripts\verify_ai_disclosure.py`
+- `docs/progress.md`
+
+Commands run:
+
+- Final independent read-only draft verification
+- `python .../verify_change_rate.py --before ... --after ... --ignore-markup`
+- Official `quick_validate.py` for `research-essay-publisher` and
+  `yioo-notes-apply`
+- Markdown and rendered-HTML exact-once disclosure validation
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --slug 2026-08-11-how-to-use-llm-wiki --no-upload`
+- `npm.cmd run verify:build`
+- `git diff --check`
+- `npm.cmd run publish:posts -- --slug 2026-08-11-how-to-use-llm-wiki`
+- Live HTTP, S3 object, and CloudFront invalidation readback
+
+Verification:
+
+- The independent final verifier returned PASS with no P0 or P1. Its two
+  private-record P2 findings were corrected before production handoff.
+- The Korean edit changed 1.6% of reference tokens with markup ignored and
+  preserved the article's claims, links, numbers, code spans, tables, title,
+  slug, category, canonical URL, and images.
+- Astro check passed with 0 errors, 0 warnings, and 0 hints.
+- The dry-run publisher rendered exactly one post, and build verification
+  passed for the post, assets, manifest, sitemap, and SEO URLs.
+- The approved disclosure appears exactly once in Markdown, rendered HTML,
+  authoritative S3 HTML, and the live page.
+- The live post, notes index, manifest, cover, and body image all return 200.
+- Live and S3 readback contain the revised introduction and modified date
+  `2026-08-13`, and no longer contain the replaced introduction.
+
+Deployment/invalidation: Published to `s3://yioo-notes/notes`; CloudFront
+distribution `EWYEJXEIKC81C` invalidation
+`IBK6K0FS9DWHWTRWXS2KTXR78F` completed successfully.
+Live URL: `https://yioo.link/notes/2026-08-11-how-to-use-llm-wiki/`
+Rollback state: Restore the previous Markdown body and `updated: 2026-08-12`,
+remove the single disclosure footer, run the slug-scoped publisher again, and
+verify the old wording and metadata on S3 and the live URL.
+Commit: This phase record is included in the scoped publication commit.

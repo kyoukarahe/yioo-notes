@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yioo Research Essay Publisher"
+  short_description: "Research, revise, and publish Yioo Notes essays"
+  default_prompt: "Use $research-essay-publisher to turn this topic into a researched Yioo Notes draft and stop for author review."
