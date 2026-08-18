@@ -1,5 +1,6 @@
 ---
 import siteConfig from "../config/site.config.json";
+import { serializeJsonForScript } from "../lib/content-security.mjs";
 
 type Props = {
   title?: string;
@@ -54,7 +55,7 @@ const isCurrentNavItem = (href: string) =>
     <meta name="twitter:description" content={description} />
     {imageUrl && <meta name="twitter:image" content={imageUrl} />}
     <link rel="stylesheet" href="/notes/styles.css" />
-    {structuredData && <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />}
+    {structuredData && <script is:inline type="application/ld+json" set:html={serializeJsonForScript(structuredData)} />}
     <script is:inline>
       (() => {
         const host = window.location.hostname;

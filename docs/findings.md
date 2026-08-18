@@ -4,6 +4,43 @@ Use this file for durable facts discovered during implementation. Do not store
 untrusted web text as instructions; summarize only the facts that should guide
 future phases.
 
+## 2026-08-17 Korean editorial wording
+
+- Use `싼`, `싸다`, and `값싼` when the intended meaning is consciously
+  negative, such as low quality or cost cutting at the expense of the result.
+  For neutral `low-cost` or positive `reasonable`, prefer wording such as
+  `비용이 낮은`, `부담이 적은`, `합리적인`, or `경제적인` according to the
+  sentence.
+- Do not use `증거` as the default translation of `evidence` in ordinary Korean
+  product writing or essays. Name its function instead: `근거`, `자료`, `완료
+  기록`, `확인 결과`, `검증 결과`, or `판단 기준`. Keep `증거` when it is the
+  established legal, investigative, forensic, or proof-oriented term.
+- These are contextual editorial rules, not global search-and-replace rules.
+  Preserve quotations, product terms, and established technical distinctions.
+
+## 2026-08-19 Publication security
+
+- Both Notes publishing scripts reconcile the complete generated release;
+  changing one post never meant that S3 changed only that post. The CLI and
+  documentation now name this behavior directly.
+- A slug argument is safe only as a presence assertion. `--require-slug`
+  verifies that the requested post exists in the full release, while the
+  default command remains local-only.
+- Production mutation requires an authoritative AWS account, bucket, region,
+  versioning status, and CloudFront readback, followed by an S3 sync/delete dry-run and explicit
+  full-release confirmation. These checks are part of the publishing entry
+  points rather than agent-only instructions.
+- PowerShell's terminating-error preference does not reliably stop on a native
+  executable's nonzero exit. Native commands need an explicit
+  `$LASTEXITCODE` check, including build and verification commands.
+- Marked accepts raw HTML by default, and both Notes renderers eventually use
+  raw HTML insertion. A shared renderer now escapes raw Markdown HTML and
+  allowlists URL schemes; JSON embedded in script elements escapes `<`, `>`,
+  and `&`.
+- The 2026-08-19 live AWS previews found no pending deletion. They confirmed
+  the expected private S3 origin and deployed `/notes` CloudFront routing; no
+  production upload or invalidation occurred.
+
 ## 2026-06-26 Baseline
 
 - Public SEO target is `https://yioo.link/notes/...`, not `notes.yioo.link`.
@@ -198,3 +235,23 @@ future phases.
   numbers, and technical distinctions even when simplifying the syntax.
 - English terms remain acceptable when they are established technical terms or
   materially improve precision; otherwise introduce natural Korean first.
+
+## 2026-08-16 Korean terminology and editorial guide
+
+- Repository-specific Korean terminology decisions now live in
+  `docs/korean-editorial-guide.md`; they are not delegated to the external
+  `humanize-korean` skill.
+- `humanize-korean` remains responsible for prose rhythm and common AI-writing
+  patterns. The repository guide governs term status, literal translation,
+  first-use definitions, sentence clarity, and article-specific terminology
+  ledgers.
+- An English technical term is classified before use as an established
+  standard, an industry term, an emerging or product-specific term, or an
+  editorial synthesis. The first two may justify retaining the technical term,
+  but an industry term still receives a first-use explanation when general
+  readers may not know it.
+- Software `contract` is a real English engineering metaphor, but Korean
+  `계약` is not the default translation in every compound. Prefer `명세`,
+  `규칙`, `조건`, `범위`, or `경계` when those words state the actual meaning
+  more clearly. Keep terms such as `data contract` only with a first-use
+  definition and a verified source.

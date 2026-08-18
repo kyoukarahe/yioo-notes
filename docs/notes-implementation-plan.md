@@ -422,17 +422,25 @@ Content-only publishing flow:
 ```text
 1. Write or edit Markdown in content/posts/{slug}.md
 2. Add images under public/notes/assets/posts/{slug}/
-3. Run npm.cmd run publish:posts
+3. Run `npm.cmd run publish:posts -- --require-slug {slug}` for a local release
 4. Script regenerates dist/notes/index.html, post pages, manifest, sitemap,
    fixed CSS, favicon, and post assets
-5. Script uploads dist/notes/... to s3://yioo-notes/notes/...
-6. Script invalidates /notes* and /notes/*
+5. Run the AWS dry run and review the complete sync/delete plan
+6. After explicit approval, use `--upload --confirm-full-release` to upload
+   dist/notes/... to s3://yioo-notes/notes/...
+7. Script invalidates /notes* and /notes/*
 ```
 
 This path is intended for post-writing agents and routine content maintenance.
 It keeps one post as one URL (`https://yioo.link/notes/{slug}/`) while avoiding
 a full Astro build for ordinary post reflection. Layout/design changes should
 still use the full local verification path before deployment.
+
+Publishing remains a full-release operation even when one slug is required.
+The slug assertion confirms inclusion only; it never narrows S3 synchronization
+to a single post. The default command is local-only, and production mutation
+requires an AWS target readback, a sync/delete preview, and explicit full-release
+confirmation.
 
 For indexing, the script updates `https://yioo.link/notes/sitemap.xml`. The
 root `robots.txt` advertises that notes sitemap, so routine post publishing does

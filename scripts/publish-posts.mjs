@@ -1,9 +1,10 @@
 import childProcess from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import matter from "gray-matter";
-import { marked } from "marked";
+import { renderMarkdownSafely, serializeJsonForScript } from "../src/lib/content-security.mjs";
 import { syncStyles } from "./sync-styles.mjs";
 
 const root = process.cwd();
@@ -13,6 +14,12 @@ const postsDirectory = path.join(root, "content", "posts");
 const publicNotesDirectory = path.join(root, "public", "notes");
 const distNotesDirectory = path.join(root, "dist", "notes");
 const categoryIdPattern = /^[a-z0-9][a-z0-9-]*$/;
+const canonicalTarget = Object.freeze({
+  bucket: "yioo-notes",
+  distributionId: "EWYEJXEIKC81C",
+  prefix: "notes",
+  region: "ap-northeast-1",
+});
 
 function parseArgs(argv) {
   const options = {
@@ -21,8 +28,10 @@ function parseArgs(argv) {
     dryRun: false,
     invalidate: true,
     prefix: "notes",
-    slug: undefined,
-    upload: true,
+    allowTargetOverride: false,
+    confirmFullRelease: false,
+    requireSlug: undefined,
+    upload: false,
     wait: true,
   };
 
@@ -48,14 +57,22 @@ function parseArgs(argv) {
       options.prefix = next();
     } else if (arg.startsWith("--prefix=")) {
       options.prefix = arg.slice("--prefix=".length);
-    } else if (arg === "--slug") {
-      options.slug = next();
-    } else if (arg.startsWith("--slug=")) {
-      options.slug = arg.slice("--slug=".length);
+    } else if (arg === "--require-slug") {
+      options.requireSlug = next();
+    } else if (arg.startsWith("--require-slug=")) {
+      options.requireSlug = arg.slice("--require-slug=".length);
+    } else if (arg === "--slug" || arg.startsWith("--slug=")) {
+      throw new Error("--slug is no longer accepted because publishing is a full release. Use --require-slug to assert that a post is present.");
     } else if (arg === "--dry-run") {
       options.dryRun = true;
     } else if (arg === "--no-upload") {
       options.upload = false;
+    } else if (arg === "--upload") {
+      options.upload = true;
+    } else if (arg === "--confirm-full-release") {
+      options.confirmFullRelease = true;
+    } else if (arg === "--allow-target-override") {
+      options.allowTargetOverride = true;
     } else if (arg === "--no-invalidate") {
       options.invalidate = false;
     } else if (arg === "--no-wait") {
@@ -67,6 +84,16 @@ function parseArgs(argv) {
 
   if (options.dryRun) {
     options.wait = false;
+  }
+
+  if (options.dryRun && options.upload) {
+    throw new Error("--dry-run and --upload are mutually exclusive.");
+  }
+  if (options.upload && !options.confirmFullRelease) {
+    throw new Error("--upload requires --confirm-full-release because this command replaces the complete notes release.");
+  }
+  if (options.confirmFullRelease && !options.upload) {
+    throw new Error("--confirm-full-release is only valid with --upload.");
   }
 
   return options;
@@ -88,10 +115,6 @@ function escapeXml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
-}
-
-function escapeScriptJson(value) {
-  return value.replaceAll("<", "\\u003c");
 }
 
 function absoluteUrl(pathname) {
@@ -206,7 +229,7 @@ function readPost(filePath) {
     cover,
     coverUrl: cover ? absoluteUrl(cover) : undefined,
     date: assertString(data.date, "date", filePath),
-    html: marked.parse(parsed.content, { async: false }),
+    html: renderMarkdownSafely(parsed.content),
     slug,
     sourcePath: filePath,
     status,
@@ -235,7 +258,7 @@ function categoriesWithPosts(posts) {
 }
 
 function renderJsonLd(data) {
-  return `<script type="application/ld+json">${escapeScriptJson(JSON.stringify(data))}</script>`;
+  return `<script type="application/ld+json">${serializeJsonForScript(data)}</script>`;
 }
 
 function isCurrentNavItem(href, currentPath) {
@@ -613,11 +636,116 @@ function run(command, args, options = {}) {
   return result.stdout;
 }
 
+function runJson(command, args) {
+  const output = run(command, [...args, "--output", "json"], { capture: true });
+  try {
+    return JSON.parse(output);
+  } catch (error) {
+    throw new Error(`Could not parse JSON from ${command} ${args.join(" ")}: ${error.message}`);
+  }
+}
+
+function normalizedPrefix(value) {
+  const prefix = String(value).replace(/^\/+|\/+$/g, "");
+  if (!prefix || prefix.includes("..")) {
+    throw new Error(`Unsafe deployment prefix: ${value}`);
+  }
+  return prefix;
+}
+
+function validateTarget(options) {
+  options.prefix = normalizedPrefix(options.prefix);
+
+  const overrides = ["bucket", "distributionId", "prefix"].filter((field) => options[field] !== canonicalTarget[field]);
+  if (overrides.length > 0 && !options.allowTargetOverride) {
+    throw new Error(`Deployment target override requires --allow-target-override: ${overrides.join(", ")}`);
+  }
+
+  const identity = runJson("aws", ["sts", "get-caller-identity"]);
+  run("aws", ["s3api", "head-bucket", "--bucket", options.bucket, "--expected-bucket-owner", identity.Account], { capture: true });
+  const location = runJson("aws", ["s3api", "get-bucket-location", "--bucket", options.bucket]).LocationConstraint ?? "us-east-1";
+  if (options.bucket === canonicalTarget.bucket && location !== canonicalTarget.region) {
+    throw new Error(`Unexpected region for ${options.bucket}: ${location}`);
+  }
+  const versioning = runJson("aws", ["s3api", "get-bucket-versioning", "--bucket", options.bucket]);
+  if (options.bucket === canonicalTarget.bucket && versioning.Status !== "Enabled") {
+    throw new Error(`S3 versioning is not enabled for ${options.bucket}: ${versioning.Status ?? "unset"}`);
+  }
+
+  const response = runJson("aws", ["cloudfront", "get-distribution", "--id", options.distributionId]);
+  const distribution = response.Distribution;
+  const config = distribution?.DistributionConfig;
+  if (!distribution || !config) {
+    throw new Error(`CloudFront distribution was not returned: ${options.distributionId}`);
+  }
+  const distributionAccount = String(distribution.ARN ?? "").split(":")[4];
+  if (distributionAccount && distributionAccount !== identity.Account) {
+    throw new Error(`CloudFront account mismatch: ${distributionAccount} != ${identity.Account}`);
+  }
+  if (distribution.Status !== "Deployed" || config.Enabled !== true) {
+    throw new Error(`CloudFront distribution is not enabled and deployed: status=${distribution.Status}, enabled=${config.Enabled}`);
+  }
+
+  const cacheBehaviors = config.CacheBehaviors?.Items ?? [];
+  const expectedPatterns = new Set([`/${options.prefix}`, `/${options.prefix}/*`]);
+  const matchingBehaviors = cacheBehaviors.filter((behavior) => expectedPatterns.has(behavior.PathPattern));
+  if (matchingBehaviors.length === 0) {
+    throw new Error(`CloudFront has no cache behavior for /${options.prefix} or /${options.prefix}/*`);
+  }
+
+  const origins = new Map((config.Origins?.Items ?? []).map((origin) => [origin.Id, origin]));
+  for (const behavior of matchingBehaviors) {
+    const origin = origins.get(behavior.TargetOriginId);
+    if (!origin || !String(origin.DomainName).toLowerCase().includes(options.bucket.toLowerCase())) {
+      throw new Error(`CloudFront behavior ${behavior.PathPattern} does not target bucket ${options.bucket}`);
+    }
+  }
+
+  console.log(`[publish-posts] target verified: account=${identity.Account}, bucket=${options.bucket}, region=${location}, versioning=${versioning.Status ?? "unset"}, distribution=${options.distributionId}`);
+}
+
+function releaseInventory(directory) {
+  const files = [];
+  const visit = (current) => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        visit(fullPath);
+      } else if (entry.isFile()) {
+        const contents = fs.readFileSync(fullPath);
+        files.push({
+          bytes: contents.byteLength,
+          path: path.relative(directory, fullPath).replaceAll(path.sep, "/"),
+          sha256: crypto.createHash("sha256").update(contents).digest("hex"),
+        });
+      }
+    }
+  };
+  visit(directory);
+  files.sort((left, right) => left.path.localeCompare(right.path));
+  return files;
+}
+
+function printReleaseInventory(directory) {
+  const files = releaseInventory(directory);
+  const totalBytes = files.reduce((sum, file) => sum + file.bytes, 0);
+  console.log(`[publish-posts] FullReleaseFiles=${files.length} FullReleaseBytes=${totalBytes}`);
+  for (const file of files) {
+    console.log(`[publish-posts] release ${file.sha256} ${file.bytes} ${file.path}`);
+  }
+  return files;
+}
+
+function previewUpload(options) {
+  const destination = `s3://${options.bucket}/${options.prefix}`;
+  console.log("[publish-posts] AWS full-release preview; review upload and delete actions before publishing");
+  run("aws", ["s3", "sync", distNotesDirectory, destination, "--delete", "--dryrun", "--cache-control", "no-cache"]);
+}
+
 function upload(options) {
   const destination = `s3://${options.bucket}/${options.prefix}`;
-  const common = options.dryRun ? ["--dryrun"] : [];
 
-  run("aws", ["s3", "sync", distNotesDirectory, destination, "--delete", "--cache-control", "no-cache", ...common]);
+  run("aws", ["s3", "sync", distNotesDirectory, destination, "--delete", "--cache-control", "no-cache"]);
   run("aws", [
     "s3",
     "cp",
@@ -632,7 +760,6 @@ function upload(options) {
     "no-cache",
     "--content-type",
     "text/html; charset=utf-8",
-    ...common,
   ]);
   run("aws", [
     "s3",
@@ -648,7 +775,6 @@ function upload(options) {
     "no-cache",
     "--content-type",
     "application/json; charset=utf-8",
-    ...common,
   ]);
   run("aws", [
     "s3",
@@ -664,7 +790,6 @@ function upload(options) {
     "no-cache",
     "--content-type",
     "application/xml; charset=utf-8",
-    ...common,
   ]);
   run("aws", [
     "s3",
@@ -675,12 +800,11 @@ function upload(options) {
     "no-cache",
     "--content-type",
     "text/css; charset=utf-8",
-    ...common,
   ]);
 
   const assetsPath = path.join(distNotesDirectory, "assets");
   if (fs.existsSync(assetsPath)) {
-    run("aws", ["s3", "cp", assetsPath, `${destination}/assets`, "--recursive", "--cache-control", "no-cache", ...common]);
+    run("aws", ["s3", "cp", assetsPath, `${destination}/assets`, "--recursive", "--cache-control", "no-cache"]);
   }
 
   const faviconPath = path.join(distNotesDirectory, "favicon.svg");
@@ -694,13 +818,12 @@ function upload(options) {
       "no-cache",
       "--content-type",
       "image/svg+xml",
-      ...common,
     ]);
   }
 }
 
 function invalidate(options) {
-  if (!options.invalidate || options.dryRun) {
+  if (!options.invalidate) {
     return undefined;
   }
 
@@ -724,8 +847,8 @@ export function renderPublishOutput(options = parseArgs([])) {
   syncStyles(root);
 
   const posts = getAllPosts();
-  if (options.slug && !posts.some((post) => post.slug === options.slug)) {
-    throw new Error(`No published post found for slug: ${options.slug}`);
+  if (options.requireSlug && !posts.some((post) => post.slug === options.requireSlug)) {
+    throw new Error(`No published post found for required slug: ${options.requireSlug}`);
   }
 
   fs.rmSync(distNotesDirectory, { recursive: true, force: true });
@@ -753,11 +876,21 @@ export function publish(options = parseArgs(process.argv.slice(2))) {
   const result = renderPublishOutput(options);
   console.log(`[publish-posts] rendered ${result.posts.length} published post(s) to ${path.relative(root, result.outputPath)}`);
 
+  run(process.execPath, [path.join(root, "scripts", "verify-build.mjs")]);
+  result.releaseFiles = printReleaseInventory(result.outputPath);
+
+  if (options.dryRun || options.upload) {
+    validateTarget(options);
+    previewUpload(options);
+  }
+
   if (options.upload) {
     upload(options);
     result.invalidationId = invalidate(options);
+  } else if (options.dryRun) {
+    console.log("[publish-posts] dry run complete; no upload or invalidation was performed");
   } else {
-    console.log("[publish-posts] skipped upload because --no-upload was set");
+    console.log("[publish-posts] local release complete; use --dry-run to preview AWS changes or --upload --confirm-full-release to publish");
   }
 
   return result;

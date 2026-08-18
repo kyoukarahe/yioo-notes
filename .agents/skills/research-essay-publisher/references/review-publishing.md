@@ -77,10 +77,16 @@ The expected local dry run includes the equivalent of:
 
 ```powershell
 npm.cmd run check
-npm.cmd run publish:posts -- --slug {slug} --no-upload
+npm.cmd run publish:posts -- --require-slug {slug}
 npm.cmd run verify:build
 git diff --check
 ```
+
+Before the production handoff, preview the complete AWS reconciliation with
+`npm.cmd run publish:posts -- --require-slug {slug} --dry-run`. The slug option
+is only a presence assertion; every upload replaces the complete generated
+notes release. The authoritative publishing skill must use the explicit
+`--upload --confirm-full-release` form after approval.
 
 Do not use these commands as a substitute for the existing publishing skill, and do not run the upload form before approval. Confirm the promoted Markdown has `status: published`, the approved disclosure appears exactly once at the article end, the category is active, only approved assets entered `public/`, and no private or draft file entered the build.
 

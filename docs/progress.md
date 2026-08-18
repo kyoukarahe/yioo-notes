@@ -8,13 +8,14 @@ and deployment interruptions.
 
 ## Current Status
 
-Phase: 18. Use Yioo as the public editorial identity
-Status: published and live-verified
-Last safe state: The first post's disclosure now ends with `by Yioo` on both
-S3 and the live page. The reusable research-essay skill also uses `Yioo` as
-the default public editorial identity.
-Next step: Keep using the two approval gates and exact-once disclosure checks
-for future essays. Override `Yioo` only with explicit article-level approval.
+Phase: 25. Harden the Notes publication entry points
+Status: verified locally and through live AWS dry-run; no production mutation
+Last safe state: Both publishers now fail closed, validate the release and AWS
+target, and require explicit full-release confirmation. The 2026-08-21 Codex
+automation remains active and uses the revised commands.
+Next step: At the scheduled run, verify the approved hashes and disclosure
+ledger, review the AWS dry-run, and publish only if every local and live gate
+passes.
 
 ## Phase Log
 
@@ -1484,3 +1485,150 @@ run the full publisher so manifest, sitemap, category pages, and S3 remove the
 slug, invalidate `/notes*` and `/notes/*`, and verify the old URL and asset are
 absent while the existing LLM Wiki post and service boundaries remain healthy.
 Commit: This phase record is included in the scoped publication commit.
+
+### Phase 22. Add repository Korean editorial guidance
+
+Status: verified
+Started: 2026-08-16
+Finished: 2026-08-16
+Scope: Add a repository-owned Korean sentence and terminology guide, separate
+its responsibility from the `humanize-korean` prose pass, and make future
+research essays discover the guide through `AGENTS.md`.
+Files changed:
+
+- `docs/korean-editorial-guide.md`
+- `AGENTS.md`
+- `docs/progress.md`
+- `docs/findings.md`
+
+Verification:
+
+- The guide distinguishes established standards, industry terms, emerging
+  terms, and article-specific editorial synthesis.
+- It gives a context-sensitive translation rule for `contract` and a starter
+  table for other frequently literal technical translations.
+- It includes sentence-level before/after examples, a drafting and publication
+  checklist, and a private terminology-ledger template.
+- `AGENTS.md` makes terminology review part of drafting and final verification
+  without changing the existing `humanize-korean` workflow or publication
+  approval gates.
+- Documentation links and Markdown structure were checked locally. No build,
+  upload, deployment, cache invalidation, commit, or push was performed.
+
+Deployment/invalidation: none
+Rollback state: Remove the guide and its `AGENTS.md`, progress, and findings
+references. No runtime rollback is required.
+Commit: not created
+
+### Phase 23. Apply Korean editorial guidance to unpublished drafts
+
+Status: verified
+Started: 2026-08-16
+Finished: 2026-08-16
+Scope: Revise seven unpublished drafts, their private terminology ledgers, and
+matching draft-only diagrams using the repository Korean editorial guide. The
+two draft mirrors of already-published posts remain out of scope.
+
+Verification:
+
+- All seven articles remain `status: draft`; no AI disclosure was inserted.
+- All 90 body URLs are present in the matching private source ledgers.
+- No matching production post or public post-asset directory exists.
+- Comment-free humanize rate checks passed at 16.87%, 20.54%, 25.59%, 15.62%,
+  16.82%, 20.21%, and 23.08%.
+- Five changed SVGs were re-rendered to WebP and visually checked. All seven
+  SVG/WebP pairs retain their documented dimensions and readable labels.
+- `npm.cmd run check`: 18 files, 0 errors, 0 warnings, 0 hints.
+- Independent read-only verification returned PASS with P0 0, P1 0, P2 0.
+
+Deployment/invalidation: none
+Rollback state: Revert only the Phase 23 prose, private terminology records,
+workspace comparison artifacts, and regenerated draft-only diagrams. No
+runtime rollback is required.
+Commit: not created
+
+### Phase 24. Schedule the long-agent-task-control publication
+
+Status: scheduled
+Started: 2026-08-17
+Scheduled run: 2026-08-21 09:00 Asia/Seoul
+Scope: Record publication approval for the verified long-agent-task-control
+essay, update the repository Korean wording rules, and create a one-run Codex
+automation for the complete production handoff.
+Files changed before the scheduled run:
+
+- `docs/korean-editorial-guide.md`
+- `docs/findings.md`
+- `docs/progress.md`
+- `content/drafts/2026-08-16-long-agent-task-control.sources.md` (private)
+
+Verification:
+
+- The article body already uses `합리적인 방식` and `완료 기록`; no public-body
+  replacement was needed.
+- The editorial guide now distinguishes negative `cheap` from neutral or
+  positive `reasonable`, and maps ordinary `evidence` wording to its actual
+  function such as 근거, 완료 기록, 확인 결과, or 검증 결과.
+- The approved draft and two assets are pinned by SHA-256 in the private
+  source ledger and the scheduled task prompt.
+- The AI disclosure ledger is `approved`; the disclosure remains absent from
+  the draft and will be inserted only by yioo-notes-apply during the production
+  handoff.
+- Codex automation `publish-long-agent-task-control` is `ACTIVE`, targets the
+  local `yioo-notes` project, and is configured for one run on the requested
+  date.
+- The task is instructed to stop before mutation on any hash, ledger,
+  destination, or preflight mismatch and to require live readback before
+  declaring publication complete.
+
+Deployment/invalidation: none at scheduling time
+Rollback state: Pause or delete the Codex automation. No runtime content needs
+rollback because the production handoff has not run.
+Commit: not created at scheduling time
+
+### Phase 25. Harden the Notes publication entry points
+
+Status: verified; no production mutation
+Started: 2026-08-19
+Finished: 2026-08-19
+Scope: Apply the approved H-05 and M-10 publication safeguards plus the small
+M-11 rendering defense, then update every documented and scheduled consumer.
+
+Implementation:
+
+- `scripts/deploy.ps1` checks every native command exit, always runs the build
+  verifier even with `-SkipBuild`, validates the AWS account/bucket/region and
+  CloudFront target, shows the S3 sync/delete dry run, and requires
+  `-ConfirmFullRelease` for production.
+- `scripts/publish-posts.mjs` defaults to local-only, rejects the misleading
+  `--slug` form, uses `--require-slug` only as a release-presence assertion,
+  validates and inventories the full release, and requires
+  `--upload --confirm-full-release` for production.
+- Astro and the content-only renderer now share the same safe Markdown and
+  JSON-in-script helpers. Raw Markdown HTML is rendered as text, unsafe link
+  and image schemes are removed, and script-closing JSON text is escaped.
+- README, the repository essay handoff, implementation plan, installed
+  `yioo-notes-apply` skill, and active 2026-08-21 automation use the revised
+  full-release contract.
+
+Verification:
+
+- `npm.cmd run test:security`: PASS. Default publishing made no AWS call;
+  legacy slug and unconfirmed mutation failed closed; build and verifier
+  failures stopped before AWS, including the `-SkipBuild` path.
+- `npm.cmd run check`: 20 files, 0 errors, 0 warnings, 0 hints.
+- Local representative publish with `--require-slug` rendered and verified 12
+  release files without calling AWS.
+- Content-only and full Astro AWS dry runs both verified the current account,
+  versioned `yioo-notes` bucket in `ap-northeast-1`, and the deployed CloudFront
+  distribution. The sync preview contained uploads only and no deletion.
+- The full Astro entry point rebuilt five pages and passed `verify:build`
+  before the AWS preview. No upload or invalidation was run.
+- The installed publishing skill passed `quick_validate.py`; an independent
+  read-only forward test selected the new local, AWS-preview, explicit upload,
+  and live-readback sequence without being told the implementation details.
+
+Deployment/invalidation: none
+Rollback state: Revert the Phase 25 code/docs commit and restore the prior
+installed skill and automation prompt. No S3 or CloudFront content rollback is
+needed because only dry runs were performed.

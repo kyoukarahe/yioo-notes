@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
-import { marked } from "marked";
 import { assertActiveCategory, type Category } from "./categories";
+import { renderMarkdownSafely } from "./content-security.mjs";
 
 export type PostFrontmatter = {
   title: string;
@@ -110,7 +110,7 @@ function readPost(filePath: string): Post {
     canonical: canonicalPath,
     sourcePath: filePath,
     body: parsed.content,
-    html: marked.parse(parsed.content, { async: false }) as string,
+    html: renderMarkdownSafely(parsed.content),
     url,
     canonicalUrl: absoluteUrl(canonicalPath),
     coverUrl: cover ? absoluteUrl(cover) : undefined,
