@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1100" viewBox="0 0 1200 1100" role="img" aria-labelledby="title desc">
+  <title id="title">에이전트 작업의 복구 방식 선택표</title>
+  <desc id="desc">실패 비용과 중복 외부 효과가 커질수록 전체 재시작, 산출물 체크포인트, 관리형 실행, 명시적 제어 순으로 필요한 운영 장치를 선택하는 그림</desc>
+  <rect width="1200" height="1100" fill="#f5f3ee"/>
+  <rect x="60" y="55" width="1080" height="990" rx="32" fill="#fffdf8" stroke="#22333b" stroke-width="3"/>
+  <text x="110" y="130" font-family="Pretendard, Noto Sans KR, sans-serif" font-size="46" font-weight="700" fill="#17252b">작업 시간을 보지 말고, 실패했을 때 잃는 것을 본다</text>
+  <text x="110" y="182" font-family="Pretendard, Noto Sans KR, sans-serif" font-size="26" fill="#52636b">오른쪽으로 갈수록 재작업·중복·승인 비용이 커진다</text>
+  <line x1="125" y1="238" x2="1065" y2="238" stroke="#9aa9a8" stroke-width="5"/>
+  <path d="M1065 238 L1038 222 L1038 254 Z" fill="#9aa9a8"/>
+
+  <g font-family="Pretendard, Noto Sans KR, sans-serif">
+    <rect x="100" y="300" width="230" height="560" rx="24" fill="#e8f3ef" stroke="#4f7c70" stroke-width="3"/>
+    <circle cx="145" cy="350" r="23" fill="#4f7c70"/>
+    <text x="145" y="359" font-size="25" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+    <text x="125" y="410" font-size="34" font-weight="700" fill="#24483f">전체 재시작</text>
+    <text x="125" y="468" font-size="25" fill="#344c48">읽기 전용</text>
+    <text x="125" y="505" font-size="25" fill="#344c48">재실행이 저렴함</text>
+    <line x1="125" y1="548" x2="305" y2="548" stroke="#8fb4aa" stroke-width="2"/>
+    <text x="125" y="602" font-size="24" font-weight="700" fill="#24483f">남길 것</text>
+    <text x="125" y="646" font-size="24" fill="#344c48">입력과 버전</text>
+    <text x="125" y="684" font-size="24" fill="#344c48">재현 방법</text>
+
+    <rect x="355" y="300" width="230" height="560" rx="24" fill="#e7eff5" stroke="#527b98" stroke-width="3"/>
+    <circle cx="400" cy="350" r="23" fill="#527b98"/>
+    <text x="400" y="359" font-size="25" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+    <text x="380" y="410" font-size="32" font-weight="700" fill="#25495e">산출물</text>
+    <text x="380" y="450" font-size="32" font-weight="700" fill="#25495e">체크포인트</text>
+    <text x="380" y="508" font-size="25" fill="#385365">다시 만들기 비쌈</text>
+    <text x="380" y="545" font-size="25" fill="#385365">중간 결과가 있음</text>
+    <line x1="380" y1="588" x2="560" y2="588" stroke="#9db7c8" stroke-width="2"/>
+    <text x="380" y="642" font-size="24" font-weight="700" fill="#25495e">남길 것</text>
+    <text x="380" y="686" font-size="24" fill="#385365">채택된 결과</text>
+    <text x="380" y="724" font-size="24" fill="#385365">남은 일과 다음 단계</text>
+
+    <rect x="610" y="300" width="230" height="560" rx="24" fill="#f6ecd8" stroke="#a87934" stroke-width="3"/>
+    <circle cx="655" cy="350" r="23" fill="#a87934"/>
+    <text x="655" y="359" font-size="25" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+    <text x="635" y="410" font-size="32" font-weight="700" fill="#704b1f">관리형 실행</text>
+    <text x="635" y="468" font-size="25" fill="#66533a">반복·예약·재시도</text>
+    <text x="635" y="505" font-size="25" fill="#66533a">기존 플랫폼 사용</text>
+    <line x1="635" y1="548" x2="815" y2="548" stroke="#d0b27d" stroke-width="2"/>
+    <text x="635" y="602" font-size="24" font-weight="700" fill="#704b1f">남길 것</text>
+    <text x="635" y="646" font-size="24" fill="#66533a">실행 ID와 상태</text>
+    <text x="635" y="684" font-size="24" fill="#66533a">재시도·중복 방지</text>
+
+    <rect x="865" y="300" width="230" height="560" rx="24" fill="#f4e5e2" stroke="#9a584d" stroke-width="3"/>
+    <circle cx="910" cy="350" r="23" fill="#9a584d"/>
+    <text x="910" y="359" font-size="25" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+    <text x="890" y="410" font-size="32" font-weight="700" fill="#733b33">명시적 제어</text>
+    <text x="890" y="468" font-size="25" fill="#684943">공유 상태·비가역 효과</text>
+    <text x="890" y="505" font-size="25" fill="#684943">중간 승인 필요</text>
+    <line x1="890" y1="548" x2="1070" y2="548" stroke="#caa39c" stroke-width="2"/>
+    <text x="890" y="602" font-size="24" font-weight="700" fill="#733b33">남길 것</text>
+    <text x="890" y="646" font-size="24" fill="#684943">현재 변경 권한</text>
+    <text x="890" y="684" font-size="24" fill="#684943">중단·인계·재개 규칙</text>
+  </g>
+
+  <rect x="100" y="905" width="995" height="90" rx="18" fill="#23343c"/>
+  <text x="598" y="960" font-family="Pretendard, Noto Sans KR, sans-serif" font-size="28" font-weight="700" fill="#ffffff" text-anchor="middle">다시 돌려도 되면 재시작하고, 그러기 어렵다면 상태와 권한을 남긴다</text>
+</svg>

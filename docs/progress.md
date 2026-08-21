@@ -1632,3 +1632,68 @@ Deployment/invalidation: none
 Rollback state: Revert the Phase 25 code/docs commit and restore the prior
 installed skill and automation prompt. No S3 or CloudFront content rollback is
 needed because only dry runs were performed.
+
+### Phase 26. Publish the long-agent task control essay
+
+Status: published and live-verified
+Started: 2026-08-21
+Finished: 2026-08-21
+Operation: New post
+Slug: `2026-08-16-long-agent-task-control`
+Live URL: `https://yioo.link/notes/2026-08-16-long-agent-task-control/`
+Scope: Publish the scheduled, explicitly approved Korean research essay,
+promote its approved SVG/WebP assets, append the approved AI disclosure once,
+and preserve every unrelated draft/research artifact outside the public build
+and scoped Git commit.
+
+Files published:
+
+- `content/posts/2026-08-16-long-agent-task-control.md`
+- `public/notes/assets/posts/2026-08-16-long-agent-task-control/recovery-choice.svg`
+- `public/notes/assets/posts/2026-08-16-long-agent-task-control/recovery-choice.webp`
+
+Commands:
+
+- `npm.cmd run test:security`
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --require-slug 2026-08-16-long-agent-task-control`
+- `npm.cmd run verify:build`
+- Markdown and rendered-HTML AI disclosure exact-once checks
+- Local manifest, sitemap, category, private-output, and 52-link checks
+- `npm.cmd run publish:posts -- --require-slug 2026-08-16-long-agent-task-control --dry-run`
+- `npm.cmd run publish:posts -- --require-slug 2026-08-16-long-agent-task-control --upload --confirm-full-release`
+- AWS S3/CloudFront and live HTTP/body readback
+
+Verification:
+
+- Approved draft, SVG, and WebP SHA-256 values matched before promotion. The
+  promoted post differs from the approved draft only by `status: published`
+  and the approved disclosure footer.
+- Security regression tests passed. Astro check passed with 20 files, 0
+  errors, 0 warnings, and 0 hints. The full local release rendered 3 posts and
+  15 files; `verify:build`, disclosure, manifest, sitemap, category, asset,
+  private-output, and local-link checks passed.
+- AWS preflight confirmed account `948654497054`, versioned bucket
+  `yioo-notes` in `ap-northeast-1`, and distribution `EWYEJXEIKC81C`. The
+  complete preview contained 10 uploads and 0 deletions. The two existing post
+  HTML upload actions were byte-identical timestamp reconciliations.
+- S3 readback returned versioned post/SVG/WebP/manifest/sitemap objects with
+  expected sizes, MIME types, cache metadata, and ETags matching local MD5.
+- Live post, SVG, WebP, notes index, implementation category, manifest, notes
+  sitemap, root sitemap, root site, API health, tools route, and stylesheet all
+  returned HTTP 200 with expected content types.
+- Live post, manifest, and notes sitemap were byte-identical to the final local
+  release. Live SVG/WebP SHA-256 values matched the approved assets. Index,
+  category, manifest, and notes sitemap include the slug; robots advertises the
+  dedicated notes sitemap and the root sitemap documents that delegation.
+- The approved AI disclosure appears exactly once at the article end in source
+  Markdown, rendered HTML, and the live URL.
+
+Deployment/invalidation: Full release uploaded to `s3://yioo-notes/notes`;
+CloudFront invalidation `IF222BPFRVMMK7M14X0OCDJSZ3` completed.
+Rollback: Revert the scoped content commit, remove the new post Markdown and
+slug-scoped public assets, run the local publisher and AWS dry run without a
+slug assertion, then publish with `--upload --confirm-full-release`; verify
+the slug is absent from S3, manifest, sitemap, category, and live URLs while
+root/API/tools remain healthy.
+Commit: This phase record is included in the scoped publication commit.
