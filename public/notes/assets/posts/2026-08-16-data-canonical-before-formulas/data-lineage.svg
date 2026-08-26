@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1420" viewBox="0 0 1200 1420" role="img" aria-labelledby="title desc">
+  <title id="title">LLM이 만든 수식을 기대 결과로 확인하는 흐름</title>
+  <desc id="desc">사람이 의도와 기대 결과를 정하고, LLM이 수식 후보를 만들며, 스프레드시트가 계산한 뒤 기대값과 실제값을 비교한다. 값이 다르면 의도와 범위부터 다시 확인하고, 같으면 실제 범위에 적용한다.</desc>
+  <rect width="1200" height="1420" fill="#f4f1ea"/>
+  <rect x="64" y="52" width="1072" height="1316" rx="36" fill="#fffdf8" stroke="#263a42" stroke-width="3"/>
+
+  <g font-family="Pretendard, Noto Sans KR, sans-serif">
+    <text x="110" y="132" font-size="52" font-weight="800" fill="#17272e">수식은 맡기고, 결과는 직접 확인한다</text>
+    <text x="110" y="184" font-size="30" fill="#58686d">LLM의 수식 후보 → 실제 계산 → 기대 결과와 비교</text>
+
+    <rect x="160" y="240" width="720" height="154" rx="28" fill="#e7efe9" stroke="#557b69" stroke-width="4"/>
+    <circle cx="225" cy="317" r="38" fill="#557b69"/>
+    <text x="225" y="330" font-size="36" font-weight="800" fill="#ffffff" text-anchor="middle">1</text>
+    <text x="295" y="302" font-size="38" font-weight="800" fill="#244a3a">사람이 뜻을 정한다</text>
+    <text x="295" y="352" font-size="28" fill="#3f5b50">포함 범위 · 빈칸 처리 · 기대 결과</text>
+
+    <path d="M520 394 V438" stroke="#74898f" stroke-width="6"/>
+    <path d="M520 454 L500 424 H540 Z" fill="#74898f"/>
+
+    <rect x="160" y="458" width="720" height="154" rx="28" fill="#e6edf6" stroke="#5a7397" stroke-width="4"/>
+    <circle cx="225" cy="535" r="38" fill="#5a7397"/>
+    <text x="225" y="548" font-size="36" font-weight="800" fill="#ffffff" text-anchor="middle">2</text>
+    <text x="295" y="520" font-size="38" font-weight="800" fill="#334d72">LLM이 수식 후보를 쓴다</text>
+    <text x="295" y="570" font-size="28" fill="#4b5e7a">참조 범위 · 가정 · 이해한 뜻도 설명</text>
+
+    <path d="M520 612 V656" stroke="#74898f" stroke-width="6"/>
+    <path d="M520 672 L500 642 H540 Z" fill="#74898f"/>
+
+    <rect x="160" y="676" width="720" height="154" rx="28" fill="#f4ead9" stroke="#a87936" stroke-width="4"/>
+    <circle cx="225" cy="753" r="38" fill="#a87936"/>
+    <text x="225" y="766" font-size="36" font-weight="800" fill="#ffffff" text-anchor="middle">3</text>
+    <text x="295" y="738" font-size="38" font-weight="800" fill="#715020">스프레드시트가 계산한다</text>
+    <text x="295" y="788" font-size="28" fill="#6b583a">원본의 사본에서 실제 셀 값으로 실행</text>
+
+    <path d="M520 830 V874" stroke="#74898f" stroke-width="6"/>
+    <path d="M520 890 L500 860 H540 Z" fill="#74898f"/>
+
+    <rect x="160" y="894" width="720" height="154" rx="28" fill="#eee7f1" stroke="#80618b" stroke-width="4"/>
+    <circle cx="225" cy="971" r="38" fill="#80618b"/>
+    <text x="225" y="984" font-size="36" font-weight="800" fill="#ffffff" text-anchor="middle">4</text>
+    <text x="295" y="956" font-size="38" font-weight="800" fill="#583b62">기대값과 실제값을 비교한다</text>
+    <text x="295" y="1006" font-size="28" fill="#66516d">정상 · 경계 · 빈칸 사례가 같은가?</text>
+
+    <path d="M520 1048 V1092" stroke="#4f806d" stroke-width="6"/>
+    <path d="M520 1108 L500 1078 H540 Z" fill="#4f806d"/>
+    <text x="548" y="1086" font-size="26" font-weight="700" fill="#3e6b59">같다</text>
+
+    <rect x="260" y="1112" width="520" height="100" rx="24" fill="#dfeee7" stroke="#4f806d" stroke-width="4"/>
+    <text x="520" y="1175" font-size="36" font-weight="800" fill="#295443" text-anchor="middle">실제 범위에 적용한다</text>
+
+    <path d="M880 971 H1022 V317 H898" fill="none" stroke="#ad6557" stroke-width="6" stroke-dasharray="14 12"/>
+    <path d="M882 317 L914 297 V337 Z" fill="#ad6557"/>
+    <rect x="927" y="620" width="166" height="110" rx="20" fill="#f7e8e4" stroke="#ad6557" stroke-width="3"/>
+    <text x="1010" y="666" font-size="28" font-weight="800" fill="#7b4037" text-anchor="middle">다르다</text>
+    <text x="1010" y="704" font-size="23" fill="#76534d" text-anchor="middle">뜻·범위부터</text>
+
+    <rect x="120" y="1260" width="960" height="76" rx="22" fill="#263a42"/>
+    <text x="600" y="1310" font-size="29" font-weight="700" fill="#ffffff" text-anchor="middle">계산 도구는 수식을 실행한다. 맞는 뜻인지는 사람이 정한다.</text>
+  </g>
+</svg>

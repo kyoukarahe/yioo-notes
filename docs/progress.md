@@ -1697,3 +1697,78 @@ slug assertion, then publish with `--upload --confirm-full-release`; verify
 the slug is absent from S3, manifest, sitemap, category, and live URLs while
 root/API/tools remain healthy.
 Commit: This phase record is included in the scoped publication commit.
+
+### Phase 29. Publish the data-canonical-before-formulas essay
+
+Status: published and live-verified
+Started: 2026-08-26 18:03 Asia/Seoul
+Finished: 2026-08-26 18:20 Asia/Seoul
+Operation: New post
+Slug: `2026-08-16-data-canonical-before-formulas`
+Live URL: `https://yioo.link/notes/2026-08-16-data-canonical-before-formulas/`
+Scope: Publish only the scheduled, explicitly approved formula-review essay,
+promote its pinned SVG/WebP assets, append the exact approved AI disclosure
+once, preserve every unrelated draft/research artifact, and leave the
+uncommitted `finance` category configuration out of this publication commit.
+
+Files published:
+
+- `content/posts/2026-08-16-data-canonical-before-formulas.md`
+- `public/notes/assets/posts/2026-08-16-data-canonical-before-formulas/data-lineage.svg`
+- `public/notes/assets/posts/2026-08-16-data-canonical-before-formulas/data-lineage.webp`
+
+Commands:
+
+- `npm.cmd run test:security`
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --require-slug 2026-08-16-data-canonical-before-formulas`
+- `npm.cmd run verify:build`
+- Markdown, rendered-HTML, S3, link, metadata, category, manifest, sitemap, and private-output checks
+- `npm.cmd run publish:posts -- --require-slug 2026-08-16-data-canonical-before-formulas --dry-run`
+- `npm.cmd run publish:posts -- --require-slug 2026-08-16-data-canonical-before-formulas --upload --confirm-full-release`
+- CloudFront invalidation, authoritative S3 object, and live HTTP/body readback
+
+Verification:
+
+- Approved draft, SVG, and WebP SHA-256 values matched before promotion. The
+  promoted Markdown differs from the approved draft only by `status:
+  published` and the exact approved disclosure footer.
+- The formula limitation is preserved: its conditions were checked, but it was
+  not executed in a live Excel or Google Sheets UI. The public article still
+  discloses product and locale differences and makes no execution-test claim.
+- Security regression passed. Astro check passed with 23 files and zero
+  errors, warnings, or hints. The local full release rendered 4 posts and 18
+  files; `verify:build`, exact-once disclosure, metadata, manifest, sitemap,
+  implementation category, private-output, and 56-link checks passed.
+- The exact authorized `finance` object remained a local unstaged
+  configuration change. No finance archive, category link, manifest category,
+  sitemap entry, S3 prefix, or draft content entered the release.
+- AWS preflight confirmed account `948654497054`, versioned private bucket
+  `yioo-notes` in `ap-northeast-1`, and distribution `EWYEJXEIKC81C`. The
+  complete preview contained 11 uploads and 0 deletions. Three existing post
+  HTML actions were byte-identical timestamp reconciliations; the remaining
+  actions were the new post/assets and the expected generated index, category,
+  manifest, and sitemap updates.
+- S3 readback returned versioned post, SVG, WebP, indexes, manifest, sitemap,
+  and stylesheet objects with expected sizes, MIME types, cache metadata, and
+  ETags matching local MD5. Live post/assets/index/category/manifest/sitemaps,
+  robots, root, API health, tools, and stylesheet returned HTTP 200 with the
+  expected content types.
+- Live post, assets, notes index, implementation category, categories index,
+  manifest, notes sitemap, and stylesheet are byte-identical to the local
+  release. The SVG/WebP live SHA-256 values match the approved assets. All 14
+  unique live post links returned 200. The root sitemap contains its Notes
+  delegation comment once, and robots advertises the dedicated Notes sitemap
+  once.
+- The approved AI disclosure appears exactly once at the article end in source
+  Markdown, rendered HTML, authoritative S3 HTML, and the live URL.
+
+Deployment/invalidation: Full release uploaded to `s3://yioo-notes/notes`;
+CloudFront invalidation `I6RQ334R7NITZ8QKNDRX0FCR6F` completed.
+Rollback: Revert the scoped content commit, remove the new post Markdown and
+slug-scoped public assets, run the local publisher and complete AWS dry run
+without a slug assertion, then publish with `--upload --confirm-full-release`;
+verify the slug is absent from S3, manifest, sitemap, category, and live URLs
+while root/API/tools remain healthy. Leave unrelated drafts and the finance
+category change untouched.
+Commit: This phase record is included in the scoped publication commit.
