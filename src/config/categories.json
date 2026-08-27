@@ -6,6 +6,13 @@
       "description": "Implementation notes, publishing pipeline checks, and operational test posts.",
       "status": "active",
       "sort": 10
+    },
+    {
+      "id": "finance",
+      "label": "Finance",
+      "description": "Personal finance, investing, income, and financial independence essays.",
+      "status": "active",
+      "sort": 20
     }
   ]
 }

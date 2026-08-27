@@ -1772,3 +1772,74 @@ verify the slug is absent from S3, manifest, sitemap, category, and live URLs
 while root/API/tools remain healthy. Leave unrelated drafts and the finance
 category change untouched.
 Commit: This phase record is included in the scoped publication commit.
+
+### Phase 30. Publish the cautious FIRE income strategy essay
+
+Status: published and live-verified
+Started: 2026-08-27 18:00 Asia/Seoul
+Finished: 2026-08-27 18:19 Asia/Seoul
+Operation: New post
+Slug: `2026-08-25-cautious-fire-income-strategy`
+Live URL: `https://yioo.link/notes/2026-08-25-cautious-fire-income-strategy/`
+Scope: Publish only the scheduled, author-approved cautious FIRE essay and its
+pinned SVG/WebP assets, include the exact approved `finance` category, preserve
+the first-person meaning and removed defensive wording, and leave unrelated
+draft/research/planning artifacts private and unstaged.
+
+Files published:
+
+- `content/posts/2026-08-25-cautious-fire-income-strategy.md`
+- `public/notes/assets/posts/2026-08-25-cautious-fire-income-strategy/crow-fire-loop.svg`
+- `public/notes/assets/posts/2026-08-25-cautious-fire-income-strategy/crow-fire-loop.webp`
+- `src/config/categories.json` (exact approved active `finance` addition)
+
+Commands:
+
+- `npm.cmd run test:security`
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --require-slug 2026-08-25-cautious-fire-income-strategy`
+- `npm.cmd run verify:build`
+- Markdown/rendered/live exact-once disclosure, metadata, link, category,
+  manifest, sitemap, private-output, S3 identity, and protected-route checks
+- `npm.cmd run publish:posts -- --require-slug 2026-08-25-cautious-fire-income-strategy --dry-run`
+- `npm.cmd run publish:posts -- --require-slug 2026-08-25-cautious-fire-income-strategy --upload --confirm-full-release`
+
+Verification:
+
+- Draft/SVG/WebP SHA-256 values matched the approved identities before
+  promotion. The promoted Markdown differs only by `status: published` and the
+  approved disclosure footer.
+- The approved first-person account, staged financial-independence goal,
+  author-reported six-holding/approximately 7.1% snapshot, omitted defensive
+  sentences, total-return/price/distribution/concentration/emergency-savings
+  limits, and diagram without the removed disclaimer text are preserved.
+- Security regression passed. Astro check passed with 23 files and zero errors,
+  warnings, or hints. The local full release rendered 5 posts and 22 files;
+  build, metadata, category, manifest, sitemap, disclosure, link, and
+  private-output checks passed.
+- AWS preflight confirmed account `948654497054`, versioned private bucket
+  `yioo-notes` in `ap-northeast-1`, and distribution `EWYEJXEIKC81C`. The
+  complete preview contained 13 explained uploads and 0 deletions.
+- S3 contains exactly 22 release objects with no extra or missing key; every
+  object size and ETag matches the local release. All 22 live files are
+  byte-identical to local output after invalidation.
+- Post, SVG, WebP, Notes index, finance archive, manifest, Notes sitemap, root
+  sitemap, robots, root site, API health, tools route, and stylesheet return
+  HTTP 200 with expected content types. Internal links pass, and external
+  source targets resolve; two bot-protected targets required direct web
+  readback after generic HTTP clients received 403.
+- The approved disclosure line is exactly:
+  `Researched and drafted with OpenAI Codex using GPT‑5.6 Sol (xhigh reasoning). Editorial review and final approval by Yioo.`
+  It appears exactly once at the article end in Markdown, rendered HTML, S3,
+  and the live URL.
+
+Deployment/invalidation: Full release uploaded to `s3://yioo-notes/notes`;
+CloudFront invalidation `IAYJG1MRLQ17NJZ0VFLM1Y21LE` completed.
+Rollback: Revert the scoped content commit, remove the FIRE post Markdown and
+slug-scoped public assets, restore the category registry if it has no remaining
+finance consumer, run the local publisher and complete AWS dry run without a
+slug assertion, then publish with `--upload --confirm-full-release`. Verify the
+slug and finance archive are absent from S3/manifest/sitemap/live while
+root/API/tools remain healthy. Preserve unrelated drafts and private ledgers.
+Commit: This phase record is included in the scoped publication commit.
+Push: Scoped commit pushed to `origin/main` with the repository deploy key.
