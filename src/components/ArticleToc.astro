@@ -1,0 +1,25 @@
+---
+import type { MarkdownHeading } from "../lib/content-security.mjs";
+
+type Props = {
+  headings: MarkdownHeading[];
+};
+
+const { headings } = Astro.props;
+const items = headings.filter((heading) => heading.depth === 2);
+---
+
+{
+  items.length >= 3 && (
+    <details class="article-toc" open>
+      <summary>이 글의 목차</summary>
+      <nav aria-label="글 목차">
+        <ol>
+          {items.map((heading) => (
+            <li><a href={`#${heading.id}`}>{heading.text}</a></li>
+          ))}
+        </ol>
+      </nav>
+    </details>
+  )
+}

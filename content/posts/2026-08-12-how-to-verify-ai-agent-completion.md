@@ -11,6 +11,9 @@ tags:
   - qa
   - evaluation
   - workflow
+related:
+  - 2026-08-16-data-canonical-before-formulas
+  - 2026-08-16-long-agent-task-control
 summary: "AI 에이전트의 완료 보고를 파일, 자동 검사, 사용자 흐름, 외부 효과, 권위 있는 재확인으로 나눠 검증하는 실무 프레임을 제안한다."
 canonical: "/notes/2026-08-12-how-to-verify-ai-agent-completion/"
 ---

@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { getActiveCategories } from "../../lib/categories";
 import { absoluteUrl, getAllPosts } from "../../lib/posts";
+import { getNavigableTagCollections } from "../../lib/tags.mjs";
 
 export const prerender = true;
 
@@ -18,6 +19,7 @@ export const GET: APIRoute = () => {
   const activeCategories = getActiveCategories().filter((category) =>
     posts.some((post) => post.category.id === category.id),
   );
+  const tags = getNavigableTagCollections(posts);
   const urls = [
     {
       loc: absoluteUrl("/notes/"),
@@ -27,6 +29,10 @@ export const GET: APIRoute = () => {
       loc: absoluteUrl("/notes/categories/"),
       lastmod: posts[0]?.updated ?? posts[0]?.date ?? new Date().toISOString().slice(0, 10),
     },
+    {
+      loc: absoluteUrl("/notes/tags/"),
+      lastmod: posts[0]?.updated ?? posts[0]?.date ?? new Date().toISOString().slice(0, 10),
+    },
     ...activeCategories.map((category) => {
       const categoryPosts = posts.filter((post) => post.category.id === category.id);
       return {
@@ -34,6 +40,10 @@ export const GET: APIRoute = () => {
         lastmod: categoryPosts[0]?.updated ?? categoryPosts[0]?.date ?? new Date().toISOString().slice(0, 10),
       };
     }),
+    ...tags.map((item) => ({
+      loc: item.canonicalUrl,
+      lastmod: item.posts[0]?.updated ?? item.posts[0]?.date ?? new Date().toISOString().slice(0, 10),
+    })),
     ...posts.map((post) => ({
       loc: post.canonicalUrl,
       lastmod: post.updated ?? post.date,

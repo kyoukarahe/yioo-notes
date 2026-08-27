@@ -11,6 +11,9 @@ tags:
   - checkpoint
   - idempotency
   - workflow
+related:
+  - 2026-08-11-how-to-use-llm-wiki
+  - 2026-08-12-how-to-verify-ai-agent-completion
 summary: "장시간 에이전트 작업에서 컨텍스트 압축이나 중단으로 무엇을 잃을 수 있는지 살펴보고, 실패 비용에 맞는 기록과 재개 방식을 정리한다."
 canonical: "/notes/2026-08-16-long-agent-task-control/"
 ---

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { assertActiveCategory, type Category } from "./categories";
-import { renderMarkdownSafely } from "./content-security.mjs";
+import { renderMarkdownDocumentSafely, type MarkdownHeading } from "./content-security.mjs";
 
 export type PostFrontmatter = {
   title: string;
@@ -12,8 +12,10 @@ export type PostFrontmatter = {
   status?: "published" | "draft";
   category: string;
   tags?: string[];
+  related?: string[];
   summary: string;
   cover?: string;
+  socialImage?: string;
   canonical?: string;
 };
 
@@ -21,12 +23,15 @@ export type Post = Omit<PostFrontmatter, "category"> & {
   status: "published" | "draft";
   category: Category;
   tags: string[];
+  related: string[];
   sourcePath: string;
   body: string;
   html: string;
+  headings: MarkdownHeading[];
   url: string;
   canonicalUrl: string;
   coverUrl?: string;
+  socialImageUrl?: string;
 };
 
 export type PublicPostManifestItem = {
@@ -41,8 +46,10 @@ export type PublicPostManifestItem = {
     canonicalUrl: string;
   };
   tags: string[];
+  related: string[];
   summary: string;
   cover?: string;
+  socialImage?: string;
   url: string;
   canonicalUrl: string;
 };
@@ -74,6 +81,24 @@ function normalizeTags(value: unknown): string[] {
     .filter(Boolean);
 }
 
+function normalizeRelated(value: unknown, filePath: string): string[] {
+  if (value === undefined) {
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    throw new Error(`${filePath} frontmatter field related must be an array`);
+  }
+
+  const related = value.map((slug) => assertString(slug, "related", filePath));
+  if (related.some((slug) => !/^[a-z0-9][a-z0-9-]*$/.test(slug))) {
+    throw new Error(`${filePath} contains an invalid related post slug`);
+  }
+  if (new Set(related).size !== related.length) {
+    throw new Error(`${filePath} contains a duplicate related post slug`);
+  }
+  return related;
+}
+
 function markdownFiles(directory: string): string[] {
   if (!fs.existsSync(directory)) {
     return [];
@@ -95,7 +120,9 @@ function readPost(filePath: string): Post {
   const url = `/notes/${slug}/`;
   const canonicalPath = typeof data.canonical === "string" ? data.canonical : url;
   const cover = typeof data.cover === "string" ? data.cover : undefined;
+  const socialImage = typeof data.socialImage === "string" ? data.socialImage : undefined;
   const categoryId = assertString(data.category, "category", filePath);
+  const rendered = renderMarkdownDocumentSafely(parsed.content);
 
   return {
     title: assertString(data.title, "title", filePath),
@@ -105,23 +132,40 @@ function readPost(filePath: string): Post {
     status,
     category: assertActiveCategory(categoryId, filePath),
     tags: normalizeTags(data.tags),
+    related: normalizeRelated(data.related, filePath),
     summary: assertString(data.summary, "summary", filePath),
     cover,
+    socialImage,
     canonical: canonicalPath,
     sourcePath: filePath,
     body: parsed.content,
-    html: renderMarkdownSafely(parsed.content),
+    html: rendered.html,
+    headings: rendered.headings,
     url,
     canonicalUrl: absoluteUrl(canonicalPath),
     coverUrl: cover ? absoluteUrl(cover) : undefined,
+    socialImageUrl: socialImage ? absoluteUrl(socialImage) : undefined,
   };
 }
 
 export function getAllPosts(): Post[] {
-  return markdownFiles(postsDirectory)
+  const posts = markdownFiles(postsDirectory)
     .map(readPost)
     .filter((post) => post.status === "published")
     .sort((a, b) => b.date.localeCompare(a.date) || b.slug.localeCompare(a.slug));
+
+  const publishedSlugs = new Set(posts.map((post) => post.slug));
+  for (const post of posts) {
+    for (const relatedSlug of post.related) {
+      if (relatedSlug === post.slug) {
+        throw new Error(`${post.sourcePath} cannot relate to itself`);
+      }
+      if (!publishedSlugs.has(relatedSlug)) {
+        throw new Error(`${post.sourcePath} references unpublished or missing related post: ${relatedSlug}`);
+      }
+    }
+  }
+  return posts;
 }
 
 export function getPostBySlug(slug: string): Post | undefined {
@@ -130,6 +174,11 @@ export function getPostBySlug(slug: string): Post | undefined {
 
 export function getPostsByCategoryId(categoryId: string): Post[] {
   return getAllPosts().filter((post) => post.category.id === categoryId);
+}
+
+export function getRelatedPosts(post: Post): Post[] {
+  const postsBySlug = new Map(getAllPosts().map((candidate) => [candidate.slug, candidate]));
+  return post.related.map((slug) => postsBySlug.get(slug)).filter((candidate): candidate is Post => Boolean(candidate));
 }
 
 export function getPublicPostManifest(): PublicPostManifestItem[] {
@@ -145,8 +194,10 @@ export function getPublicPostManifest(): PublicPostManifestItem[] {
       canonicalUrl: post.category.canonicalUrl,
     },
     tags: post.tags,
+    related: post.related,
     summary: post.summary,
     cover: post.cover,
+    socialImage: post.socialImage,
     url: post.url,
     canonicalUrl: post.canonicalUrl,
   }));

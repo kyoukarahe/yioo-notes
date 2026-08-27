@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import PostList from "../../../../components/PostList.astro";
+import { getAllPosts } from "../../../../lib/posts";
+import { getNavigableTagCollections } from "../../../../lib/tags.mjs";
+
+export function getStaticPaths() {
+  return getNavigableTagCollections(getAllPosts()).map((item) => ({
+    params: { tag: item.slug },
+  }));
+}
+
+const { tag: tagSlug } = Astro.params;
+const item = getNavigableTagCollections(getAllPosts()).find((candidate) => candidate.slug === tagSlug);
+
+if (!item) {
+  throw new Error(`Tag not found: ${tagSlug}`);
+}
+
+const description = `‘${item.tag}’ 태그가 붙은 글 ${item.posts.length}편을 모았습니다.`;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: `#${item.tag} | Yioo Notes`,
+  description,
+  url: item.canonicalUrl,
+  hasPart: item.posts.map((post) => ({
+    "@type": "BlogPosting",
+    headline: post.title,
+    url: post.canonicalUrl,
+    datePublished: post.date,
+    dateModified: post.updated ?? post.date,
+  })),
+};
+---
+
+<BaseLayout title={`#${item.tag}`} description={description} canonicalPath={item.url} structuredData={structuredData}>
+  <section class="intro">
+    <p class="eyebrow">태그</p>
+    <h1>#{item.tag}</h1>
+    <p>{description}</p>
+  </section>
+  <PostList posts={item.posts} />
+</BaseLayout>

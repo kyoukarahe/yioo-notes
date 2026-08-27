@@ -1,0 +1,39 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getAllPosts } from "../../../lib/posts";
+import { getNavigableTagCollections } from "../../../lib/tags.mjs";
+import siteConfig from "../../../config/site.config.json";
+
+const tags = getNavigableTagCollections(getAllPosts());
+const description = "두 편 이상의 글에서 이어지는 주제를 태그별로 모았습니다.";
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Yioo Notes 태그",
+  description,
+  url: `${siteConfig.baseUrl}/notes/tags/`,
+  hasPart: tags.map((item) => ({
+    "@type": "CollectionPage",
+    name: item.tag,
+    url: item.canonicalUrl,
+  })),
+};
+---
+
+<BaseLayout title="태그" description={description} canonicalPath="/notes/tags/" structuredData={structuredData}>
+  <section class="intro">
+    <p class="eyebrow">태그</p>
+    <h1>함께 읽을 주제</h1>
+    <p>{description}</p>
+  </section>
+  <ol class="tag-list" aria-label="글 태그">
+    {tags.map((item) => (
+      <li>
+        <a class="tag-list-link" href={item.url}>
+          <span>#{item.tag}</span>
+          <span>{item.posts.length}편</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</BaseLayout>

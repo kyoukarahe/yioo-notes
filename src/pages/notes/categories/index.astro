@@ -14,8 +14,8 @@ const categories = getActiveCategories()
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  name: "Yioo Notes Categories",
-  description: "Primary sections for Yioo Notes posts.",
+  name: "Yioo Notes 글 분류",
+  description: "Yioo Notes의 글을 주제별로 모아 봅니다.",
   url: `${siteConfig.baseUrl}/notes/categories/`,
   hasPart: categories.map((category) => ({
     "@type": "CollectionPage",
@@ -25,13 +25,13 @@ const structuredData = {
 };
 ---
 
-<BaseLayout title="Categories" description="Primary sections for Yioo Notes posts." canonicalPath="/notes/categories/" structuredData={structuredData}>
+<BaseLayout title="글 분류" description="Yioo Notes의 글을 주제별로 모아 봅니다." canonicalPath="/notes/categories/" structuredData={structuredData}>
   <section class="intro">
-    <p class="eyebrow">Categories</p>
-    <h1>Note Categories</h1>
-    <p>Stable primary sections for published notes.</p>
+    <p class="eyebrow">분류</p>
+    <h1>글 분류</h1>
+    <p>관심 있는 주제에서 글을 찾아보세요.</p>
   </section>
-  <ol class="category-list" aria-label="Note categories">
+  <ol class="category-list" aria-label="글 분류">
     {
       categories.map((category) => (
         <li>

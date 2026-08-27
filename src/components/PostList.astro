@@ -1,41 +1,50 @@
 ---
-import type { Post } from "../lib/posts";
+import { getAllPosts, type Post } from "../lib/posts";
+import { getNavigableTagCollections, tagSlug } from "../lib/tags.mjs";
 
 type Props = {
   posts: Post[];
 };
 
 const { posts } = Astro.props;
+const tagLinks = new Map(
+  getNavigableTagCollections(getAllPosts()).map((collection) => [collection.slug, collection.url]),
+);
 ---
 
 {
   posts.length > 0 ? (
-    <ol class="post-list" aria-label="Published notes">
+    <ol class="post-list" aria-label="공개된 글">
       {posts.map((post) => (
         <li class="post-list-item">
-          <a class="post-list-link" href={post.url}>
-            <span class="post-date">
-              <time datetime={post.date}>{post.date}</time>
-            </span>
-            <span class="post-copy">
+          <span class="post-date">
+            <time datetime={post.date}>{post.date}</time>
+          </span>
+          <span class="post-copy">
+            <a class="post-list-link" href={post.url}>
               <span class="post-title">{post.title}</span>
               <span class="post-summary">{post.summary}</span>
-              <span class="post-taxonomy">
-                <span class="post-category">{post.category.label}</span>
-                {post.tags.length > 0 && (
-                  <span class="post-tags" aria-label={`Tags for ${post.title}`}>
-                    {post.tags.map((tag) => (
+            </a>
+            <span class="post-taxonomy">
+              <a class="post-category" href={post.category.url}>{post.category.label}</a>
+              {post.tags.length > 0 && (
+                <span class="post-tags" aria-label={`${post.title}의 태그`}>
+                  {post.tags.map((tag) => {
+                    const href = tagLinks.get(tagSlug(tag));
+                    return href ? (
+                      <a class="post-tag" href={href}>{tag}</a>
+                    ) : (
                       <span class="post-tag">{tag}</span>
-                    ))}
-                  </span>
-                )}
-              </span>
+                    );
+                  })}
+                </span>
+              )}
             </span>
-          </a>
+          </span>
         </li>
       ))}
     </ol>
   ) : (
-    <p class="empty-state">Published notes will appear here.</p>
+    <p class="empty-state">아직 공개된 글이 없습니다.</p>
   )
 }

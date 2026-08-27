@@ -4,7 +4,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { renderMarkdownSafely, serializeJsonForScript } from "../src/lib/content-security.mjs";
+import {
+  renderMarkdownDocumentSafely,
+  renderMarkdownSafely,
+  serializeJsonForScript,
+} from "../src/lib/content-security.mjs";
+import { renderRssFeed } from "../src/lib/feed.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const publishScript = path.join(root, "scripts", "publish-posts.mjs");
@@ -59,10 +64,48 @@ assert.equal(/src="(?:javascript|data):/i.test(rendered), false, "dangerous imag
 assert.match(rendered, /href="https:\/\/example\.com\/path"/, "safe HTTPS links must remain usable");
 assert.match(rendered, /src="\/notes\/assets\/example\.webp"/, "safe relative images must remain usable");
 
+const headingDocument = renderMarkdownDocumentSafely([
+  "## 같은 제목",
+  "",
+  "## 같은 제목",
+  "",
+  "## <img src=x onerror=alert(1)>",
+].join("\n"));
+assert.deepEqual(
+  headingDocument.headings.map((heading) => heading.id),
+  ["같은-제목", "같은-제목-2", "section"],
+  "Korean heading ids must be stable and duplicate-aware",
+);
+assert.match(headingDocument.html, /<h2 id="같은-제목">같은 제목<\/h2>/);
+assert.equal(headingDocument.html.includes("<img src=x"), false, "raw heading HTML must remain escaped");
+
 const serialized = serializeJsonForScript({ value: "</script><script>alert(1)</script>&" });
 assert.equal(serialized.includes("</script>"), false, "JSON-LD must not contain a literal closing script tag");
 assert.equal(serialized.includes("<"), false, "JSON-LD must escape angle brackets");
 assert.equal(serialized.includes("&"), false, "JSON-LD must escape ampersands");
+
+const escapedFeed = renderRssFeed(
+  [
+    {
+      canonicalUrl: "https://yioo.link/notes/safe/",
+      date: "2026-08-27",
+      summary: "요약 & <script>alert(1)</script>",
+      tags: ["a&b"],
+      title: "제목 <확인>",
+    },
+  ],
+  { baseUrl: "https://yioo.link", description: "설명 & 확인", title: "Yioo Notes" },
+);
+assert.equal(escapedFeed.includes("<script>"), false, "RSS text must not contain active markup from content");
+assert.match(escapedFeed, /요약 &amp; &lt;script&gt;/, "RSS descriptions must be XML escaped");
+assert.match(escapedFeed, /<category>a&amp;b<\/category>/, "RSS categories must be XML escaped");
+
+const publishSource = fs.readFileSync(publishScript, "utf8");
+const deploySource = fs.readFileSync(deployScript, "utf8");
+for (const [source, label] of [[publishSource, "publisher"], [deploySource, "PowerShell deployer"]]) {
+  assert.match(source, /rss\.xml/, `${label} must handle the RSS object explicitly`);
+  assert.match(source, /application\/rss\+xml; charset=utf-8/, `${label} must upload RSS with its feed MIME type`);
+}
 
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "yioo-notes-security-"));
 try {

@@ -4,8 +4,10 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getAllPosts } from "../../lib/posts";
 import { getActiveCategories } from "../../lib/categories";
 import siteConfig from "../../config/site.config.json";
+import { getNavigableTagCollections } from "../../lib/tags.mjs";
 
 const posts = getAllPosts();
+const tags = getNavigableTagCollections(posts);
 const categories = getActiveCategories().map((category) => ({
   ...category,
   count: posts.filter((post) => post.category.id === category.id).length,
@@ -28,15 +30,13 @@ const structuredData = {
 
 <BaseLayout canonicalPath="/notes/" structuredData={structuredData}>
   <section class="intro">
-    <p class="eyebrow">Notes</p>
+    <p class="eyebrow">글 모음</p>
     <h1>Yioo Notes</h1>
-    <p>
-      Essays, research notes, and implementation thoughts collected as static
-      documents under yioo.link.
-    </p>
+    <p>AI와 도구, 구현과 생활 속 선택을 조사하고 생각한 글을 모아 둡니다.</p>
   </section>
-  <nav class="category-strip" aria-label="Note categories">
-    <a href="/notes/categories/">Categories</a>
+  <nav class="category-strip" aria-label="글 분류">
+    <a href="/notes/categories/">분류</a>
+    <a href="/notes/tags/">태그<span>{tags.length}</span></a>
     {
       categories
         .filter((category) => category.count > 0)

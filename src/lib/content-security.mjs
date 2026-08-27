@@ -40,10 +40,49 @@ function isAllowedUrl(value, allowedSchemes) {
   return !match || allowedSchemes.has(match[0].toLowerCase());
 }
 
-export function renderMarkdownSafely(markdown) {
+function plainTextFromTokens(tokens) {
+  return tokens
+    .map((token) => {
+      if (token.type === "html") {
+        return "";
+      }
+      if (Array.isArray(token.tokens)) {
+        return plainTextFromTokens(token.tokens);
+      }
+      if (typeof token.text === "string") {
+        return token.text;
+      }
+      return "";
+    })
+    .join("");
+}
+
+function headingSlug(value) {
+  return String(value)
+    .normalize("NFKC")
+    .toLocaleLowerCase("ko-KR")
+    .replace(/[^\p{Letter}\p{Number}\s-]/gu, "")
+    .trim()
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function renderMarkdownDocumentSafely(markdown) {
   const renderer = new Renderer();
+  const headings = [];
+  const headingCounts = new Map();
 
   renderer.html = ({ text }) => escapeHtml(text);
+  renderer.heading = function renderHeading({ tokens, depth }) {
+    const text = plainTextFromTokens(tokens).trim();
+    const baseId = headingSlug(text) || "section";
+    const count = (headingCounts.get(baseId) ?? 0) + 1;
+    headingCounts.set(baseId, count);
+    const id = count === 1 ? baseId : `${baseId}-${count}`;
+    const label = text || `제목 ${headings.length + 1}`;
+    headings.push({ depth, id, text: label });
+    return `<h${depth} id="${escapeHtml(id)}">${this.parser.parseInline(tokens)}</h${depth}>`;
+  };
   renderer.link = function renderLink({ href, title, tokens }) {
     const label = this.parser.parseInline(tokens);
     if (!isAllowedUrl(href, linkSchemes)) {
@@ -61,7 +100,14 @@ export function renderMarkdownSafely(markdown) {
     return `<img src="${escapeHtml(href)}" alt="${alt}"${titleAttribute}>`;
   };
 
-  return marked.parse(markdown, { async: false, renderer });
+  return {
+    headings,
+    html: marked.parse(markdown, { async: false, renderer }),
+  };
+}
+
+export function renderMarkdownSafely(markdown) {
+  return renderMarkdownDocumentSafely(markdown).html;
 }
 
 export function serializeJsonForScript(value) {

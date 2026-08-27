@@ -1,20 +1,24 @@
 {
   "title": "Yioo Notes",
-  "description": "Personal notes, essays, research, and implementation logs from yioo.",
+  "description": "AI와 도구, 구현과 생활 속 선택을 조사하고 생각한 글을 모아 둡니다.",
   "baseUrl": "https://yioo.link",
   "notesPath": "/notes/",
-  "author": "yioo",
+  "author": "Yioo",
+  "socialImage": "/notes/assets/social/yioo-notes-og.png",
+  "socialImageAlt": "에세이와 조사, 구현 기록을 모은 Yioo Notes",
+  "socialImageWidth": 1200,
+  "socialImageHeight": 630,
   "nav": [
     {
-      "label": "Home",
+      "label": "홈",
       "href": "/"
     },
     {
-      "label": "Tools",
+      "label": "도구",
       "href": "/tools/"
     },
     {
-      "label": "Notes",
+      "label": "글",
       "href": "/notes/"
     }
   ]

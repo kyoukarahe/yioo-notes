@@ -2,15 +2,15 @@
   "categories": [
     {
       "id": "implementation",
-      "label": "Implementation",
-      "description": "Implementation notes, publishing pipeline checks, and operational test posts.",
+      "label": "AI와 구현",
+      "description": "AI 에이전트, 지식 관리, 도구 활용과 구현 과정에서 얻은 생각을 다룹니다.",
       "status": "active",
       "sort": 10
     },
     {
       "id": "finance",
-      "label": "Finance",
-      "description": "Personal finance, investing, income, and financial independence essays.",
+      "label": "금융",
+      "description": "개인 금융, 투자, 현금흐름과 경제적 자립에 관한 생각을 다룹니다.",
       "status": "active",
       "sort": 20
     }

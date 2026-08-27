@@ -1843,3 +1843,63 @@ slug and finance archive are absent from S3/manifest/sitemap/live while
 root/API/tools remain healthy. Preserve unrelated drafts and private ledgers.
 Commit: This phase record is included in the scoped publication commit.
 Push: Scoped commit pushed to `origin/main` with the repository deploy key.
+
+### Phase 31. Improve Notes discovery, long-form reading, and RSS
+
+Status: published and live-verified
+Started: 2026-08-27
+Finished: 2026-08-27 22:17 Asia/Seoul
+Operation: Existing-site capability update
+Scope: Localize Notes aggregation copy, add a static H2 table of contents,
+site-wide and per-post social-image metadata, repeated-tag navigation, curated
+related reading, and one RSS 2.0 feed. Keep Astro and the manual publication
+renderer aligned, preserve public URLs and all approved disclosures, and keep
+draft/private content outside the release.
+
+Implemented behavior:
+
+- Root, category, navigation, accessibility, metadata, and structured-data copy
+  now use Korean while category IDs and canonical URLs remain stable.
+- Every long post receives duplicate-safe Korean heading IDs and an open,
+  collapsible H2 table of contents. Mobile fragment targets clear the sticky
+  header without JavaScript.
+- A 1200x630 Korean social card covers aggregation pages and posts without an
+  explicit image; the LLM Wiki post keeps its existing 1200x630 cover.
+- Only the repeated `ai-agent` and `workflow` tags receive public archives and
+  sitemap URLs. Singleton tags remain labels rather than thin archive links.
+- Four implementation essays expose curated related-reading links outside the
+  article. The finance essay remains unlinked until a related finance post
+  exists, and every AI disclosure remains the final content inside its article.
+- `/notes/rss.xml` contains summaries for the five published posts, has page
+  autodiscovery, and is uploaded as `application/rss+xml; charset=utf-8` by
+  both deployment entry points.
+
+Verification:
+
+- `npm.cmd run test:security`, `npm.cmd run check`, `npm.cmd run build`,
+  `npm.cmd run publish:posts`, and `npm.cmd run verify:build` passed.
+- The final manual release contains 28 files, five RSS items, 12 sitemap URLs,
+  12 HTML pages, zero missing internal links, no draft/private output, and one
+  disclosure per source and rendered post.
+- Desktop 1440x1000 plus mobile 390x844 and 360x740 browser checks passed with
+  zero horizontal overflow, failed images, console errors, or warnings. The
+  design score is 93/100.
+- AWS preflight confirmed account `948654497054`, the versioned `yioo-notes`
+  bucket in `ap-northeast-1`, and distribution `EWYEJXEIKC81C`. The full
+  preview contained 18 explained uploads and zero deletions.
+- After invalidation, S3 contained exactly the same 28 files as the local
+  release; every object size and MD5-backed ETag matched. RSS, sitemap, HTML,
+  and PNG content types matched their intended values.
+- Fifteen Notes routes, root, root sitemap, robots, tools, and API health
+  returned HTTP 200. RSS has five live items, the Notes sitemap has 12 URLs,
+  the two repeated-tag archives contain two posts each, and a singleton tag
+  archive remains absent with HTTP 403.
+
+Deployment/invalidation: Full release uploaded to `s3://yioo-notes/notes`;
+CloudFront invalidation `I6EI7E7K88QXMYVARQWDPM2ALN` completed.
+Rollback: Revert the scoped capability commit, run the complete local
+publisher and AWS dry run, and publish the understood prior full release with
+`--upload --confirm-full-release`. S3 versioning remains enabled for object
+recovery. Verify Notes and protected root/API/tools routes again. Preserve
+unrelated drafts, scheduling records, and private ledgers.
+Commit: This phase record is included in the scoped capability commit.

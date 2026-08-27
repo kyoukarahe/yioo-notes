@@ -1,6 +1,9 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import { getAllPosts, getPostBySlug } from "../../../lib/posts";
+import ArticleToc from "../../../components/ArticleToc.astro";
+import RelatedPosts from "../../../components/RelatedPosts.astro";
+import { getAllPosts, getPostBySlug, getRelatedPosts } from "../../../lib/posts";
+import { getNavigableTagCollections, tagSlug } from "../../../lib/tags.mjs";
 
 export function getStaticPaths() {
   return getAllPosts().map((post) => ({
@@ -16,6 +19,10 @@ if (!post) {
 }
 
 const canonicalPath = post.canonical ?? post.url;
+const relatedPosts = getRelatedPosts(post);
+const tagLinks = new Map(
+  getNavigableTagCollections(getAllPosts()).map((collection) => [collection.slug, collection.url]),
+);
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -26,7 +33,7 @@ const structuredData = {
   dateModified: post.updated ?? post.date,
   author: {
     "@type": "Person",
-    name: "yioo",
+    name: "Yioo",
   },
   image: post.coverUrl ? [post.coverUrl] : undefined,
   keywords: post.tags,
@@ -38,7 +45,8 @@ const structuredData = {
   description={post.summary}
   canonicalPath={canonicalPath}
   ogType="article"
-  imagePath={post.cover}
+  imagePath={post.socialImage}
+  imageAlt={post.title}
   publishedTime={post.date}
   modifiedTime={post.updated ?? post.date}
   tags={post.tags}
@@ -46,16 +54,25 @@ const structuredData = {
 >
   <article class="article">
     <header class="article-header">
-      <a class="back-link" href="/notes/">Notes</a>
+      <a class="back-link" href="/notes/">글 목록</a>
       <h1>{post.title}</h1>
       <p>{post.summary}</p>
       <div class="article-meta">
         <time datetime={post.date}>{post.date}</time>
         <a href={post.category.url}>{post.category.label}</a>
-        {post.tags.length > 0 && <span>{post.tags.join(", ")}</span>}
+        {post.tags.length > 0 && (
+          <span class="post-tags" aria-label={`${post.title}의 태그`}>
+            {post.tags.map((tag) => {
+              const href = tagLinks.get(tagSlug(tag));
+              return href ? <a class="post-tag" href={href}>{tag}</a> : <span class="post-tag">{tag}</span>;
+            })}
+          </span>
+        )}
       </div>
     </header>
     {post.cover && <img class="cover-image" src={post.cover} alt="" loading="eager" />}
+    <ArticleToc headings={post.headings} />
     <div class="article-content" set:html={post.html} />
   </article>
+  <RelatedPosts posts={relatedPosts} />
 </BaseLayout>

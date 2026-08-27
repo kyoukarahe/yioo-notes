@@ -148,6 +148,11 @@ Invoke-Native -Command "aws" -Arguments @("s3", "cp", $distNotes, $destination, 
 Invoke-Native -Command "aws" -Arguments @("s3", "cp", $distNotes, $destination, "--recursive", "--exclude", "*", "--include", "*.json", "--cache-control", "no-cache", "--content-type", "application/json; charset=utf-8")
 Invoke-Native -Command "aws" -Arguments @("s3", "cp", $distNotes, $destination, "--recursive", "--exclude", "*", "--include", "*.xml", "--cache-control", "no-cache", "--content-type", "application/xml; charset=utf-8")
 
+$rssPath = Join-Path $distNotes "rss.xml"
+if (Test-Path $rssPath) {
+  Invoke-Native -Command "aws" -Arguments @("s3", "cp", $rssPath, "$destination/rss.xml", "--cache-control", "no-cache", "--content-type", "application/rss+xml; charset=utf-8")
+}
+
 $assetsPath = Join-Path $distNotes "assets"
 if (Test-Path $assetsPath) {
   Invoke-Native -Command "aws" -Arguments @("s3", "cp", $assetsPath, "$destination/assets", "--recursive", "--cache-control", "no-cache")

@@ -11,6 +11,8 @@ tags:
   - llm
   - ai-assisted-work
   - testing
+related:
+  - 2026-08-12-how-to-verify-ai-agent-completion
 summary: "LLM이 만든 수식을 그대로 믿지 않고, 스프레드시트에서 실행한 결과를 사람이 미리 정한 예시와 비교해 의도와 범위를 확인하는 방법을 살펴본다."
 canonical: "/notes/2026-08-16-data-canonical-before-formulas/"
 ---

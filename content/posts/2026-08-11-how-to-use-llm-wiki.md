@@ -10,8 +10,12 @@ tags:
   - knowledge-management
   - context-engineering
   - agent-memory
+related:
+  - 2026-08-12-how-to-verify-ai-agent-completion
+  - 2026-08-16-long-agent-task-control
 summary: "실제 운영 중인 Obsidian Wiki와 관련 연구를 바탕으로 LLM Wiki의 ingest 기준, 기억 계층, 품질 관리와 작은 검증 방법을 정리한다."
 cover: "/notes/assets/posts/2026-08-11-how-to-use-llm-wiki/cover.webp"
+socialImage: "/notes/assets/posts/2026-08-11-how-to-use-llm-wiki/cover.webp"
 canonical: "/notes/2026-08-11-how-to-use-llm-wiki/"
 ---
 

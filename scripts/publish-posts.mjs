@@ -4,7 +4,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import matter from "gray-matter";
-import { renderMarkdownSafely, serializeJsonForScript } from "../src/lib/content-security.mjs";
+import { renderMarkdownDocumentSafely, serializeJsonForScript } from "../src/lib/content-security.mjs";
+import { getNavigableTagCollections, tagSlug } from "../src/lib/tags.mjs";
+import { renderRssFeed } from "../src/lib/feed.mjs";
 import { syncStyles } from "./sync-styles.mjs";
 
 const root = process.cwd();
@@ -140,6 +142,24 @@ function normalizeTags(value) {
     .filter(Boolean);
 }
 
+function normalizeRelated(value, filePath) {
+  if (value === undefined) {
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    throw new Error(`${path.relative(root, filePath)} frontmatter field related must be an array`);
+  }
+
+  const related = value.map((slug) => assertString(slug, "related", filePath));
+  if (related.some((slug) => !/^[a-z0-9][a-z0-9-]*$/.test(slug))) {
+    throw new Error(`${path.relative(root, filePath)} contains an invalid related post slug`);
+  }
+  if (new Set(related).size !== related.length) {
+    throw new Error(`${path.relative(root, filePath)} contains a duplicate related post slug`);
+  }
+  return related;
+}
+
 function readCategories() {
   const parsed = JSON.parse(fs.readFileSync(categoriesConfigPath, "utf8"));
   if (!Array.isArray(parsed.categories)) {
@@ -218,8 +238,10 @@ function readPost(filePath) {
   const url = `/notes/${slug}/`;
   const canonicalPath = typeof data.canonical === "string" ? data.canonical : url;
   const cover = typeof data.cover === "string" ? data.cover : undefined;
+  const socialImage = typeof data.socialImage === "string" ? data.socialImage : undefined;
   const updated = typeof data.updated === "string" ? data.updated : undefined;
   const categoryId = assertString(data.category, "category", filePath);
+  const rendered = renderMarkdownDocumentSafely(parsed.content);
 
   return {
     body: parsed.content,
@@ -228,13 +250,17 @@ function readPost(filePath) {
     category: assertActiveCategory(categoryId, filePath),
     cover,
     coverUrl: cover ? absoluteUrl(cover) : undefined,
+    socialImage,
+    socialImageUrl: socialImage ? absoluteUrl(socialImage) : undefined,
     date: assertString(data.date, "date", filePath),
-    html: renderMarkdownSafely(parsed.content),
+    html: rendered.html,
+    headings: rendered.headings,
     slug,
     sourcePath: filePath,
     status,
     summary: assertString(data.summary, "summary", filePath),
     tags: normalizeTags(data.tags),
+    related: normalizeRelated(data.related, filePath),
     title: assertString(data.title, "title", filePath),
     updated,
     url,
@@ -242,10 +268,25 @@ function readPost(filePath) {
 }
 
 function getAllPosts() {
-  return markdownFiles(postsDirectory)
+  const posts = markdownFiles(postsDirectory)
     .map(readPost)
     .filter((post) => post.status === "published")
     .sort((a, b) => b.date.localeCompare(a.date) || b.slug.localeCompare(a.slug));
+
+  const publishedSlugs = new Set(posts.map((post) => post.slug));
+  for (const post of posts) {
+    for (const relatedSlug of post.related) {
+      if (relatedSlug === post.slug) {
+        throw new Error(`${path.relative(root, post.sourcePath)} cannot relate to itself`);
+      }
+      if (!publishedSlugs.has(relatedSlug)) {
+        throw new Error(
+          `${path.relative(root, post.sourcePath)} references unpublished or missing related post: ${relatedSlug}`,
+        );
+      }
+    }
+  }
+  return posts;
 }
 
 function categoriesWithPosts(posts) {
@@ -276,7 +317,7 @@ function renderNav(currentPath) {
     .join("");
 
   return `<header class="site-header">
-  <nav class="site-nav" aria-label="Primary">
+  <nav class="site-nav" aria-label="주요 메뉴">
     <a class="brand" href="/notes/">
       <span class="brand-mark" aria-hidden="true">Y</span>
       <span>${escapeHtml(siteConfig.title)}</span>
@@ -291,7 +332,8 @@ function renderLayout({
   canonicalPath = siteConfig.notesPath,
   currentPath = siteConfig.notesPath,
   description = siteConfig.description,
-  imagePath,
+  imagePath = siteConfig.socialImage,
+  imageAlt = siteConfig.socialImageAlt,
   modifiedTime,
   ogType = "website",
   publishedTime,
@@ -300,7 +342,8 @@ function renderLayout({
   title = siteConfig.title,
 }) {
   const canonicalUrl = absoluteUrl(canonicalPath);
-  const imageUrl = imagePath ? absoluteUrl(imagePath) : undefined;
+  const imageUrl = absoluteUrl(imagePath);
+  const imageType = imagePath.toLowerCase().endsWith(".webp") ? "image/webp" : "image/png";
   const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.title}`;
   const structuredDataHtml = structuredData ? renderJsonLd(structuredData) : "";
   const articleTimes =
@@ -319,16 +362,23 @@ function renderLayout({
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="icon" href="/notes/favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
+  <link rel="alternate" type="application/rss+xml" title="Yioo Notes RSS" href="/notes/rss.xml">
   <meta property="og:type" content="${escapeHtml(ogType)}">
   <meta property="og:title" content="${escapeHtml(pageTitle)}">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:url" content="${escapeHtml(canonicalUrl)}">
-  ${imageUrl ? `<meta property="og:image" content="${escapeHtml(imageUrl)}">` : ""}
+  <meta property="og:image" content="${escapeHtml(imageUrl)}">
+  <meta property="og:image:secure_url" content="${escapeHtml(imageUrl)}">
+  <meta property="og:image:type" content="${imageType}">
+  <meta property="og:image:width" content="${siteConfig.socialImageWidth}">
+  <meta property="og:image:height" content="${siteConfig.socialImageHeight}">
+  <meta property="og:image:alt" content="${escapeHtml(imageAlt)}">
   ${articleTimes}
-  <meta name="twitter:card" content="${imageUrl ? "summary_large_image" : "summary"}">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(pageTitle)}">
   <meta name="twitter:description" content="${escapeHtml(description)}">
-  ${imageUrl ? `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">` : ""}
+  <meta name="twitter:image" content="${escapeHtml(imageUrl)}">
+  <meta name="twitter:image:alt" content="${escapeHtml(imageAlt)}">
   <link rel="stylesheet" href="/notes/styles.css">
   ${structuredDataHtml}
   <script>
@@ -344,7 +394,7 @@ function renderLayout({
   </script>
 </head>
 <body>
-  <a class="skip-link" href="#content">Skip to content</a>
+  <a class="skip-link" href="#content">본문으로 건너뛰기</a>
   ${renderNav(currentPath)}
   <main id="content" class="page-shell">
     ${body}
@@ -354,32 +404,41 @@ function renderLayout({
 `;
 }
 
-function renderPostList(posts) {
+function renderPostList(posts, allPosts = getAllPosts()) {
   if (posts.length === 0) {
-    return '<p class="empty-state">Published notes will appear here.</p>';
+    return '<p class="empty-state">아직 공개된 글이 없습니다.</p>';
   }
 
-  return `<ol class="post-list" aria-label="Published notes">
+  const tagLinks = new Map(
+    getNavigableTagCollections(allPosts).map((collection) => [collection.slug, collection.url]),
+  );
+
+  return `<ol class="post-list" aria-label="공개된 글">
 ${posts
   .map(
     (post) => `  <li class="post-list-item">
-    <a class="post-list-link" href="${escapeHtml(post.url)}">
-      <span class="post-date"><time datetime="${escapeHtml(post.date)}">${escapeHtml(post.date)}</time></span>
-      <span class="post-copy">
+    <span class="post-date"><time datetime="${escapeHtml(post.date)}">${escapeHtml(post.date)}</time></span>
+    <span class="post-copy">
+      <a class="post-list-link" href="${escapeHtml(post.url)}">
         <span class="post-title">${escapeHtml(post.title)}</span>
         <span class="post-summary">${escapeHtml(post.summary)}</span>
-        <span class="post-taxonomy">
-          <span class="post-category">${escapeHtml(post.category.label)}</span>
-          ${
-            post.tags.length > 0
-              ? `<span class="post-tags" aria-label="Tags for ${escapeHtml(post.title)}">${post.tags
-                  .map((tag) => `<span class="post-tag">${escapeHtml(tag)}</span>`)
-                  .join("")}</span>`
-              : ""
-          }
-        </span>
+      </a>
+      <span class="post-taxonomy">
+        <a class="post-category" href="${escapeHtml(post.category.url)}">${escapeHtml(post.category.label)}</a>
+        ${
+          post.tags.length > 0
+            ? `<span class="post-tags" aria-label="${escapeHtml(post.title)}의 태그">${post.tags
+                .map((tag) => {
+                  const href = tagLinks.get(tagSlug(tag));
+                  return href
+                    ? `<a class="post-tag" href="${escapeHtml(href)}">${escapeHtml(tag)}</a>`
+                    : `<span class="post-tag">${escapeHtml(tag)}</span>`;
+                })
+                .join("")}</span>`
+            : ""
+        }
       </span>
-    </a>
+    </span>
   </li>`,
   )
   .join("\n")}
@@ -388,6 +447,7 @@ ${posts
 
 function renderIndex(posts) {
   const categories = categoriesWithPosts(posts);
+  const tags = getNavigableTagCollections(posts);
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -403,12 +463,13 @@ function renderIndex(posts) {
     url: `${siteConfig.baseUrl}/notes/`,
   };
   const body = `<section class="intro">
-  <p class="eyebrow">Notes</p>
+  <p class="eyebrow">글 모음</p>
   <h1>Yioo Notes</h1>
-  <p>Essays, research notes, and implementation thoughts collected as static documents under yioo.link.</p>
+  <p>AI와 도구, 구현과 생활 속 선택을 조사하고 생각한 글을 모아 둡니다.</p>
 </section>
-<nav class="category-strip" aria-label="Note categories">
-  <a href="/notes/categories/">Categories</a>
+<nav class="category-strip" aria-label="글 분류">
+  <a href="/notes/categories/">분류</a>
+  <a href="/notes/tags/">태그<span>${tags.length}</span></a>
   ${categories
     .map(
       (category) =>
@@ -431,21 +492,21 @@ function renderCategoryIndex(posts) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    description: "Primary sections for Yioo Notes posts.",
+    description: "Yioo Notes의 글을 주제별로 모아 봅니다.",
     hasPart: categories.map((category) => ({
       "@type": "CollectionPage",
       name: category.label,
       url: category.canonicalUrl,
     })),
-    name: "Yioo Notes Categories",
+    name: "Yioo Notes 글 분류",
     url: `${siteConfig.baseUrl}/notes/categories/`,
   };
   const body = `<section class="intro">
-  <p class="eyebrow">Categories</p>
-  <h1>Note Categories</h1>
-  <p>Stable primary sections for published notes.</p>
+  <p class="eyebrow">분류</p>
+  <h1>글 분류</h1>
+  <p>관심 있는 주제에서 글을 찾아보세요.</p>
 </section>
-<ol class="category-list" aria-label="Note categories">
+<ol class="category-list" aria-label="글 분류">
 ${categories
   .map(
     (category) => `  <li>
@@ -465,9 +526,9 @@ ${categories
     body,
     canonicalPath: "/notes/categories/",
     currentPath: "/notes/categories/",
-    description: "Primary sections for Yioo Notes posts.",
+    description: "Yioo Notes의 글을 주제별로 모아 봅니다.",
     structuredData,
-    title: "Categories",
+    title: "글 분류",
   });
 }
 
@@ -487,7 +548,7 @@ function renderCategoryPage(category) {
     url: category.canonicalUrl,
   };
   const body = `<section class="intro">
-  <p class="eyebrow">Category</p>
+  <p class="eyebrow">분류</p>
   <h1>${escapeHtml(category.label)}</h1>
   <p>${escapeHtml(category.description)}</p>
 </section>
@@ -503,7 +564,118 @@ ${renderPostList(category.posts)}`;
   });
 }
 
+function renderTagIndex(tags) {
+  const description = "두 편 이상의 글에서 이어지는 주제를 태그별로 모았습니다.";
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    description,
+    hasPart: tags.map((item) => ({
+      "@type": "CollectionPage",
+      name: item.tag,
+      url: item.canonicalUrl,
+    })),
+    name: "Yioo Notes 태그",
+    url: `${siteConfig.baseUrl}/notes/tags/`,
+  };
+  const body = `<section class="intro">
+  <p class="eyebrow">태그</p>
+  <h1>함께 읽을 주제</h1>
+  <p>${description}</p>
+</section>
+<ol class="tag-list" aria-label="글 태그">
+${tags
+  .map(
+    (item) => `  <li>
+    <a class="tag-list-link" href="${escapeHtml(item.url)}">
+      <span>#${escapeHtml(item.tag)}</span>
+      <span>${item.posts.length}편</span>
+    </a>
+  </li>`,
+  )
+  .join("\n")}
+</ol>`;
+
+  return renderLayout({
+    body,
+    canonicalPath: "/notes/tags/",
+    currentPath: "/notes/tags/",
+    description,
+    structuredData,
+    title: "태그",
+  });
+}
+
+function renderTagPage(item, allPosts) {
+  const description = `‘${item.tag}’ 태그가 붙은 글 ${item.posts.length}편을 모았습니다.`;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    description,
+    hasPart: item.posts.map((post) => ({
+      "@type": "BlogPosting",
+      dateModified: post.updated ?? post.date,
+      datePublished: post.date,
+      headline: post.title,
+      url: post.canonicalUrl,
+    })),
+    name: `#${item.tag} | Yioo Notes`,
+    url: item.canonicalUrl,
+  };
+  const body = `<section class="intro">
+  <p class="eyebrow">태그</p>
+  <h1>#${escapeHtml(item.tag)}</h1>
+  <p>${escapeHtml(description)}</p>
+</section>
+${renderPostList(item.posts, allPosts)}`;
+
+  return renderLayout({
+    body,
+    canonicalPath: item.url,
+    currentPath: item.url,
+    description,
+    structuredData,
+    title: `#${item.tag}`,
+  });
+}
+
+function renderArticleToc(headings) {
+  const items = headings.filter((heading) => heading.depth === 2);
+  if (items.length < 3) {
+    return "";
+  }
+
+  return `<details class="article-toc" open>
+  <summary>이 글의 목차</summary>
+  <nav aria-label="글 목차">
+    <ol>
+      ${items.map((heading) => `<li><a href="#${escapeHtml(heading.id)}">${escapeHtml(heading.text)}</a></li>`).join("\n      ")}
+    </ol>
+  </nav>
+</details>`;
+}
+
+function renderRelatedPosts(post, allPosts) {
+  const postsBySlug = new Map(allPosts.map((candidate) => [candidate.slug, candidate]));
+  const relatedPosts = post.related.map((slug) => postsBySlug.get(slug)).filter(Boolean);
+  if (relatedPosts.length === 0) {
+    return "";
+  }
+
+  return `<aside class="related-posts" aria-labelledby="related-posts-title">
+  <p class="eyebrow">이어 읽기</p>
+  <h2 id="related-posts-title">같이 읽을 글</h2>
+  <ul>
+    ${relatedPosts.map((related) => `<li><a href="${escapeHtml(related.url)}">${escapeHtml(related.title)}</a></li>`).join("\n    ")}
+  </ul>
+</aside>`;
+}
+
 function renderPost(post) {
+  const allPosts = getAllPosts();
+  const tagLinks = new Map(
+    getNavigableTagCollections(allPosts).map((collection) => [collection.slug, collection.url]),
+  );
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -521,25 +693,39 @@ function renderPost(post) {
   };
   const body = `<article class="article">
   <header class="article-header">
-    <a class="back-link" href="/notes/">Notes</a>
+    <a class="back-link" href="/notes/">글 목록</a>
     <h1>${escapeHtml(post.title)}</h1>
     <p>${escapeHtml(post.summary)}</p>
     <div class="article-meta">
       <time datetime="${escapeHtml(post.date)}">${escapeHtml(post.date)}</time>
       <a href="${escapeHtml(post.category.url)}">${escapeHtml(post.category.label)}</a>
-      ${post.tags.length > 0 ? `<span>${escapeHtml(post.tags.join(", "))}</span>` : ""}
+      ${
+        post.tags.length > 0
+          ? `<span class="post-tags" aria-label="${escapeHtml(post.title)}의 태그">${post.tags
+              .map((tag) => {
+                const href = tagLinks.get(tagSlug(tag));
+                return href
+                  ? `<a class="post-tag" href="${escapeHtml(href)}">${escapeHtml(tag)}</a>`
+                  : `<span class="post-tag">${escapeHtml(tag)}</span>`;
+              })
+              .join("")}</span>`
+          : ""
+      }
     </div>
   </header>
   ${post.cover ? `<img class="cover-image" src="${escapeHtml(post.cover)}" alt="" loading="eager">` : ""}
+  ${renderArticleToc(post.headings)}
   <div class="article-content">${post.html}</div>
-</article>`;
+</article>
+${renderRelatedPosts(post, allPosts)}`;
 
   return renderLayout({
     body,
     canonicalPath: post.canonical ?? post.url,
     currentPath: post.url,
     description: post.summary,
-    imagePath: post.cover,
+    imagePath: post.socialImage,
+    imageAlt: post.title,
     modifiedTime: post.updated ?? post.date,
     ogType: "article",
     publishedTime: post.date,
@@ -562,10 +748,12 @@ function renderManifest(posts) {
           url: post.category.url,
         },
         cover: post.cover,
+        socialImage: post.socialImage,
         date: post.date,
         slug: post.slug,
         summary: post.summary,
         tags: post.tags,
+        related: post.related,
         title: post.title,
         updated: post.updated,
         url: post.url,
@@ -578,6 +766,7 @@ function renderManifest(posts) {
 
 function renderSitemap(posts) {
   const categories = categoriesWithPosts(posts);
+  const tags = getNavigableTagCollections(posts);
   const urls = [
     {
       lastmod: posts[0]?.updated ?? posts[0]?.date ?? new Date().toISOString().slice(0, 10),
@@ -587,9 +776,17 @@ function renderSitemap(posts) {
       lastmod: posts[0]?.updated ?? posts[0]?.date ?? new Date().toISOString().slice(0, 10),
       loc: absoluteUrl("/notes/categories/"),
     },
+    {
+      lastmod: posts[0]?.updated ?? posts[0]?.date ?? new Date().toISOString().slice(0, 10),
+      loc: absoluteUrl("/notes/tags/"),
+    },
     ...categories.map((category) => ({
       lastmod: category.posts[0]?.updated ?? category.posts[0]?.date ?? new Date().toISOString().slice(0, 10),
       loc: category.canonicalUrl,
+    })),
+    ...tags.map((item) => ({
+      lastmod: item.posts[0]?.updated ?? item.posts[0]?.date ?? new Date().toISOString().slice(0, 10),
+      loc: item.canonicalUrl,
     })),
     ...posts.map((post) => ({
       lastmod: post.updated ?? post.date,
@@ -791,6 +988,19 @@ function upload(options) {
     "--content-type",
     "application/xml; charset=utf-8",
   ]);
+  const rssPath = path.join(distNotesDirectory, "rss.xml");
+  if (fs.existsSync(rssPath)) {
+    run("aws", [
+      "s3",
+      "cp",
+      rssPath,
+      `${destination}/rss.xml`,
+      "--cache-control",
+      "no-cache",
+      "--content-type",
+      "application/rss+xml; charset=utf-8",
+    ]);
+  }
   run("aws", [
     "s3",
     "cp",
@@ -847,6 +1057,7 @@ export function renderPublishOutput(options = parseArgs([])) {
   syncStyles(root);
 
   const posts = getAllPosts();
+  const tags = getNavigableTagCollections(posts);
   if (options.requireSlug && !posts.some((post) => post.slug === options.requireSlug)) {
     throw new Error(`No published post found for required slug: ${options.requireSlug}`);
   }
@@ -860,10 +1071,15 @@ export function renderPublishOutput(options = parseArgs([])) {
   for (const category of categoriesWithPosts(posts)) {
     writeFile(path.join("categories", category.id, "index.html"), renderCategoryPage(category));
   }
+  writeFile(path.join("tags", "index.html"), renderTagIndex(tags));
+  for (const item of tags) {
+    writeFile(path.join("tags", item.slug, "index.html"), renderTagPage(item, posts));
+  }
   for (const post of posts) {
     writeFile(path.join(post.slug, "index.html"), renderPost(post));
   }
   writeFile("posts.manifest.json", renderManifest(posts));
+  writeFile("rss.xml", renderRssFeed(posts, siteConfig));
   writeFile("sitemap.xml", renderSitemap(posts));
 
   return {
