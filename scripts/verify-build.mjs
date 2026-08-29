@@ -42,6 +42,14 @@ const expectedRelated = new Map([
   ["2026-08-16-data-canonical-before-formulas", ["2026-08-12-how-to-verify-ai-agent-completion"]],
   ["2026-08-16-long-agent-task-control", ["2026-08-11-how-to-use-llm-wiki", "2026-08-12-how-to-verify-ai-agent-completion"]],
 ]);
+const expectedFooterLinks = [
+  ["/privacy_policy.html", "개인정보처리방침"],
+  ["/terms.html", "이용약관"],
+  ["/support.html", "도움말·FAQ"],
+  ["/tools/", "도구"],
+  ["/contact.html", "문의"],
+];
+const expectedFooterCopyright = "© 2026 Yioo. All rights reserved.";
 const forbiddenSegments = [
   `${path.sep}drafts${path.sep}`,
   `${path.sep}private${path.sep}`,
@@ -128,6 +136,38 @@ for (const filePath of walk(dist)) {
     if (filePath.includes(segment)) {
       fail(`draft/private output detected: ${path.relative(root, filePath)}`);
     }
+  }
+}
+
+for (const htmlPath of walk(path.join(dist, "notes")).filter((filePath) => filePath.endsWith(".html"))) {
+  const label = path.relative(dist, htmlPath).replaceAll(path.sep, "/");
+  const html = fs.readFileSync(htmlPath, "utf8");
+  const footerCount = [...html.matchAll(/<footer class="site-footer">/g)].length;
+  if (footerCount !== 1) {
+    fail(`${label} must contain exactly one global footer, found ${footerCount}`);
+    continue;
+  }
+  if (!html.includes('<nav class="footer-nav" aria-label="하단 메뉴">')) {
+    fail(`${label} global footer navigation is missing`);
+  }
+  for (const [href, text] of expectedFooterLinks) {
+    const link = `<a class="footer-link" href="${href}">${text}</a>`;
+    if (!html.includes(link)) {
+      fail(`${label} global footer link is missing: ${href}`);
+    }
+  }
+  if (!html.includes(`<p class="footer-copyright">${expectedFooterCopyright}</p>`)) {
+    fail(`${label} global footer copyright is missing or incorrect`);
+  }
+  const mainEnd = html.indexOf("</main>");
+  const footerStart = html.indexOf('<footer class="site-footer">');
+  const bodyEnd = html.indexOf("</body>");
+  if (mainEnd === -1 || bodyEnd === -1 || footerStart < mainEnd || footerStart > bodyEnd) {
+    fail(`${label} global footer must remain outside main and before the closing body tag`);
+  }
+  const articleEnd = html.indexOf("</article>");
+  if (articleEnd !== -1 && footerStart < articleEnd) {
+    fail(`${label} global footer must remain outside article content`);
   }
 }
 

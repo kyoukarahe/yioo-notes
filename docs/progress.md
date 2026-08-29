@@ -1903,3 +1903,59 @@ publisher and AWS dry run, and publish the understood prior full release with
 recovery. Verify Notes and protected root/API/tools routes again. Preserve
 unrelated drafts, scheduling records, and private ledgers.
 Commit: This phase record is included in the scoped capability commit.
+
+### Phase 32. Add the global Yioo footer to Notes
+
+Status: published and live-verified
+Started: 2026-08-29
+Finished: 2026-08-29
+Operation: Existing-site layout update
+Scope: Add one product-neutral Yioo footer after `main` on every Notes HTML
+page, preserve article content and AI disclosures, keep the Astro and manual
+renderers aligned, and retain all existing discovery, RSS, sitemap, category,
+tag, asset, and post behavior.
+
+Implemented behavior:
+
+- Every Notes index, category, tag, and post page exposes the current shared
+  Yioo destinations for privacy, terms, help/FAQ, tools, and contact.
+- Korean link labels match the Notes interface; the copyright identifies Yioo
+  rather than the email product.
+- The footer remains outside `main` and `article`, so it is not part of any
+  post body or AI disclosure.
+- Responsive layout wraps links and moves the copyright below them on mobile.
+- `site.config.json` is the shared data contract; `BaseLayout.astro` and the
+  manual `renderLayout()` consume equivalent footer output.
+- The build verifier requires exactly one correctly placed footer with the
+  complete configured link set on every generated HTML page.
+
+Verification:
+
+- `npm.cmd run test:security`, `npm.cmd run check`, Node syntax checks,
+  `npm.cmd run build`, `npm.cmd run publish:posts`, and
+  `npm.cmd run verify:build` passed.
+- Astro and manual publisher output each contained one equivalent footer on all
+  12 generated HTML pages. No published Markdown or post asset changed.
+- Local browser checks covered the index and representative post at 1440x1000,
+  390x844, and 360x740 with no required-width overflow, clipping, failed post
+  image, console error, or warning. The design score is 94/100.
+- AWS preflight confirmed account `948654497054`, the versioned `yioo-notes`
+  bucket in `ap-northeast-1`, and distribution `EWYEJXEIKC81C`. The complete
+  preview contained 16 expected uploads and zero deletions.
+- S3 readback contained exactly the same 28 files as the local release with
+  zero missing, extra, or SHA-256 mismatches. HTML, RSS, and CSS metadata was
+  correct.
+- All 12 live HTML routes returned 200 and exposed exactly one footer after
+  `main` and outside `article`. Notes stylesheet, manifest, sitemap, RSS, OG
+  image, root sitemap, robots, root, tools, and API health remained healthy.
+- Live desktop index and mobile post checks matched local layout, had no
+  horizontal overflow, and reported no browser warnings or errors.
+
+Deployment/invalidation: Full release uploaded to `s3://yioo-notes/notes`;
+CloudFront invalidation `IBFN5ET1LQ8E5RSGEU2TWWA092` completed.
+Rollback: Revert the scoped footer capability commit, run the complete local
+publisher and AWS dry run, then publish the understood prior full release with
+`--upload --confirm-full-release`. S3 versioning remains enabled for recovery.
+Verify every Notes HTML route and protected root/API/tools routes again.
+Preserve unrelated drafts, scheduling records, and private ledgers.
+Commit: This phase record is included in the scoped capability commit.

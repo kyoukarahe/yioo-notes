@@ -1,6 +1,7 @@
 ---
 import siteConfig from "../config/site.config.json";
 import { serializeJsonForScript } from "../lib/content-security.mjs";
+import SiteFooter from "../components/SiteFooter.astro";
 
 type Props = {
   title?: string;
@@ -100,5 +101,6 @@ const isCurrentNavItem = (href: string) =>
     <main id="content" class="page-shell">
       <slot />
     </main>
+    <SiteFooter />
   </body>
 </html>

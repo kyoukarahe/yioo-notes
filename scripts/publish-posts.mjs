@@ -327,6 +327,22 @@ function renderNav(currentPath) {
 </header>`;
 }
 
+function renderFooter() {
+  const links = siteConfig.footer.links
+    .map(
+      (item) =>
+        `<a class="footer-link" href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`,
+    )
+    .join("");
+
+  return `<footer class="site-footer">
+  <div class="site-footer-inner">
+    <nav class="footer-nav" aria-label="하단 메뉴">${links}</nav>
+    <p class="footer-copyright">${escapeHtml(siteConfig.footer.copyright)}</p>
+  </div>
+</footer>`;
+}
+
 function renderLayout({
   body,
   canonicalPath = siteConfig.notesPath,
@@ -399,6 +415,7 @@ function renderLayout({
   <main id="content" class="page-shell">
     ${body}
   </main>
+  ${renderFooter()}
 </body>
 </html>
 `;

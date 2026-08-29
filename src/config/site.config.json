@@ -21,5 +21,30 @@
       "label": "글",
       "href": "/notes/"
     }
-  ]
+  ],
+  "footer": {
+    "links": [
+      {
+        "label": "개인정보처리방침",
+        "href": "/privacy_policy.html"
+      },
+      {
+        "label": "이용약관",
+        "href": "/terms.html"
+      },
+      {
+        "label": "도움말·FAQ",
+        "href": "/support.html"
+      },
+      {
+        "label": "도구",
+        "href": "/tools/"
+      },
+      {
+        "label": "문의",
+        "href": "/contact.html"
+      }
+    ],
+    "copyright": "© 2026 Yioo. All rights reserved."
+  }
 }
