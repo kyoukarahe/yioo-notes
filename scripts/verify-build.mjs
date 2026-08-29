@@ -43,11 +43,10 @@ const expectedRelated = new Map([
   ["2026-08-16-long-agent-task-control", ["2026-08-11-how-to-use-llm-wiki", "2026-08-12-how-to-verify-ai-agent-completion"]],
 ]);
 const expectedFooterLinks = [
-  ["/privacy_policy.html", "개인정보처리방침"],
+  ["/", "Yioo 홈"],
   ["/terms.html", "이용약관"],
-  ["/support.html", "도움말·FAQ"],
-  ["/tools/", "도구"],
-  ["/contact.html", "문의"],
+  ["/privacy_policy.html", "개인정보처리방침"],
+  ["/contact.html", "문의하기"],
 ];
 const expectedFooterCopyright = "© 2026 Yioo. All rights reserved.";
 const forbiddenSegments = [
@@ -142,13 +141,17 @@ for (const filePath of walk(dist)) {
 for (const htmlPath of walk(path.join(dist, "notes")).filter((filePath) => filePath.endsWith(".html"))) {
   const label = path.relative(dist, htmlPath).replaceAll(path.sep, "/");
   const html = fs.readFileSync(htmlPath, "utf8");
-  const footerCount = [...html.matchAll(/<footer class="site-footer">/g)].length;
+  const footerTag = '<footer class="site-footer" data-yioo-global-footer-fallback>';
+  const footerCount = [...html.matchAll(/<footer class="site-footer" data-yioo-global-footer-fallback>/g)].length;
   if (footerCount !== 1) {
     fail(`${label} must contain exactly one global footer, found ${footerCount}`);
     continue;
   }
   if (!html.includes('<nav class="footer-nav" aria-label="하단 메뉴">')) {
     fail(`${label} global footer navigation is missing`);
+  }
+  if ([...html.matchAll(/<span class="footer-separator" aria-hidden="true">\|<\/span>/g)].length !== 3) {
+    fail(`${label} global footer separators are missing or incorrect`);
   }
   for (const [href, text] of expectedFooterLinks) {
     const link = `<a class="footer-link" href="${href}">${text}</a>`;
@@ -159,8 +162,11 @@ for (const htmlPath of walk(path.join(dist, "notes")).filter((filePath) => fileP
   if (!html.includes(`<p class="footer-copyright">${expectedFooterCopyright}</p>`)) {
     fail(`${label} global footer copyright is missing or incorrect`);
   }
+  if (!html.includes('footerScript.src = "/global-footer.js";')) {
+    fail(`${label} shared footer loader is missing`);
+  }
   const mainEnd = html.indexOf("</main>");
-  const footerStart = html.indexOf('<footer class="site-footer">');
+  const footerStart = html.indexOf(footerTag);
   const bodyEnd = html.indexOf("</body>");
   if (mainEnd === -1 || bodyEnd === -1 || footerStart < mainEnd || footerStart > bodyEnd) {
     fail(`${label} global footer must remain outside main and before the closing body tag`);

@@ -75,6 +75,12 @@ const isCurrentNavItem = (href: string) =>
           script.defer = true;
           script.src = "/analytics-loader.js";
           document.head.appendChild(script);
+
+          if (host === "yioo.link") {
+            const footerScript = document.createElement("script");
+            footerScript.src = "/global-footer.js";
+            document.head.appendChild(footerScript);
+          }
         }
       })();
     </script>

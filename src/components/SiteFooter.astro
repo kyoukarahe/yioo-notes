@@ -2,12 +2,15 @@
 import siteConfig from "../config/site.config.json";
 ---
 
-<footer class="site-footer">
+<footer class="site-footer" data-yioo-global-footer-fallback>
   <div class="site-footer-inner">
     <nav class="footer-nav" aria-label="하단 메뉴">
       {
-        siteConfig.footer.links.map((item) => (
-          <a class="footer-link" href={item.href}>{item.label}</a>
+        siteConfig.footer.links.map((item, index) => (
+          <>
+            {index > 0 && <span class="footer-separator" aria-hidden="true">|</span>}
+            <a class="footer-link" href={item.href}>{item.label}</a>
+          </>
         ))
       }
     </nav>

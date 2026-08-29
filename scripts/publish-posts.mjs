@@ -329,13 +329,13 @@ function renderNav(currentPath) {
 
 function renderFooter() {
   const links = siteConfig.footer.links
-    .map(
-      (item) =>
-        `<a class="footer-link" href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`,
-    )
+    .map((item, index) => {
+      const separator = index > 0 ? '<span class="footer-separator" aria-hidden="true">|</span>' : "";
+      return `${separator}<a class="footer-link" href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`;
+    })
     .join("");
 
-  return `<footer class="site-footer">
+  return `<footer class="site-footer" data-yioo-global-footer-fallback>
   <div class="site-footer-inner">
     <nav class="footer-nav" aria-label="하단 메뉴">${links}</nav>
     <p class="footer-copyright">${escapeHtml(siteConfig.footer.copyright)}</p>
@@ -405,6 +405,12 @@ function renderLayout({
         script.defer = true;
         script.src = "/analytics-loader.js";
         document.head.appendChild(script);
+
+        if (host === "yioo.link") {
+          const footerScript = document.createElement("script");
+          footerScript.src = "/global-footer.js";
+          document.head.appendChild(footerScript);
+        }
       }
     })();
   </script>

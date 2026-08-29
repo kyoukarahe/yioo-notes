@@ -17,6 +17,10 @@ This repository owns the static notes/blog implementation for
 - Post assets: `public/notes/assets/posts/{slug}/`
 - Layout and design: `src/layouts/`, `src/components/`, `src/styles/`
 - Site config: `src/config/site.config.json`
+- The canonical runtime footer for `https://yioo.link/notes/...` is the
+  `yioo-link`-owned `/global-footer.html`, `.css`, and `.js` asset set. Keep the
+  local `SiteFooter.astro`, manual `renderFooter()`, and config entries aligned
+  as the Tools-style failure/no-JavaScript fallback.
 - Implementation logs: `docs/progress.md`, `docs/findings.md`
 - Korean editorial and terminology guidance: `docs/korean-editorial-guide.md`
 - Design guidance and design audits: `design-docs/`
