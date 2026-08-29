@@ -44,6 +44,8 @@ const expectedRelated = new Map([
 ]);
 const expectedFooterLinks = [
   ["/", "Yioo 홈"],
+  ["/tools/", "도구"],
+  ["/notes/", "노트"],
   ["/terms.html", "이용약관"],
   ["/privacy_policy.html", "개인정보처리방침"],
   ["/contact.html", "문의하기"],
@@ -150,7 +152,7 @@ for (const htmlPath of walk(path.join(dist, "notes")).filter((filePath) => fileP
   if (!html.includes('<nav class="footer-nav" aria-label="하단 메뉴">')) {
     fail(`${label} global footer navigation is missing`);
   }
-  if ([...html.matchAll(/<span class="footer-separator" aria-hidden="true">\|<\/span>/g)].length !== 3) {
+  if ([...html.matchAll(/<span class="footer-separator" aria-hidden="true">\|<\/span>/g)].length !== 5) {
     fail(`${label} global footer separators are missing or incorrect`);
   }
   for (const [href, text] of expectedFooterLinks) {

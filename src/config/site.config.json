@@ -29,6 +29,14 @@
         "href": "/"
       },
       {
+        "label": "도구",
+        "href": "/tools/"
+      },
+      {
+        "label": "노트",
+        "href": "/notes/"
+      },
+      {
         "label": "이용약관",
         "href": "/terms.html"
       },
