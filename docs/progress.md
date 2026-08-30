@@ -1959,3 +1959,76 @@ publisher and AWS dry run, then publish the understood prior full release with
 Verify every Notes HTML route and protected root/API/tools routes again.
 Preserve unrelated drafts, scheduling records, and private ledgers.
 Commit: This phase record is included in the scoped capability commit.
+
+### Phase 33. Publish the small-game decision-loop essay
+
+Status: published and live-verified
+Started: 2026-08-30
+Finished: 2026-08-30
+Operation: New post
+Slug: `2026-08-16-small-game-decision-loop`
+Scope: Promote only the explicitly approved essay and its decision-loop SVG
+and WebP, append the approved AI disclosure exactly once, preserve all existing
+posts, assets, discovery metadata, categories, repeated-tag archives, RSS, and
+the current shared Yioo footer, then publish the complete Notes release.
+
+Commands:
+
+- `npm.cmd run test:security`
+- `npm.cmd run check`
+- `npm.cmd run publish:posts -- --require-slug 2026-08-16-small-game-decision-loop`
+- `npm.cmd run verify:build`
+- `npm.cmd run publish:posts -- --require-slug 2026-08-16-small-game-decision-loop --dry-run`
+- `npm.cmd run publish:posts -- --require-slug 2026-08-16-small-game-decision-loop --upload --confirm-full-release`
+- Exact-once disclosure verification for Markdown, rendered HTML, downloaded
+  S3 HTML, and the live URL
+- Complete S3 and CloudFront file/hash readback plus desktop/mobile Playwright
+  checks for every generated HTML route
+
+Verification:
+
+- Approved draft/SVG/WebP SHA-256 values matched
+  `4BD2BCF5DE8833FE16553797C8A5CD1F47C888390DE2A48A8EC432EB81AD5CA1`,
+  `1FB37005DC49D094E63DB258927E244B561DF6A472001897DC5232BF0D0DE81D`,
+  and `B716C3F80B3B606DC46D687CA8F9817FBA85F944FEB7E2E4582192847A5B6D91`.
+  The promoted Markdown differs only by `status: published` and the approved
+  disclosure footer. Independent final verification returned P0/P1/P2 zero.
+- Security regression and Astro check passed. The full local publisher rendered
+  6 posts and 31 files. `verify:build`, exact-once disclosure, internal links,
+  manifest, 13-URL Notes sitemap, 6-item RSS, category, repeated-tag-only,
+  static H2 TOC, fallback social image, related-link, footer, and private-output
+  checks passed.
+- AWS preflight confirmed account `948654497054`, the versioned private
+  `yioo-notes` bucket in `ap-northeast-1`, and deployed distribution
+  `EWYEJXEIKC81C`. The complete preview contained 18 explained uploads and zero
+  deletions: 3 new artifacts, 6 generated aggregation changes, and 9 existing
+  HTML files whose normalized DOM meaning was unchanged from S3.
+- S3 and the live CloudFront release each contained exactly the same 31 files
+  and 763659 bytes as the local release, with zero missing, extra, SHA-256, or
+  size mismatches and no draft/private path. All 31 S3 objects had expected
+  content types, `no-cache`, and version IDs.
+- The post, SVG, WebP, Notes index, implementation and finance archives,
+  manifest, Notes sitemap, RSS and its MIME, tag index and both repeated-tag
+  archives, fallback social image, stylesheet, root sitemap handoff comment,
+  robots, root site, API health, tools route, and shared footer assets returned
+  their expected live status and content type. The singleton `game-design` tag
+  archive remained absent with HTTP 403.
+- The new post appears once as a manifest entry, sitemap URL, index row,
+  implementation archive row, and RSS item. Korean title/summary/category
+  metadata, canonical URL, 9-heading static TOC, image references, existing
+  finance content, and curated related links are preserved.
+- All 13 live HTML routes passed at 1440x1000 and 390x844: one central footer,
+  zero fallback footer, footer after `main` and outside `article`, current six
+  shared destinations, desktop one-row/mobile two-row wrapping, no horizontal
+  overflow, no failed images, and zero console, page, or same-origin request
+  errors. Commits `467aef2` and `49231f4` remain ancestors; later shared-footer
+  work in `47caa28` and `2db7228` was preserved rather than reset.
+
+Deployment/invalidation: Full release uploaded to `s3://yioo-notes/notes`;
+CloudFront invalidation `IANNGAZMTUPY47UKBIIYM1SL0H` completed.
+Rollback: Revert the scoped publication commit, run the complete local
+publisher and AWS dry run, then publish the understood prior full release with
+`--upload --confirm-full-release`. S3 versioning remains enabled for object
+recovery. Verify the removed slug, all Notes routes, and protected root/API/tools
+routes again. Preserve unrelated drafts, private ledgers, and documentation.
+Commit: This phase record is included in the scoped publication commit.

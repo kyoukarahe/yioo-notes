@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">작은 게임의 한 번의 결정 고리와 수직 슬라이스</title>
+  <desc id="desc">플레이어가 정보를 읽고 행동을 고르면 상태가 바뀌고 피드백이 다음 정보를 주는 순환과, 이를 실제 상호작용·임시 시스템·미지의 위험·포기 기준으로 검증하는 도표</desc>
+  <rect width="1200" height="1200" fill="#f4f1ea"/>
+  <rect x="60" y="55" width="1080" height="1090" rx="34" fill="#fffdf8" stroke="#26373e" stroke-width="3"/>
+  <g font-family="Pretendard, Noto Sans KR, sans-serif">
+    <text x="105" y="132" font-size="48" font-weight="700" fill="#17272e">작은 게임은 한 번의 결정에서 시작한다</text>
+    <text x="105" y="181" font-size="26" fill="#596a70">콘텐츠를 늘리기 전에 정보와 선택, 결과가 다시 이어지는지 본다</text>
+
+    <rect x="105" y="250" width="260" height="132" rx="22" fill="#e8f1ed" stroke="#517f70" stroke-width="3"/>
+    <text x="235" y="305" font-size="31" font-weight="700" fill="#2a5145" text-anchor="middle">정보를 읽는다</text>
+    <text x="235" y="350" font-size="23" fill="#3d5c52" text-anchor="middle">위험 · 자원 · 단서</text>
+
+    <path d="M382 316 H452" stroke="#85979b" stroke-width="5"/>
+    <path d="M452 316 L428 301 L428 331 Z" fill="#85979b"/>
+
+    <rect x="470" y="250" width="260" height="132" rx="22" fill="#e6eef5" stroke="#557c96" stroke-width="3"/>
+    <text x="600" y="305" font-size="31" font-weight="700" fill="#2b4d61" text-anchor="middle">행동을 고른다</text>
+    <text x="600" y="350" font-size="23" fill="#405968" text-anchor="middle">비용 · 가역성 · 압력</text>
+
+    <path d="M748 316 H818" stroke="#85979b" stroke-width="5"/>
+    <path d="M818 316 L794 301 L794 331 Z" fill="#85979b"/>
+
+    <rect x="835" y="250" width="260" height="132" rx="22" fill="#f4ead8" stroke="#a67b39" stroke-width="3"/>
+    <text x="965" y="305" font-size="31" font-weight="700" fill="#735022" text-anchor="middle">상태가 바뀐다</text>
+    <text x="965" y="350" font-size="23" fill="#66543d" text-anchor="middle">위치 · 자원 · 관계</text>
+
+    <path d="M965 399 V467" stroke="#85979b" stroke-width="5"/>
+    <path d="M965 467 L950 443 L980 443 Z" fill="#85979b"/>
+
+    <rect x="835" y="485" width="260" height="132" rx="22" fill="#eee7f1" stroke="#82608e" stroke-width="3"/>
+    <text x="965" y="540" font-size="31" font-weight="700" fill="#593d62" text-anchor="middle">결과를 느낀다</text>
+    <text x="965" y="585" font-size="23" fill="#65506b" text-anchor="middle">소리 · 움직임 · 손실</text>
+
+    <path d="M818 551 H748" stroke="#85979b" stroke-width="5"/>
+    <path d="M748 551 L772 536 L772 566 Z" fill="#85979b"/>
+
+    <rect x="470" y="485" width="260" height="132" rx="22" fill="#e9f0ea" stroke="#668476" stroke-width="3"/>
+    <text x="600" y="540" font-size="31" font-weight="700" fill="#2f5144" text-anchor="middle">새 정보가 생긴다</text>
+    <text x="600" y="585" font-size="23" fill="#456158" text-anchor="middle">다음 선택의 근거</text>
+
+    <path d="M452 551 H235 V399" fill="none" stroke="#85979b" stroke-width="5"/>
+    <path d="M235 399 L220 423 L250 423 Z" fill="#85979b"/>
+
+    <rect x="105" y="710" width="990" height="275" rx="26" fill="#f2eee5" stroke="#857c6f" stroke-width="3"/>
+    <text x="145" y="770" font-size="32" font-weight="700" fill="#4b463e">수직 슬라이스는 이 고리를 시험하는 작은 단면이다</text>
+
+    <rect x="145" y="820" width="210" height="105" rx="18" fill="#ffffff" stroke="#517f70" stroke-width="3"/>
+    <text x="250" y="862" font-size="24" font-weight="700" fill="#2a5145" text-anchor="middle">실제 상호작용</text>
+    <text x="250" y="899" font-size="20" fill="#53665f" text-anchor="middle">결정 고리의 본체</text>
+
+    <rect x="380" y="820" width="210" height="105" rx="18" fill="#ffffff" stroke="#557c96" stroke-width="3"/>
+    <text x="485" y="862" font-size="24" font-weight="700" fill="#2b4d61" text-anchor="middle">임시 시스템</text>
+    <text x="485" y="899" font-size="20" fill="#53636d" text-anchor="middle">아직 꾸며도 되는 것</text>
+
+    <rect x="615" y="820" width="210" height="105" rx="18" fill="#ffffff" stroke="#a67b39" stroke-width="3"/>
+    <text x="720" y="862" font-size="24" font-weight="700" fill="#735022" text-anchor="middle">모르는 위험</text>
+    <text x="720" y="899" font-size="20" fill="#6b5b43" text-anchor="middle">이번에 답할 질문</text>
+
+    <rect x="850" y="820" width="205" height="105" rx="18" fill="#ffffff" stroke="#9a665e" stroke-width="3"/>
+    <text x="953" y="862" font-size="24" font-weight="700" fill="#713f38" text-anchor="middle">포기 기준</text>
+    <text x="953" y="899" font-size="20" fill="#6b514d" text-anchor="middle">계속할 조건</text>
+
+    <rect x="105" y="1030" width="990" height="72" rx="20" fill="#263940"/>
+    <text x="600" y="1077" font-size="27" font-weight="700" fill="#ffffff" text-anchor="middle">재현성은 재미의 증명이 아니라, 같은 문제를 다시 보는 손잡이다</text>
+  </g>
+</svg>
