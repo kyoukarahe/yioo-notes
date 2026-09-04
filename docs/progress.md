@@ -6,6 +6,43 @@ This file is the running implementation log for `yioo-notes`. Update it at the
 start and end of every phase so state survives context changes, agent handoffs,
 and deployment interruptions.
 
+## 2026-09-04 AI image learning and credit publication
+
+- Status: `PUBLISHED`; approved research essay promoted, deployed, live
+  verified, and ready for scoped Git delivery.
+- Operation: publish one new post.
+- Slug: `2026-08-31-ai-image-learning-and-credit`.
+- Files changed: production post plus this publication record. The applied
+  private source ledger and all draft, research, browser, and planning
+  artifacts remain outside the commit.
+- Commands: `npm.cmd run test:security`; `npm.cmd run check`;
+  `npm.cmd run publish:posts -- --require-slug
+  2026-08-31-ai-image-learning-and-credit`; `npm.cmd run verify:build`;
+  `npm.cmd run publish:posts -- --require-slug
+  2026-08-31-ai-image-learning-and-credit --dry-run`; and the approved
+  `--upload --confirm-full-release` form.
+- Verification: pinned draft and approved-ledger SHA-256 matched; promotion
+  changed only publication status and the approved disclosure footer. Local,
+  authoritative S3, and live releases contain the same 32 files and 796,532
+  bytes with zero missing, extra, size, or SHA-256 differences. Manifest,
+  index, implementation and finance archives, both sitemaps and delegation,
+  RSS MIME/feed, repeated-tag archives, fallback OG/Korean metadata,
+  stylesheet, central footer, root, API health, and tools passed. Desktop
+  1440x1000 and mobile 390x844 browser checks found no overflow, broken image,
+  clipped article, TOC target, footer-placement, or console problem.
+- AI disclosure: `Researched and drafted with OpenAI Codex using GPT‑5.6 Sol
+  (xhigh reasoning). Editorial review and final approval by Yioo.` appears
+  exactly once in production Markdown, local HTML, authoritative S3 HTML, and
+  the live URL.
+- Deployment/invalidation: account `948654497054`, bucket `yioo-notes`,
+  region `ap-northeast-1`, versioning enabled, CloudFront
+  `EWYEJXEIKC81C`; full-release preview was 17 uploads and zero deletions;
+  invalidation `I8VM98B9JPYFL7LSO7ER20JS0N` completed.
+- Rollback: revert the scoped publication commit, render and review a full
+  release without this slug, deploy with `--upload --confirm-full-release`,
+  then verify the post is absent from S3, manifest, sitemap, RSS, index, and
+  implementation archive while root, API, and tools remain healthy.
+
 ## Current Status
 
 Phase: 25. Harden the Notes publication entry points
