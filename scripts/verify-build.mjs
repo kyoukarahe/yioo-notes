@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { imageMetadata } from "astro/assets/utils";
 
 const root = process.cwd();
 const dist = path.join(root, "dist");
@@ -14,7 +15,7 @@ const sitemapPath = path.join(dist, "notes", "sitemap.xml");
 const rssPath = path.join(dist, "notes", "rss.xml");
 const stylesPath = path.join(dist, "notes", "styles.css");
 const fallbackSocialImagePath = path.join(dist, "notes", "assets", "social", "yioo-notes-og.png");
-const fallbackSocialImageUrl = "https://yioo.link/notes/assets/social/yioo-notes-og.png";
+const fallbackSocialImageUrl = "https://yioo.link/notes/assets/social/yioo-notes-og.png?v=20260916";
 const publishedSlug = "2026-08-11-how-to-use-llm-wiki";
 const publishedPost = path.join(dist, "notes", publishedSlug, "index.html");
 const coverImage = path.join(
@@ -127,8 +128,8 @@ if (!fs.existsSync(fallbackSocialImagePath)) {
 } else {
   const png = fs.readFileSync(fallbackSocialImagePath);
   const signature = png.subarray(0, 8).toString("hex");
-  if (signature !== "89504e470d0a1a0a" || png.readUInt32BE(16) !== 1200 || png.readUInt32BE(20) !== 630) {
-    fail("fallback social image must be a 1200x630 PNG");
+  if (signature !== "89504e470d0a1a0a" || png.readUInt32BE(16) !== 1731 || png.readUInt32BE(20) !== 909) {
+    fail("fallback social image must be the approved 1731x909 PNG");
   }
 }
 
@@ -223,12 +224,23 @@ function verifyPostHtml(postPath, slug, canonical, imagePaths) {
   }
 }
 
-function verifySocialMetadata(html, label, expectedImageUrl) {
+async function verifySocialMetadata(html, label, expectedImageUrl) {
+  const expectedWidth = expectedImageUrl === fallbackSocialImageUrl ? 1731 : 1200;
+  const expectedHeight = expectedImageUrl === fallbackSocialImageUrl ? 909 : 630;
+  const assetPath = path.join(dist, new URL(expectedImageUrl).pathname);
+  try {
+    const actual = await imageMetadata(fs.readFileSync(assetPath), assetPath);
+    if (actual.width !== expectedWidth || actual.height !== expectedHeight) {
+      fail(`${label} declared social image dimensions do not match the actual asset`);
+    }
+  } catch (error) {
+    fail(`${label} social image cannot be inspected: ${error.message}`);
+  }
   const required = [
     `<meta property="og:image" content="${expectedImageUrl}">`,
     `<meta property="og:image:secure_url" content="${expectedImageUrl}">`,
-    '<meta property="og:image:width" content="1200">',
-    '<meta property="og:image:height" content="630">',
+    `<meta property="og:image:width" content="${expectedWidth}">`,
+    `<meta property="og:image:height" content="${expectedHeight}">`,
     '<meta name="twitter:card" content="summary_large_image">',
     `<meta name="twitter:image" content="${expectedImageUrl}">`,
   ];
@@ -272,7 +284,7 @@ if (fs.existsSync(notesIndex)) {
   if (!indexHtml.includes(`<p>${koreanSiteDescription}</p>`)) {
     fail("notes index Korean visible description is missing");
   }
-  verifySocialMetadata(indexHtml, "notes index", fallbackSocialImageUrl);
+  await verifySocialMetadata(indexHtml, "notes index", fallbackSocialImageUrl);
   if (!indexHtml.includes('href="/notes/tags/"')) {
     fail("notes index tag navigation link is missing");
   }
@@ -338,7 +350,7 @@ if (fs.existsSync(categoriesIndex)) {
   if (categoryIndexHtml.includes("Primary sections for Yioo Notes posts.")) {
     fail("category index still contains the legacy English description");
   }
-  verifySocialMetadata(categoryIndexHtml, "category index", fallbackSocialImageUrl);
+  await verifySocialMetadata(categoryIndexHtml, "category index", fallbackSocialImageUrl);
 }
 
 if (fs.existsSync(implementationCategory)) {
@@ -371,7 +383,7 @@ if (fs.existsSync(manifestPath)) {
     const expectedImageUrl = item.socialImage
       ? new URL(item.socialImage, "https://yioo.link").toString()
       : fallbackSocialImageUrl;
-    verifySocialMetadata(html, item.slug, expectedImageUrl);
+    await verifySocialMetadata(html, item.slug, expectedImageUrl);
     const related = expectedRelated.get(item.slug) ?? [];
     if (JSON.stringify(item.related ?? []) !== JSON.stringify(related)) {
       fail(`${item.slug} manifest related-post list is incorrect`);

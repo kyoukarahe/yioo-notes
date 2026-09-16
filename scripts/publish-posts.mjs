@@ -386,8 +386,8 @@ function renderLayout({
   <meta property="og:image" content="${escapeHtml(imageUrl)}">
   <meta property="og:image:secure_url" content="${escapeHtml(imageUrl)}">
   <meta property="og:image:type" content="${imageType}">
-  <meta property="og:image:width" content="${siteConfig.socialImageWidth}">
-  <meta property="og:image:height" content="${siteConfig.socialImageHeight}">
+  <meta property="og:image:width" content="${imagePath === siteConfig.socialImage ? siteConfig.socialImageWidth : 1200}">
+  <meta property="og:image:height" content="${imagePath === siteConfig.socialImage ? siteConfig.socialImageHeight : 630}">
   <meta property="og:image:alt" content="${escapeHtml(imageAlt)}">
   ${articleTimes}
   <meta name="twitter:card" content="summary_large_image">

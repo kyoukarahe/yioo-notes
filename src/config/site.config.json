@@ -4,10 +4,10 @@
   "baseUrl": "https://yioo.link",
   "notesPath": "/notes/",
   "author": "Yioo",
-  "socialImage": "/notes/assets/social/yioo-notes-og.png",
-  "socialImageAlt": "에세이와 조사, 구현 기록을 모은 Yioo Notes",
-  "socialImageWidth": 1200,
-  "socialImageHeight": 630,
+  "socialImage": "/notes/assets/social/yioo-notes-og.png?v=20260916",
+  "socialImageAlt": "펼친 공책 위에 손글씨로 적힌 yioo notes",
+  "socialImageWidth": 1731,
+  "socialImageHeight": 909,
   "nav": [
     {
       "label": "홈",
