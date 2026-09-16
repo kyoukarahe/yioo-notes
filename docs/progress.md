@@ -2069,3 +2069,12 @@ publisher and AWS dry run, then publish the understood prior full release with
 recovery. Verify the removed slug, all Notes routes, and protected root/API/tools
 routes again. Preserve unrelated drafts, private ledgers, and documentation.
 Commit: This phase record is included in the scoped publication commit.
+
+## 2026-09-16 Approved OG Artwork
+
+- Applied and deployed the user-approved notebook PNG and aligned default
+  OG/Twitter metadata; preserved the existing custom post cover and all 8 posts.
+- Product commit: 1f19af8. Invalidation I4OU29WFHGGLTRDN7YJSBXXR6G completed.
+- All 35 S3 files match the local release. Live image hash/metadata and four
+  desktop/mobile index/post checks pass. No draft or unrelated source was staged.
+- Scope, live/untracked post caveat and rollback: docs/og-image-20260916.md.
