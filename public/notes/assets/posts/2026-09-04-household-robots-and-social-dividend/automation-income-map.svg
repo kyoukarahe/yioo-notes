@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">로봇이 번 몫은 어떻게 사람에게 돌아올까</title>
+  <desc id="desc">자동화 정책을 이익을 거두는 방법, 생산 자산의 소유자, 확보한 몫을 돌려주는 방식이라는 세 가지 질문으로 구분한 도표</desc>
+  <defs>
+    <filter id="shadow" x="-15%" y="-20%" width="130%" height="150%">
+      <feDropShadow dx="0" dy="9" stdDeviation="12" flood-color="#173f39" flood-opacity="0.10"/>
+    </filter>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7f5ee"/>
+      <stop offset="1" stop-color="#edf5f1"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="1095" cy="80" r="130" fill="#dfeee8" opacity="0.72"/>
+  <circle cx="86" cy="596" r="165" fill="#f1e2c7" opacity="0.56"/>
+
+  <g font-family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif">
+    <text x="72" y="78" fill="#356b61" font-size="19" font-weight="700" letter-spacing="1.5">AUTOMATION INCOME MAP</text>
+    <text x="72" y="132" fill="#142d29" font-size="43" font-weight="800">로봇이 번 몫은 어떻게 사람에게 돌아올까</text>
+    <text x="72" y="173" fill="#58706b" font-size="22">자동화로 생긴 몫을 거두고, 소유하고, 나누는 방법</text>
+
+    <g filter="url(#shadow)">
+      <rect x="72" y="221" width="324" height="250" rx="24" fill="#ffffff" stroke="#b9d7cf" stroke-width="2"/>
+      <rect x="438" y="221" width="324" height="250" rx="24" fill="#ffffff" stroke="#e0c894" stroke-width="2"/>
+      <rect x="804" y="221" width="324" height="250" rx="24" fill="#ffffff" stroke="#c8cbe2" stroke-width="2"/>
+    </g>
+
+    <circle cx="112" cy="264" r="21" fill="#2f7668"/>
+    <text x="112" y="272" text-anchor="middle" fill="#ffffff" font-size="20" font-weight="800">1</text>
+    <text x="147" y="271" fill="#183f38" font-size="29" font-weight="800">어떻게 거둘까</text>
+    <text x="106" y="330" fill="#2f4c47" font-size="24" font-weight="700">로봇세 · 법인세</text>
+    <text x="106" y="371" fill="#2f4c47" font-size="24" font-weight="700">자본소득세</text>
+    <line x1="106" y1="407" x2="362" y2="407" stroke="#dcebe7" stroke-width="2"/>
+    <text x="106" y="441" fill="#6a7d79" font-size="17">자동화 이익을 확보하는 방법</text>
+
+    <circle cx="478" cy="264" r="21" fill="#9a6d22"/>
+    <text x="478" y="272" text-anchor="middle" fill="#ffffff" font-size="20" font-weight="800">2</text>
+    <text x="513" y="271" fill="#584117" font-size="29" font-weight="800">누가 소유할까</text>
+    <text x="472" y="330" fill="#5f4f2e" font-size="24" font-weight="700">개인 · 노동자기금</text>
+    <text x="472" y="371" fill="#5f4f2e" font-size="24" font-weight="700">공공기금 · 시민기금</text>
+    <line x1="472" y1="407" x2="728" y2="407" stroke="#eee4cf" stroke-width="2"/>
+    <text x="472" y="441" fill="#80745d" font-size="17">생산 자산의 주인을 정하는 문제</text>
+
+    <circle cx="844" cy="264" r="21" fill="#626a9d"/>
+    <text x="844" y="272" text-anchor="middle" fill="#ffffff" font-size="20" font-weight="800">3</text>
+    <text x="879" y="271" fill="#353a68" font-size="29" font-weight="800">어떻게 돌려줄까</text>
+    <text x="838" y="330" fill="#4f5579" font-size="24" font-weight="700">사회 배당 · 기본소득</text>
+    <text x="838" y="371" fill="#4f5579" font-size="24" font-weight="700">기존 복지 · 공공서비스</text>
+    <line x1="838" y1="407" x2="1094" y2="407" stroke="#e2e3ef" stroke-width="2"/>
+    <text x="838" y="441" fill="#737795" font-size="17">확보한 몫을 분배하는 방식</text>
+
+    <rect x="72" y="511" width="1056" height="70" rx="18" fill="#173f39"/>
+    <text x="336" y="554" text-anchor="middle" fill="#ffffff" font-size="23" font-weight="700">가격과 자율성을 함께 확인</text>
+    <line x1="600" y1="529" x2="600" y2="563" stroke="#6e918a" stroke-width="2"/>
+    <text x="864" y="554" text-anchor="middle" fill="#ffffff" font-size="23" font-weight="700">재원과 소유권을 함께 설계</text>
+  </g>
+</svg>

@@ -1,5 +1,12 @@
 # Yioo Notes Progress
 
+## 2026-10-14 — Track the already-live household-robots article
+
+- Operation: user approved resolving the missing Git tracking reported after the SSR release. Added the existing published `2026-09-04-household-robots-and-social-dividend.md` and its `automation-income-map.svg` / `.webp` to version control without changing source content, dates, disclosure or asset files.
+- Verification: fresh production readback matched the rendered article body and manifest metadata; both image SHA-256 values matched local files. A tracked-files-only index export, using the existing installed dependencies, rendered all 14 published posts and passed `verify-build`. Its 250 release paths match the deployed release; article HTML and binary assets match byte-for-byte. Only generated manifest time and normal Windows checkout line endings in SVG/CSS differ.
+- Resolution: all 14 currently live article sources and their public assets are now included in the Git index. This closes the household-robots tracking gap recorded in the preceding SSR publication entry. Private drafts, review artifacts and unrelated documentation changes are excluded.
+- Deployment/invalidation: none. This is a source-tracking repair; the public site is unchanged and was not uploaded again. Records: `_workspace/robots-source-tracking-2026-10-14/`.
+
 ## 2026-10-14 — SSR guide production publication
 
 - Operation: published all six author-approved SSR Card Maker guides with 206 referenced images (106,858,562 bytes), preserving the reviewed bodies and eight existing live articles. Original slug/date values remain stable; updated dates are 2026-10-14. ZIP/source ledgers and unapproved drafts remain private.
