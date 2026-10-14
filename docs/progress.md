@@ -1,5 +1,17 @@
 # Yioo Notes Progress
 
+## 2026-10-14 — SSR guide production publication
+
+- Operation: published all six author-approved SSR Card Maker guides with 206 referenced images (106,858,562 bytes), preserving the reviewed bodies and eight existing live articles. Original slug/date values remain stable; updated dates are 2026-10-14. ZIP/source ledgers and unapproved drafts remain private.
+- Slugs: `2026-09-23-ssr-card-maker-{guide,print-materials,foil,surface-finishes,lighting-inks,text}`. Entry: https://yioo.link/notes/2026-09-23-ssr-card-maker-guide/ . Included the previously reviewed safe guide-step/comparison renderer, matching source/public CSS and two regression suites required to render the approved layouts.
+- AI disclosure: user explicitly requested the current model after original-model provenance could not be recovered. Session metadata confirms GPT-6 Astra / xhigh. Inserted exactly once: `Final revision with OpenAI Codex using GPT-6 Astra (xhigh reasoning). Reviewed and edited by Yioo.` Original drafting model remains unknown in private ledgers; this line identifies final revision only. Markdown, generated HTML and all six live URLs passed exact-once/end-of-body checks.
+- Commands: `check`, `test:security`, `test:guide-steps`, `test:image-compare`, `build`, `publish:posts -- --require-slug 2026-09-23-ssr-card-maker-guide`, `verify:build`, `git diff --check`, full AWS `--dry-run`, then `--upload --confirm-full-release --no-wait`. Astro diagnostics: zero errors/warnings; two unused-variable hints in a pre-existing private capture script.
+- Verification: full dry run validated account/bucket/region/versioning/CloudFront and 250 release files, with 234 uploads and zero deletes. Eight existing article bodies matched live before release. After release, 27 exact SHA-256 HTTP readbacks matched generated pages/index/manifest/sitemap/RSS/CSS/category/tag archives and 14 sample images including all eight replacement foil crops. All 14 posts are listed; all six new posts appear in sitemap/RSS. Root, API health, Tools and three shared-footer assets returned 200.
+- Browser: production index → basic guide → each linked guide succeeded. All 377 image elements loaded (8/118/92/72/32/55), with no horizontal overflow at desktop1280/mobile390. Index/basic-guide screenshots inspected at both widths; original/applied and normal/emboss/deboss interactions passed at both widths. Canonical runtime footer loaded. Product ZIP export was not re-certified in this publication task; its earlier CSP observation remains separate.
+- Deployment/invalidation: `s3://yioo-notes/notes`; CloudFront `EWYEJXEIKC81C`, invalidation `IDSP9VY4Q116T2PI9Z1H4E623E` completed (created 2026-10-14T14:25:29.910Z). Private release records: `_workspace/ssrcard-publication-2026-10-14/`; screenshots: `output/playwright/ssrcard-publish-*`.
+- Repository boundary: the already-live household-robots article/assets were present but untracked before this task. They remain unchanged and included in the live release, but are not silently added to this SSR-only commit. A clean-checkout release still requires resolving that pre-existing source-tracking gap before any full sync.
+- Rollback: revert this publication commit only if requested, preserve all prior live sources (including the currently untracked robots article), regenerate, inspect the full AWS dry run, then deploy/invalidate. No rollback or source deletion was performed.
+
 Date started: 2026-06-26
 
 This file is the running implementation log for `yioo-notes`. Update it at the

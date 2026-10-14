@@ -12,6 +12,8 @@
     "publish:posts": "node scripts/publish-posts.mjs",
     "preview": "astro preview --host 127.0.0.1",
     "test:security": "node scripts/test-security.mjs",
+    "test:guide-steps": "node scripts/test-guide-steps.mjs",
+    "test:image-compare": "node scripts/test-image-compare.mjs",
     "verify:build": "node scripts/verify-build.mjs"
   },
   "dependencies": {
