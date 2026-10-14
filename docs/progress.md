@@ -1,5 +1,17 @@
 # Yioo Notes Progress
 
+## 2026-10-15 — Publish six English SSR Card Maker guides
+
+- Operation: published the six approved English translations and seven English UI screenshots. Existing comparison images are shared with the Korean guides; all 14 previous post sources and the six approved English bodies are unchanged. Total public posts: 20.
+- Slugs: `2026-09-23-ssr-card-maker-{guide,print-materials,foil,surface-finishes,lighting-inks,text}-en`. Entry: https://yioo.link/notes/2026-09-23-ssr-card-maker-guide-en/ . Publication dates are 2026-10-15; stable series slugs retain 2026-09-23.
+- Language support: Astro and manual publisher consume `lang` (default ko) and `translationOf`, validate published translation pairs, emit reciprocal hreflang/self-canonicals/JSON-LD language and visible language links. English article navigation, TOC and comparison controls are localized; mixed-language RSS identifies each item instead of declaring the entire feed Korean. The root-owned shared footer and Korean archive UI retain their existing ownership.
+- AI disclosure: inserted exactly once after explicit approval: `Translated with OpenAI Codex using GPT-6 Astra (xhigh reasoning). Reviewed and edited by Yioo.` Translation-time model provenance retained; user chose the existing reviewer credit. Markdown, Astro/manual HTML and all six live URLs passed exact-once/end-of-body checks. Private ledgers marked applied.
+- Commands: `check`, `test:security`, `test:guide-steps`, `test:image-compare`, new `test:languages`, `build`, `verify:build`, local `publish:posts -- --require-slug 2026-09-23-ssr-card-maker-guide-en`, full `--dry-run`, then `--upload --confirm-full-release --no-wait`. Zero Astro errors/warnings; four unused-variable hints in private workspace scripts.
+- Verification: both renderers pass. Full release has 263 files; reviewed sync preview has 41 uploads and zero deletes. Target/account/region/versioning validated. The existing upload workflow also recopies assets for cache headers; reused assets remain byte-identical. Post-release 26 HTTP SHA-256 readbacks match pages, index, manifest, sitemap, RSS, archives, styles and all seven new screenshots; root, Tools and API health return 200.
+- Browser: live index → English basic guide → all five linked guides succeeds at 1440px and 390px; all 377 image positions load with no horizontal overflow. Desktop/mobile index and basic-guide screenshots inspected. Korean ↔ English navigation and both comparison-control types pass. This verifies guide publication, not a new product export/ZIP round trip.
+- Deployment/invalidation: `s3://yioo-notes/notes`, CloudFront `EWYEJXEIKC81C`; `I6ESOXQQRH1C17HCWZZ4J658RT` Completed (2026-10-14T15:18:47.212Z). Private records: `_workspace/ssrcard-en-publish-2026-10-15/`; screenshots: `output/playwright/ssrcard-en-publish-2026-10-15/`.
+- Rollback: only if requested, revert this scoped publication commit, regenerate and review the full AWS dry run before redeploying. Preserve shared Korean assets and unrelated drafts. No deletion performed.
+
 ## 2026-10-14 — Track the already-live household-robots article
 
 - Operation: user approved resolving the missing Git tracking reported after the SSR release. Added the existing published `2026-09-04-household-robots-and-social-dividend.md` and its `automation-income-map.svg` / `.webp` to version control without changing source content, dates, disclosure or asset files.

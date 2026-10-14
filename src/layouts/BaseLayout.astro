@@ -2,8 +2,11 @@
 import siteConfig from "../config/site.config.json";
 import { serializeJsonForScript } from "../lib/content-security.mjs";
 import SiteFooter from "../components/SiteFooter.astro";
+import { navLabel, ogLocale, type Language, type LanguageAlternate } from "../lib/languages.mjs";
 
 type Props = {
+  lang?: Language;
+  alternates?: LanguageAlternate[];
   title?: string;
   description?: string;
   canonicalPath?: string;
@@ -17,6 +20,8 @@ type Props = {
 };
 
 const {
+  lang = "ko",
+  alternates = [],
   title = siteConfig.title,
   description = siteConfig.description,
   canonicalPath = siteConfig.notesPath,
@@ -41,7 +46,7 @@ const isCurrentNavItem = (href: string) =>
 ---
 
 <!doctype html>
-<html lang="ko">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -49,6 +54,9 @@ const isCurrentNavItem = (href: string) =>
     <meta name="description" content={description} />
     <link rel="icon" href="/notes/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href={canonicalUrl} />
+    {alternates.map((peer) => <link rel="alternate" hreflang={peer.lang} href={peer.canonicalUrl} />)}
+    <meta property="og:locale" content={ogLocale(lang)} />
+    {alternates.filter((peer) => peer.lang !== lang).map((peer) => <meta property="og:locale:alternate" content={ogLocale(peer.lang)} />)}
     <link rel="alternate" type="application/rss+xml" title="Yioo Notes RSS" href="/notes/rss.xml" />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={pageTitle} />
@@ -89,9 +97,9 @@ const isCurrentNavItem = (href: string) =>
     </script>
   </head>
   <body>
-    <a class="skip-link" href="#content">본문으로 건너뛰기</a>
+    <a class="skip-link" href="#content">{lang === "en" ? "Skip to content" : "본문으로 건너뛰기"}</a>
     <header class="site-header">
-      <nav class="site-nav" aria-label="주요 메뉴">
+      <nav class="site-nav" aria-label={lang === "en" ? "Main navigation" : "주요 메뉴"}>
         <a class="brand" href="/notes/">
           <span class="brand-mark" aria-hidden="true">Y</span>
           <span>{siteConfig.title}</span>
@@ -100,7 +108,7 @@ const isCurrentNavItem = (href: string) =>
           {
             siteConfig.nav.map((item) => (
               <a class={isCurrentNavItem(item.href) ? "is-active" : undefined} href={item.href} aria-current={isCurrentNavItem(item.href) ? "page" : undefined}>
-                {item.label}
+                {navLabel(item, lang)}
               </a>
             ))
           }
@@ -110,6 +118,6 @@ const isCurrentNavItem = (href: string) =>
     <main id="content" class="page-shell">
       <slot />
     </main>
-    <SiteFooter />
+    <SiteFooter lang={lang} />
   </body>
 </html>

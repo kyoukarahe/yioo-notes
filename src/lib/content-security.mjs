@@ -92,7 +92,7 @@ function comparisonCrop(title) {
   return { key: match.slice(1).map(Number).join(","), style: `aspect-ratio:${width}/${height};--compare-width:${sourceWidth / width * 100}%;--compare-left:${-left / width * 100}%;--compare-top:${-top / height * 100}%` };
 }
 
-export function renderMarkdownDocumentSafely(markdown) {
+export function renderMarkdownDocumentSafely(markdown, { lang = "ko" } = {}) {
   const renderer = new Renderer();
   const headings = [];
   const headingCounts = new Map();
@@ -103,14 +103,17 @@ export function renderMarkdownDocumentSafely(markdown) {
     const blocks = token.tokens.filter((item) => item.type !== "space");
     if (blocks[0]?.type === "paragraph" && ["[!image-compare]", "[!relief-compare]"].includes(blocks[0].text)) {
       const relief = blocks[0].text === "[!relief-compare]";
-      const states = relief ? [["normal", "일반"], ["emboss", "양각"], ["deboss", "음각"]] : [["before", "원본"], ["after", "적용"]];
+      const states = relief
+        ? [["normal", lang === "en" ? "No relief" : "일반"], ["emboss", lang === "en" ? "Emboss" : "양각"], ["deboss", lang === "en" ? "Deboss" : "음각"]]
+        : [["before", lang === "en" ? "Before" : "원본"], ["after", lang === "en" ? "After" : "적용"]];
       const images = states.map((_, index) => comparisonImage(blocks[index + 1]));
       const crop = comparisonCrop(images[0]?.image.title);
       if (!crop || images.some(item => !item || comparisonCrop(item.image.title)?.key !== crop.key) || (relief && comparisonImage(blocks[4]))) return Renderer.prototype.blockquote.call(this, token);
       const id = `image-compare-${++comparisonCount}`;
       const panel = (item, state) => `<div class="image-compare__panel image-compare__panel--${state}"><div class="image-compare__crop" style="${crop.style}"><a href="${escapeHtml(item.link.href)}">${this.image({ ...item.image, title: null })}</a></div></div>`;
       const controls = states.map(([state, label], index) => `<input class="image-compare__radio image-compare__radio--${state}" type="radio" name="${id}" id="${id}-${state}"${index === 0 ? " checked" : ""}><label class="image-compare__label" for="${id}-${state}">${label}</label>`).join("");
-      return `<fieldset class="image-compare${relief ? " image-compare--relief" : ""}"><legend>${relief ? "양각·음각 확대 비교" : "확대 이미지 비교"}</legend>${controls}<div class="image-compare__panels">${images.map((item, index) => panel(item, states[index][0])).join("")}</div><div class="image-compare__caption">${this.parser.parse(blocks.slice(states.length + 1))}</div></fieldset>\n`;
+      const legend = lang === "en" ? (relief ? "Emboss and deboss close-up" : "Close-up comparison") : (relief ? "양각·음각 확대 비교" : "확대 이미지 비교");
+      return `<fieldset class="image-compare${relief ? " image-compare--relief" : ""}"><legend>${legend}</legend>${controls}<div class="image-compare__panels">${images.map((item, index) => panel(item, states[index][0])).join("")}</div><div class="image-compare__caption">${this.parser.parse(blocks.slice(states.length + 1))}</div></fieldset>\n`;
     }
     const [marker, visual, ...copy] = blocks;
     const inline = visual?.tokens?.length === 1 ? visual.tokens[0] : null;

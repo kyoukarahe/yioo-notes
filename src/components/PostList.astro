@@ -21,7 +21,7 @@ const tagLinks = new Map(
             <time datetime={post.date}>{post.date}</time>
           </span>
           <span class="post-copy">
-            <a class="post-list-link" href={post.url}>
+            <a class="post-list-link" href={post.url} lang={post.lang}>
               <span class="post-title">{post.title}</span>
               <span class="post-summary">{post.summary}</span>
             </a>

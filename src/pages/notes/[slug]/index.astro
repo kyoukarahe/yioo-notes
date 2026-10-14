@@ -4,6 +4,7 @@ import ArticleToc from "../../../components/ArticleToc.astro";
 import RelatedPosts from "../../../components/RelatedPosts.astro";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "../../../lib/posts";
 import { getNavigableTagCollections, tagSlug } from "../../../lib/tags.mjs";
+import { categoryLabel, languageName } from "../../../lib/languages.mjs";
 
 export function getStaticPaths() {
   return getAllPosts().map((post) => ({
@@ -26,6 +27,7 @@ const tagLinks = new Map(
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
+  inLanguage: post.lang,
   headline: post.title,
   description: post.summary,
   url: post.canonicalUrl,
@@ -41,6 +43,8 @@ const structuredData = {
 ---
 
 <BaseLayout
+  lang={post.lang}
+  alternates={post.alternates}
   title={post.title}
   description={post.summary}
   canonicalPath={canonicalPath}
@@ -54,14 +58,19 @@ const structuredData = {
 >
   <article class="article">
     <header class="article-header">
-      <a class="back-link" href="/notes/">글 목록</a>
+      <a class="back-link" href="/notes/">{post.lang === "en" ? "All posts" : "글 목록"}</a>
+      {post.alternates.length > 0 && <nav class="article-languages" aria-label={post.lang === "en" ? "Article language" : "글 언어"}>
+        {post.alternates.map((peer) => peer.lang === post.lang
+          ? <span lang={peer.lang} aria-current="page">{languageName(peer.lang)}</span>
+          : <a href={peer.url} lang={peer.lang} hreflang={peer.lang} rel="alternate">{languageName(peer.lang)}</a>)}
+      </nav>}
       <h1>{post.title}</h1>
       <p>{post.summary}</p>
       <div class="article-meta">
         <time datetime={post.date}>{post.date}</time>
-        <a href={post.category.url}>{post.category.label}</a>
+        <a href={post.category.url}>{categoryLabel(post.category, post.lang)}</a>
         {post.tags.length > 0 && (
-          <span class="post-tags" aria-label={`${post.title}의 태그`}>
+          <span class="post-tags" aria-label={post.lang === "en" ? `Tags for ${post.title}` : `${post.title}의 태그`}>
             {post.tags.map((tag) => {
               const href = tagLinks.get(tagSlug(tag));
               return href ? <a class="post-tag" href={href}>{tag}</a> : <span class="post-tag">{tag}</span>;
@@ -71,8 +80,8 @@ const structuredData = {
       </div>
     </header>
     {post.cover && <img class="cover-image" src={post.cover} alt="" loading="eager" />}
-    <ArticleToc headings={post.headings} />
+    <ArticleToc headings={post.headings} lang={post.lang} />
     <div class="article-content" set:html={post.html} />
   </article>
-  <RelatedPosts posts={relatedPosts} />
+  <RelatedPosts posts={relatedPosts} lang={post.lang} />
 </BaseLayout>

@@ -3,6 +3,7 @@ import path from "node:path";
 import matter from "gray-matter";
 import { assertActiveCategory, type Category } from "./categories";
 import { renderMarkdownDocumentSafely, type MarkdownHeading } from "./content-security.mjs";
+import { postLanguage, translationSource, attachLanguageAlternates, type Language, type LanguageAlternate } from "./languages.mjs";
 
 export type PostFrontmatter = {
   title: string;
@@ -17,10 +18,14 @@ export type PostFrontmatter = {
   cover?: string;
   socialImage?: string;
   canonical?: string;
+  lang?: Language;
+  translationOf?: string;
 };
 
 export type Post = Omit<PostFrontmatter, "category"> & {
   status: "published" | "draft";
+  lang: Language;
+  alternates: LanguageAlternate[];
   category: Category;
   tags: string[];
   related: string[];
@@ -35,6 +40,8 @@ export type Post = Omit<PostFrontmatter, "category"> & {
 };
 
 export type PublicPostManifestItem = {
+  lang: Language;
+  translationOf?: string;
   slug: string;
   title: string;
   date: string;
@@ -122,7 +129,8 @@ function readPost(filePath: string): Post {
   const cover = typeof data.cover === "string" ? data.cover : undefined;
   const socialImage = typeof data.socialImage === "string" ? data.socialImage : undefined;
   const categoryId = assertString(data.category, "category", filePath);
-  const rendered = renderMarkdownDocumentSafely(parsed.content);
+  const lang = postLanguage(data.lang);
+  const rendered = renderMarkdownDocumentSafely(parsed.content, { lang });
 
   return {
     title: assertString(data.title, "title", filePath),
@@ -130,6 +138,9 @@ function readPost(filePath: string): Post {
     date: assertString(data.date, "date", filePath),
     updated: typeof data.updated === "string" ? data.updated : undefined,
     status,
+    lang,
+    translationOf: translationSource(data.translationOf),
+    alternates: [],
     category: assertActiveCategory(categoryId, filePath),
     tags: normalizeTags(data.tags),
     related: normalizeRelated(data.related, filePath),
@@ -165,7 +176,7 @@ export function getAllPosts(): Post[] {
       }
     }
   }
-  return posts;
+  return attachLanguageAlternates(posts);
 }
 
 export function getPostBySlug(slug: string): Post | undefined {
@@ -183,6 +194,8 @@ export function getRelatedPosts(post: Post): Post[] {
 
 export function getPublicPostManifest(): PublicPostManifestItem[] {
   return getAllPosts().map((post) => ({
+    lang: post.lang,
+    translationOf: post.translationOf,
     slug: post.slug,
     title: post.title,
     date: post.date,

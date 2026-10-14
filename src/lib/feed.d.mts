@@ -1,4 +1,5 @@
 export type RssPost = {
+  lang?: "ko" | "en";
   title: string;
   date: string;
   updated?: string;

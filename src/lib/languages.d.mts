@@ -1,0 +1,10 @@
+export type Language = "ko" | "en";
+export type LanguageAlternate = {lang: Language; url: string; canonicalUrl: string};
+export function postLanguage(value: unknown): Language;
+export function translationSource(value: unknown): string | undefined;
+export function attachLanguageAlternates<T extends {slug: string; lang: Language; translationOf?: string; url: string; canonicalUrl: string; alternates?: LanguageAlternate[]}>(posts: T[]): T[];
+export function languageName(lang: Language): string;
+export function ogLocale(lang: Language): string;
+export function categoryLabel(category: {id: string; label: string}, lang: Language): string;
+export function navLabel(item: {href: string; label: string}, lang: Language): string;
+export function footerLabel(item: {href: string; label: string}, lang: Language): string;

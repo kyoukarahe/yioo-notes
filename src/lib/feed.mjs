@@ -16,6 +16,7 @@ function rssDate(value) {
 }
 
 export function renderRssFeed(posts, site) {
+  const languages = new Set(posts.map(post => post.lang ?? "ko"));
   const feedUrl = new URL("/notes/rss.xml", site.baseUrl).toString();
   const notesUrl = new URL("/notes/", site.baseUrl).toString();
   const lastDate = posts
@@ -24,7 +25,7 @@ export function renderRssFeed(posts, site) {
 
   const items = posts
     .map(
-      (post) => `    <item>
+      (post) => `    <item xml:lang="${xmlEscape(post.lang ?? "ko")}">
       <title>${xmlEscape(post.title)}</title>
       <link>${xmlEscape(post.canonicalUrl)}</link>
       <guid isPermaLink="true">${xmlEscape(post.canonicalUrl)}</guid>
@@ -41,7 +42,7 @@ ${post.tags.map((tag) => `      <category>${xmlEscape(tag)}</category>`).join("\
     <title>${xmlEscape(site.title)}</title>
     <link>${xmlEscape(notesUrl)}</link>
     <description>${xmlEscape(site.description)}</description>
-    <language>ko</language>
+${languages.size === 1 ? `    <language>${xmlEscape([...languages][0])}</language>\n` : ""}
     <atom:link href="${xmlEscape(feedUrl)}" rel="self" type="application/rss+xml"/>
 ${lastDate ? `    <lastBuildDate>${rssDate(lastDate)}</lastBuildDate>\n` : ""}${items}
   </channel>

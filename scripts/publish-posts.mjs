@@ -8,6 +8,7 @@ import { renderMarkdownDocumentSafely, serializeJsonForScript } from "../src/lib
 import { getNavigableTagCollections, tagSlug } from "../src/lib/tags.mjs";
 import { renderRssFeed } from "../src/lib/feed.mjs";
 import { syncStyles } from "./sync-styles.mjs";
+import { postLanguage, translationSource, attachLanguageAlternates, languageName, ogLocale, categoryLabel, navLabel, footerLabel } from "../src/lib/languages.mjs";
 
 const root = process.cwd();
 const siteConfig = JSON.parse(fs.readFileSync(path.join(root, "src", "config", "site.config.json"), "utf8"));
@@ -241,10 +242,14 @@ function readPost(filePath) {
   const socialImage = typeof data.socialImage === "string" ? data.socialImage : undefined;
   const updated = typeof data.updated === "string" ? data.updated : undefined;
   const categoryId = assertString(data.category, "category", filePath);
-  const rendered = renderMarkdownDocumentSafely(parsed.content);
+  const lang = postLanguage(data.lang);
+  const rendered = renderMarkdownDocumentSafely(parsed.content, { lang });
 
   return {
     body: parsed.content,
+    lang,
+    translationOf: translationSource(data.translationOf),
+    alternates: [],
     canonical: canonicalPath,
     canonicalUrl: absoluteUrl(canonicalPath),
     category: assertActiveCategory(categoryId, filePath),
@@ -286,7 +291,7 @@ function getAllPosts() {
       }
     }
   }
-  return posts;
+  return attachLanguageAlternates(posts);
 }
 
 function categoriesWithPosts(posts) {
@@ -306,18 +311,18 @@ function isCurrentNavItem(href, currentPath) {
   return href === "/" ? currentPath === href : currentPath === href || currentPath.startsWith(href);
 }
 
-function renderNav(currentPath) {
+function renderNav(currentPath, lang = "ko") {
   const links = siteConfig.nav
     .map((item) => {
       const active = isCurrentNavItem(item.href, currentPath);
       const classAttr = active ? ' class="is-active"' : "";
       const currentAttr = active ? ' aria-current="page"' : "";
-      return `<a${classAttr} href="${escapeHtml(item.href)}"${currentAttr}> ${escapeHtml(item.label)} </a>`;
+      return `<a${classAttr} href="${escapeHtml(item.href)}"${currentAttr}> ${escapeHtml(navLabel(item, lang))} </a>`;
     })
     .join("");
 
   return `<header class="site-header">
-  <nav class="site-nav" aria-label="주요 메뉴">
+  <nav class="site-nav" aria-label="${lang === "en" ? "Main navigation" : "주요 메뉴"}">
     <a class="brand" href="/notes/">
       <span class="brand-mark" aria-hidden="true">Y</span>
       <span>${escapeHtml(siteConfig.title)}</span>
@@ -327,23 +332,25 @@ function renderNav(currentPath) {
 </header>`;
 }
 
-function renderFooter() {
+function renderFooter(lang = "ko") {
   const links = siteConfig.footer.links
     .map((item, index) => {
       const separator = index > 0 ? '<span class="footer-separator" aria-hidden="true">|</span>' : "";
-      return `${separator}<a class="footer-link" href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`;
+      return `${separator}<a class="footer-link" href="${escapeHtml(item.href)}">${escapeHtml(footerLabel(item, lang))}</a>`;
     })
     .join("");
 
   return `<footer class="site-footer" data-yioo-global-footer-fallback>
   <div class="site-footer-inner">
-    <nav class="footer-nav" aria-label="하단 메뉴">${links}</nav>
+    <nav class="footer-nav" aria-label="${lang === "en" ? "Footer navigation" : "하단 메뉴"}">${links}</nav>
     <p class="footer-copyright">${escapeHtml(siteConfig.footer.copyright)}</p>
   </div>
 </footer>`;
 }
 
 function renderLayout({
+  lang = "ko",
+  alternates = [],
   body,
   canonicalPath = siteConfig.notesPath,
   currentPath = siteConfig.notesPath,
@@ -370,7 +377,7 @@ function renderLayout({
       : "";
 
   return `<!doctype html>
-<html lang="ko">
+<html lang="${escapeHtml(lang)}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -378,6 +385,9 @@ function renderLayout({
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="icon" href="/notes/favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
+  ${alternates.map(peer => `<link rel="alternate" hreflang="${escapeHtml(peer.lang)}" href="${escapeHtml(peer.canonicalUrl)}">`).join("\n  ")}
+  <meta property="og:locale" content="${ogLocale(lang)}">
+  ${alternates.filter(peer => peer.lang !== lang).map(peer => `<meta property="og:locale:alternate" content="${ogLocale(peer.lang)}">`).join("\n  ")}
   <link rel="alternate" type="application/rss+xml" title="Yioo Notes RSS" href="/notes/rss.xml">
   <meta property="og:type" content="${escapeHtml(ogType)}">
   <meta property="og:title" content="${escapeHtml(pageTitle)}">
@@ -416,12 +426,12 @@ function renderLayout({
   </script>
 </head>
 <body>
-  <a class="skip-link" href="#content">본문으로 건너뛰기</a>
-  ${renderNav(currentPath)}
+  <a class="skip-link" href="#content">${lang === "en" ? "Skip to content" : "본문으로 건너뛰기"}</a>
+  ${renderNav(currentPath, lang)}
   <main id="content" class="page-shell">
     ${body}
   </main>
-  ${renderFooter()}
+  ${renderFooter(lang)}
 </body>
 </html>
 `;
@@ -442,7 +452,7 @@ ${posts
     (post) => `  <li class="post-list-item">
     <span class="post-date"><time datetime="${escapeHtml(post.date)}">${escapeHtml(post.date)}</time></span>
     <span class="post-copy">
-      <a class="post-list-link" href="${escapeHtml(post.url)}">
+      <a class="post-list-link" href="${escapeHtml(post.url)}" lang="${escapeHtml(post.lang)}">
         <span class="post-title">${escapeHtml(post.title)}</span>
         <span class="post-summary">${escapeHtml(post.summary)}</span>
       </a>
@@ -662,15 +672,15 @@ ${renderPostList(item.posts, allPosts)}`;
   });
 }
 
-function renderArticleToc(headings) {
+function renderArticleToc(headings, lang = "ko") {
   const items = headings.filter((heading) => heading.depth === 2);
   if (items.length < 3) {
     return "";
   }
 
   return `<details class="article-toc" open>
-  <summary>이 글의 목차</summary>
-  <nav aria-label="글 목차">
+  <summary>${lang === "en" ? "On this page" : "이 글의 목차"}</summary>
+  <nav aria-label="${lang === "en" ? "Table of contents" : "글 목차"}">
     <ol>
       ${items.map((heading) => `<li><a href="#${escapeHtml(heading.id)}">${escapeHtml(heading.text)}</a></li>`).join("\n      ")}
     </ol>
@@ -686,8 +696,8 @@ function renderRelatedPosts(post, allPosts) {
   }
 
   return `<aside class="related-posts" aria-labelledby="related-posts-title">
-  <p class="eyebrow">이어 읽기</p>
-  <h2 id="related-posts-title">같이 읽을 글</h2>
+  <p class="eyebrow">${post.lang === "en" ? "Keep reading" : "이어 읽기"}</p>
+  <h2 id="related-posts-title">${post.lang === "en" ? "Related posts" : "같이 읽을 글"}</h2>
   <ul>
     ${relatedPosts.map((related) => `<li><a href="${escapeHtml(related.url)}">${escapeHtml(related.title)}</a></li>`).join("\n    ")}
   </ul>
@@ -702,6 +712,7 @@ function renderPost(post) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
+    inLanguage: post.lang,
     author: {
       "@type": "Person",
       name: siteConfig.author,
@@ -716,15 +727,18 @@ function renderPost(post) {
   };
   const body = `<article class="article">
   <header class="article-header">
-    <a class="back-link" href="/notes/">글 목록</a>
+    <a class="back-link" href="/notes/">${post.lang === "en" ? "All posts" : "글 목록"}</a>
+    ${post.alternates.length ? `<nav class="article-languages" aria-label="${post.lang === "en" ? "Article language" : "글 언어"}">${post.alternates.map(peer => peer.lang === post.lang
+      ? `<span lang="${escapeHtml(peer.lang)}" aria-current="page">${languageName(peer.lang)}</span>`
+      : `<a href="${escapeHtml(peer.url)}" lang="${escapeHtml(peer.lang)}" hreflang="${escapeHtml(peer.lang)}" rel="alternate">${languageName(peer.lang)}</a>`).join("")}</nav>` : ""}
     <h1>${escapeHtml(post.title)}</h1>
     <p>${escapeHtml(post.summary)}</p>
     <div class="article-meta">
       <time datetime="${escapeHtml(post.date)}">${escapeHtml(post.date)}</time>
-      <a href="${escapeHtml(post.category.url)}">${escapeHtml(post.category.label)}</a>
+      <a href="${escapeHtml(post.category.url)}">${escapeHtml(categoryLabel(post.category, post.lang))}</a>
       ${
         post.tags.length > 0
-          ? `<span class="post-tags" aria-label="${escapeHtml(post.title)}의 태그">${post.tags
+          ? `<span class="post-tags" aria-label="${escapeHtml(post.lang === "en" ? `Tags for ${post.title}` : `${post.title}의 태그`)}">${post.tags
               .map((tag) => {
                 const href = tagLinks.get(tagSlug(tag));
                 return href
@@ -737,7 +751,7 @@ function renderPost(post) {
     </div>
   </header>
   ${post.cover ? `<img class="cover-image" src="${escapeHtml(post.cover)}" alt="" loading="eager">` : ""}
-  ${renderArticleToc(post.headings)}
+  ${renderArticleToc(post.headings, post.lang)}
   <div class="article-content">${post.html}</div>
 </article>
 ${renderRelatedPosts(post, allPosts)}`;
@@ -745,6 +759,8 @@ ${renderRelatedPosts(post, allPosts)}`;
   return renderLayout({
     body,
     canonicalPath: post.canonical ?? post.url,
+    lang: post.lang,
+    alternates: post.alternates,
     currentPath: post.url,
     description: post.summary,
     imagePath: post.socialImage,
@@ -763,6 +779,8 @@ function renderManifest(posts) {
     {
       generatedAt: new Date().toISOString(),
       posts: posts.map((post) => ({
+        lang: post.lang,
+        translationOf: post.translationOf,
         canonicalUrl: post.canonicalUrl,
         category: {
           canonicalUrl: post.category.canonicalUrl,

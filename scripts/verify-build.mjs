@@ -150,13 +150,15 @@ for (const htmlPath of walk(path.join(dist, "notes")).filter((filePath) => fileP
     fail(`${label} must contain exactly one global footer, found ${footerCount}`);
     continue;
   }
-  if (!html.includes('<nav class="footer-nav" aria-label="하단 메뉴">')) {
+  const english = html.includes('<html lang="en">');
+  if (!html.includes(`<nav class="footer-nav" aria-label="${english ? "Footer navigation" : "하단 메뉴"}">`)) {
     fail(`${label} global footer navigation is missing`);
   }
   if ([...html.matchAll(/<span class="footer-separator" aria-hidden="true">\|<\/span>/g)].length !== 5) {
     fail(`${label} global footer separators are missing or incorrect`);
   }
-  for (const [href, text] of expectedFooterLinks) {
+  const footerLinks = english ? [["/", "Yioo Home"], ["/tools/", "Tools"], ["/notes/", "Notes"], ["/terms.html", "Terms"], ["/privacy_policy.html", "Privacy Policy"], ["/contact.html", "Contact"]] : expectedFooterLinks;
+  for (const [href, text] of footerLinks) {
     const link = `<a class="footer-link" href="${href}">${text}</a>`;
     if (!html.includes(link)) {
       fail(`${label} global footer link is missing: ${href}`);
@@ -380,6 +382,17 @@ if (fs.existsSync(manifestPath)) {
       continue;
     }
     const html = fs.readFileSync(htmlPath, "utf8");
+    const lang = item.lang ?? "ko";
+    if (!html.includes(`<html lang="${lang}">`)) fail(`${item.slug} has incorrect page language`);
+    const source = item.translationOf ? manifest.posts.find(peer => peer.slug === item.translationOf) : item;
+    const translations = manifest.posts.filter(peer => peer.translationOf === source?.slug);
+    if (item.translationOf && !source) fail(`${item.slug} translation source is missing`);
+    if (translations.length) {
+      for (const peer of [source, ...translations]) {
+        if (!html.includes(`hreflang="${peer.lang ?? "ko"}" href="${peer.canonicalUrl}"`)) fail(`${item.slug} missing reciprocal alternate ${peer.slug}`);
+      }
+      if (!html.includes('class="article-languages"')) fail(`${item.slug} missing visible language links`);
+    }
     const expectedImageUrl = item.socialImage
       ? new URL(item.socialImage, "https://yioo.link").toString()
       : fallbackSocialImageUrl;
@@ -440,7 +453,6 @@ if (fs.existsSync(rssPath) && fs.existsSync(manifestPath)) {
   const requiredFragments = [
     '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
     '<atom:link href="https://yioo.link/notes/rss.xml" rel="self" type="application/rss+xml"/>',
-    "<language>ko</language>",
     `<description>${koreanSiteDescription}</description>`,
   ];
   for (const fragment of requiredFragments) {
@@ -448,7 +460,11 @@ if (fs.existsSync(rssPath) && fs.existsSync(manifestPath)) {
       fail(`RSS required fragment is missing: ${fragment}`);
     }
   }
-  const itemCount = [...rss.matchAll(/<item>/g)].length;
+  const languages = new Set(manifest.posts.map(post => post.lang ?? "ko"));
+  if (languages.size === 1 && !rss.includes(`<language>${[...languages][0]}</language>`)) fail("RSS channel language is incorrect");
+  if (languages.size > 1 && rss.includes("<language>")) fail("Mixed-language RSS must not declare one channel language");
+  const items = [...rss.matchAll(/<item\b[^>]*>[\s\S]*?<\/item>/g)].map(match => match[0]);
+  const itemCount = items.length;
   if (itemCount !== (manifest.posts?.length ?? 0)) {
     fail(`RSS item count ${itemCount} does not match manifest count ${manifest.posts?.length ?? 0}`);
   }
@@ -461,6 +477,8 @@ if (fs.existsSync(rssPath) && fs.existsSync(manifestPath)) {
       fail(`RSS post order differs from the manifest at: ${post.slug}`);
     }
     previousIndex = itemIndex;
+    const itemXml = items.find(item => item.includes(`<guid isPermaLink="true">${post.canonicalUrl}</guid>`));
+    if (!itemXml?.startsWith(`<item xml:lang="${post.lang ?? "ko"}">`)) fail(`RSS item language is incorrect: ${post.slug}`);
   }
   if (/(content\/drafts|content\/private|\/notes\/drafts\/|\/notes\/private\/)/i.test(rss)) {
     fail("RSS contains a draft/private path");

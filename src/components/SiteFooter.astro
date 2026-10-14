@@ -1,15 +1,18 @@
 ---
 import siteConfig from "../config/site.config.json";
+import { footerLabel, type Language } from "../lib/languages.mjs";
+type Props = {lang?: Language};
+const {lang = "ko"} = Astro.props;
 ---
 
 <footer class="site-footer" data-yioo-global-footer-fallback>
   <div class="site-footer-inner">
-    <nav class="footer-nav" aria-label="하단 메뉴">
+    <nav class="footer-nav" aria-label={lang === "en" ? "Footer navigation" : "하단 메뉴"}>
       {
         siteConfig.footer.links.map((item, index) => (
           <>
             {index > 0 && <span class="footer-separator" aria-hidden="true">|</span>}
-            <a class="footer-link" href={item.href}>{item.label}</a>
+            <a class="footer-link" href={item.href}>{footerLabel(item, lang)}</a>
           </>
         ))
       }

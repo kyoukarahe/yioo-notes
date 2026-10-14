@@ -875,6 +875,8 @@ a.post-tag:focus-visible {
   pointer-events: none;
 }
 
+.article-languages { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin: 0.75rem 0; font-size: 0.9rem; }
+.article-languages [aria-current="page"] { font-weight: 700; }
 .article-content .guide-step__copy { min-width: 0; }
 .article-content .guide-step__copy > :first-child { margin-top: 0; }
 .article-content .guide-step__copy > :last-child { margin-bottom: 0; }
