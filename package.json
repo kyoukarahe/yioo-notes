@@ -12,6 +12,11 @@
     "publish:posts": "node scripts/publish-posts.mjs",
     "preview": "astro preview --host 127.0.0.1",
     "test:security": "node scripts/test-security.mjs",
+    "test:security:portable": "node scripts/test-security.mjs --portable",
+    "ci:source": "node scripts/ci/source.mjs",
+    "ci:verify": "node scripts/ci/verify.mjs",
+    "ci:browser": "node scripts/ci/browser.mjs",
+    "ci:artifacts": "node scripts/ci/artifacts.mjs",
     "test:guide-steps": "node scripts/test-guide-steps.mjs",
     "test:image-compare": "node scripts/test-image-compare.mjs",
     "test:languages": "node scripts/test-languages.mjs",
@@ -25,6 +30,7 @@
     "typescript": "^5.9.2"
   },
   "devDependencies": {
-    "@types/node": "^24.0.10"
+    "@types/node": "^24.0.10",
+    "playwright": "1.65.1"
   }
 }
