@@ -31,6 +31,7 @@ jobs:
           node-version: '24.22.1'
           package-manager-cache: false
       - run: npm ci --no-audit --no-fund
+      - run: npm run test:ci-source
       - run: npm run ci:source
       - name: Build and verify the isolated renderer
         run: docker compose -p notes-ci -f compose.preview.yml build

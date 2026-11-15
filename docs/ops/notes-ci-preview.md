@@ -15,8 +15,10 @@ Each Linux matrix job uses a separate checkout and Docker build. A portable
 security test may render temporary output, but each job then generates and
 verifies its own final release. No final output is shared between renderers.
 
-1. `npm ci` and `ci:source`: require tracked public input, explicit published
-   status, unique safe slugs and a clean hosted checkout; record input hashes.
+1. `npm ci`, `test:ci-source` and `ci:source`: require every build/release input
+   to be tracked, explicit published status, unique safe slugs and a clean
+   checkout both locally and on hosted CI; record input hashes. Real-entry-point
+   regressions reject an untracked local helper and a dirty tracked source.
 2. Docker `verify` stage: check input hashes and private-context exclusion,
    Astro diagnostics, portable content/publisher security, guide steps,
    image/relief comparison, languages, actual selected renderer, existing
@@ -89,7 +91,8 @@ npm.cmd run test:security   # Windows only; overwrites local generated output
 Preserve the Astro report/output before running the manual path in a separate
 checkout. Run `ci:source`, then `ci:verify -- --renderer manual` and `ci:browser`.
 On Linux use `playwright install --with-deps chromium` and the portable security
-command. Local changed-input runs are marked dirty; hosted runs reject them.
+command. Changed or untracked build-input runs are rejected locally as well;
+use a clean worktree rather than copying unrelated local scripts into Docker.
 
 For Docker, run `ci:source` before the README Compose command. The image build
 checks those input hashes. `NOTES_RENDERER=manual` selects the other renderer.

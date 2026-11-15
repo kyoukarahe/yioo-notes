@@ -8,8 +8,8 @@ import { walk, fileHash, json } from './lib.mjs';
 const inputs = ['package.json', 'package-lock.json', 'astro.config.mjs', 'tsconfig.json',
   ...['src', 'scripts', 'content/posts', 'public/notes'].flatMap(dir => walk(dir).map(file => `${dir}/${file}`))];
 const tracked = new Set(execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).split('\0'));
-for (const file of inputs.filter(file => file.startsWith('content/') || file.startsWith('public/'))) {
-  assert.ok(tracked.has(file), `Untracked public release input: ${file}`);
+for (const file of inputs) {
+  assert.ok(tracked.has(file), `Untracked release/build input: ${file}`);
 }
 const posts = [];
 for (const file of inputs.filter(file => file.startsWith('content/posts/') && file.endsWith('.md'))) {
@@ -22,6 +22,6 @@ for (const file of inputs.filter(file => file.startsWith('content/posts/') && fi
 assert.ok(posts.length > 0);
 const commit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const dirty = execFileSync('git', ['status', '--porcelain', '--untracked-files=all'], { encoding: 'utf8' }).trim().length > 0;
-if (process.env.CI) assert.equal(dirty, false, 'Hosted CI must start with a clean checkout');
+assert.equal(dirty, false, 'Release/preview must start with a clean checkout, including locally');
 json('output/ci/source.json', { commit, dirty, posts: posts.sort(), files: Object.fromEntries(inputs.map(file => [file, fileHash(file)])) });
 console.log(`Source boundary passed: ${posts.length} published posts, ${inputs.length} input files, ${commit}, dirty=${dirty}`);

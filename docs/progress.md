@@ -1,5 +1,10 @@
 # Yioo Notes Progress
 
+## 2026-11-16 — Local CI input boundary follow-up
+
+- Final review found the local-only source gate allowed dirty tracked code and did not require scripts/src inputs to be tracked. Hosted CI was already clean-gated, and no production content was affected. Tightened the same entry point for local use, excluded unrelated script subdirectories from Docker context, and added a real Git-fixture regression for the observed untracked-helper/dirty-source cases.
+- This is a CI-only follow-up to PR #1. The previously deployed release is commit `fca22ac302f7d87cb900080912a6cbeb3fc8523e`, invalidation `I30SZG3VNH9AIQRGQ9K50J7Y94` Completed, zero deletes. Final runtime/readback and follow-up checks are recorded in the PR ledger.
+
 ## 2026-11-16 — Hosted CI and Docker preview implementation
 
 - User approved implementation, PR verification, main merge and this manual production deployment. Existing editorial work remains in the original dirty worktree; this scoped branch starts at `3e189290cc92cdbadbd383fe7398ed0c304d10aa`.
