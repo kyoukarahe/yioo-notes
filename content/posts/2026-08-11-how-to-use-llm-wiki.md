@@ -3,7 +3,7 @@ title: "LLM Wiki를 잘 쓰는 사람은 무엇을 저장하지 않을지 먼저
 slug: "2026-08-11-how-to-use-llm-wiki"
 date: "2026-08-11"
 updated: "2026-08-14"
-status: draft
+status: published
 category: implementation
 tags:
   - llm-wiki

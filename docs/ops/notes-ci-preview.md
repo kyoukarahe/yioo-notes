@@ -108,6 +108,9 @@ desktop/mobile navigation, canonical/hreflang, RSS/sitemap and HTTP hashes.
 Deployment remains the existing guarded full-release workflow: verify exact
 merged source, review AWS dry-run and all deletion targets, then manually
 upload with explicit confirmation. Do not deploy CI artifacts automatically.
+On the current operator host, select `AWS_PROFILE=codex-yioo-notes` only for
+the deployment process. The default profile returned InvalidClientTokenId;
+do not repair/replace global or another owner's credentials as a workaround.
 If live-only assets would be deleted, pause only that deployment decision and
 report the exact paths; do not infer approval to delete them from merge approval.
 
@@ -124,6 +127,25 @@ Rollback changes only the new workflow/preview code through a reviewed revert;
 existing manual publishing remains available. Required-check/branch-protection
 policy is a separate decision. Production rollback requires the recorded
 previous release/S3 version identities, never a broad workspace reset.
+
+## Initial hosted acceptance evidence (2026-11-16)
+
+- [PASS run 43740569428](https://github.com/kyoukarahe/yioo-notes/actions/runs/43740569428):
+  head `06bebff54b1f260b841cd5438986d796d2085749`, tested PR merge ref
+  `7c1d26899b58d63550eb8f2402c87ccb2fe8d811`; all three jobs passed.
+  Both Docker outputs have 263 files / 20 posts. Verification stage measured
+  12 seconds Astro and 6.5 seconds manual. Context transfer was 110.29 MB;
+  report uploads approximately 2.23 MB per renderer. Post-browser container
+  memory snapshots were 34.2/33.58 MiB of 256 MiB, not peak memory.
+- [Intentional FAIL run 43740794102](https://github.com/kyoukarahe/yioo-notes/actions/runs/43740794102):
+  head `4f37f7d7687cee35b6e6d5bacdc8bb8f46b1daa7`; a real source's temporary
+  `status: draft` was rejected by both source-boundary checks and the existing
+  Windows publication regression. Nothing was deployed; status restored before
+  merge. Recovery/main/deployment records are in [PR #1](https://github.com/kyoukarahe/yioo-notes/pull/1).
+- Scoped AWS dry-run passed with zero deletions; current S3 version inventory
+  retained in the operator's ignored output folder. Production upload awaits
+  recovered CI and merge. GitHub workflow publication succeeded using the
+  existing responsible credential, without replacing any profile/token.
 
 Reference: [GitHub Actions security](https://docs.github.com/en/actions/reference/security/secure-use),
 [Playwright CI](https://playwright.dev/docs/ci),

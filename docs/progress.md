@@ -7,6 +7,7 @@
 - Local Astro diagnostics, portable security, guide/comparison/language regressions, build and output verification passed (20 posts, 263 files). Browser verification passed at 1440/390px after correcting two test-fixture assumptions: guide related links belong to the LLM Wiki essay, and relief comparisons belong to print materials rather than surface finishes. Product/content sources remain unchanged.
 - Reports are limited to public manifests/screenshots, 20 MiB per renderer and seven-day retention. Full assets are approximately 104 MiB and are not duplicated as uploaded CI artifacts. Docker context excludes drafts/private/workspaces/auth data.
 - Hosted CI, Docker runtime, merge and deployment results will be recorded in the owning PR ledger and acceptance record after actual execution. Local Docker installation and branch-protection changes remain outside this change.
+- Hosted run `43740569428` passed all three jobs; artifact source is the PR merge ref `7c1d26899b58d63550eb8f2402c87ccb2fe8d811`, head `06bebff`. Intentional non-published input run `43740794102` failed as required on head `4f37f7d`; status restored before merge. Notes-scoped AWS dry-run passed with zero deletes after selecting the existing responsible AWS profile. No default/global credential repair was made.
 
 ## 2026-10-15 — Publish six English SSR Card Maker guides
 

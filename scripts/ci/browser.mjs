@@ -32,6 +32,13 @@ try {
     page.on('response', response => { if (response.url().startsWith(`${base}/notes/`) && response.status() >= 400) errors.push(`${response.status()} ${response.url()}`); });
     async function layout(label) {
       await page.evaluate(() => document.fonts.ready);
+      if (report.footer === 'shared-runtime') {
+        const footer = page.locator('footer[data-yioo-global-footer="central"]');
+        await footer.waitFor({ state: 'visible' });
+        assert.equal(await footer.locator('a').count(), 6);
+        assert.equal(await page.locator('[data-yioo-global-footer-fallback]').count(), 0);
+        assert.ok(await page.locator('link[data-yioo-global-footer-style]').evaluate(link => Boolean(link.sheet)));
+      }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `${label}: horizontal overflow at ${width}`);
       const clipped = await page.locator('h1, .article-content p, .article-content h2, .back-link, .article-languages').evaluateAll(elements => elements.filter(el => {
         const r = el.getBoundingClientRect(); return r.width > 0 && (r.left < -1 || r.right > innerWidth + 1);

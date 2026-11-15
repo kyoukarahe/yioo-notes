@@ -40,7 +40,8 @@ jobs:
           mkdir -p dist output/ci
           docker cp notes-preview:/app/dist/notes dist/notes
           docker cp notes-preview:/app/release.json output/ci/release.json
-          docker inspect notes-preview --format '{"image":"{{.Image}}","memoryLimit":{{.HostConfig.Memory}},"cpuNano":{{.HostConfig.NanoCpus}},"readOnly":{{.HostConfig.ReadonlyRootfs}},"user":"{{.Config.User}}"}' > output/ci/docker.json
+          IMAGE_BYTES=$(docker image inspect notes-preview --format '{{.Size}}')
+          docker inspect notes-preview --format "{\"image\":\"{{.Image}}\",\"imageBytes\":$IMAGE_BYTES,\"memoryLimit\":{{.HostConfig.Memory}},\"cpuNano\":{{.HostConfig.NanoCpus}},\"readOnly\":{{.HostConfig.ReadonlyRootfs}},\"user\":\"{{.Config.User}}\"}" > output/ci/docker.json
       - run: npx --no-install playwright install --with-deps chromium
       - run: npm run verify:build
       - name: Actual HTTP and desktop/mobile browser verification
