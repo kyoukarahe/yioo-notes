@@ -14,6 +14,8 @@ import { renderRssFeed } from "../src/lib/feed.mjs";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const publishScript = path.join(root, "scripts", "publish-posts.mjs");
 const deployScript = path.join(root, "scripts", "deploy.ps1");
+const portable = process.argv.includes("--portable");
+assert.ok(portable || process.platform === "win32", "Full deployment regression requires Windows; use test:security:portable on Linux and retain the Windows CI job.");
 
 function spawn(command, args, env = process.env) {
   return childProcess.spawnSync(command, args, {
@@ -111,6 +113,7 @@ const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "yioo-notes-security-"));
 try {
   const callLog = path.join(tempRoot, "calls.log");
   fs.writeFileSync(path.join(tempRoot, "aws.cmd"), '@echo off\r\necho aws %*>>"%YIOO_TEST_CALL_LOG%"\r\nexit /b 91\r\n');
+  fs.writeFileSync(path.join(tempRoot, "aws"), '#!/bin/sh\nprintf "aws %s\\n" "$*" >> "$YIOO_TEST_CALL_LOG"\nexit 91\n', { mode: 0o755 });
   fs.writeFileSync(
     path.join(tempRoot, "npm.cmd"),
     '@echo off\r\necho npm %*>>"%YIOO_TEST_CALL_LOG%"\r\nif /I "%1"=="run" if /I "%2"=="build" exit /b %YIOO_TEST_BUILD_EXIT%\r\nif /I "%1"=="run" if /I "%2"=="verify:build" exit /b %YIOO_TEST_VERIFY_EXIT%\r\nexit /b 0\r\n',
@@ -143,6 +146,7 @@ try {
   assert.match(output(unapprovedTarget), /requires --allow-target-override/);
   assertNoAws(callLog, "unapproved publisher target");
 
+  if (!portable) {
   const powershell = path.join(process.env.SystemRoot ?? "C:\\Windows", "System32", "WindowsPowerShell", "v1.0", "powershell.exe");
   const unconfirmedDeploy = spawn(powershell, ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", deployScript], shimEnv);
   assert.notEqual(unconfirmedDeploy.status, 0, "unconfirmed deploy must fail before build or AWS");
@@ -169,8 +173,9 @@ try {
   assert.notEqual(verifyFailure.status, 0, "deploy must verify and stop even when -SkipBuild is used");
   assert.match(output(verifyFailure), /npm\.cmd exited with code 9/);
   assertNoAws(callLog, "failed verification");
+  }
 } finally {
   fs.rmSync(tempRoot, { recursive: true, force: true });
 }
 
-console.log("Security regression tests passed.");
+console.log(portable ? "Portable content/publisher security tests passed; Windows deployment checks are a separate job." : "Security regression tests passed (including Windows deployment guards).");

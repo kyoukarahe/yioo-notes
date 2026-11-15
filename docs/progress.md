@@ -1,5 +1,13 @@
 # Yioo Notes Progress
 
+## 2026-11-16 — Hosted CI and Docker preview implementation
+
+- User approved implementation, PR verification, main merge and this manual production deployment. Existing editorial work remains in the original dirty worktree; this scoped branch starts at `3e189290cc92cdbadbd383fe7398ed0c304d10aa`.
+- Added isolated Linux Astro/manual Docker jobs, real HTTP file-hash and Chromium desktop/mobile checks, and a separate Windows deployment-guard job. Actions, Node base digest and Playwright are pinned. No production secrets or automatic deployment are configured.
+- Local Astro diagnostics, portable security, guide/comparison/language regressions, build and output verification passed (20 posts, 263 files). Browser verification passed at 1440/390px after correcting two test-fixture assumptions: guide related links belong to the LLM Wiki essay, and relief comparisons belong to print materials rather than surface finishes. Product/content sources remain unchanged.
+- Reports are limited to public manifests/screenshots, 20 MiB per renderer and seven-day retention. Full assets are approximately 104 MiB and are not duplicated as uploaded CI artifacts. Docker context excludes drafts/private/workspaces/auth data.
+- Hosted CI, Docker runtime, merge and deployment results will be recorded in the owning PR ledger and acceptance record after actual execution. Local Docker installation and branch-protection changes remain outside this change.
+
 ## 2026-10-15 — Publish six English SSR Card Maker guides
 
 - Operation: published the six approved English translations and seven English UI screenshots. Existing comparison images are shared with the Korean guides; all 14 previous post sources and the six approved English bodies are unchanged. Total public posts: 20.

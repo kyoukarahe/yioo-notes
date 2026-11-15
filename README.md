@@ -2,6 +2,28 @@
 
 Static notes/blog source for `https://yioo.link/notes/`.
 
+## CI and isolated preview
+
+PRs and main run **Notes CI** on GitHub-hosted Linux (separate Astro/manual
+Docker releases and desktop/mobile browser checks) and Windows (deployment
+safety regression). CI has no production credentials and never deploys.
+
+```powershell
+npm.cmd ci
+npm.cmd run ci:source
+docker compose -f compose.preview.yml up --build -d
+# Open http://127.0.0.1:8798/notes/
+docker compose -f compose.preview.yml down
+```
+
+Use a clean checkout. `NOTES_RENDERER=manual` selects the content publisher;
+the default is Astro. Preview serves the exact verified files from the image,
+without rerendering. Docker is required only for this preview command, not the
+existing local workflow below. No local self-hosted runner is required.
+
+See [CI operations](docs/ops/notes-ci-preview.md) for checks, report limits,
+authentication, source boundaries and non-Docker verification commands.
+
 ## Local Workflow
 
 ```powershell

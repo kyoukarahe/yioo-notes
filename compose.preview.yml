@@ -1,0 +1,18 @@
+services:
+  notes-preview:
+    image: yioo-notes-preview:${NOTES_RENDERER:-astro}
+    build:
+      context: .
+      target: preview
+      args:
+        RENDERER: ${NOTES_RENDERER:-astro}
+    ports:
+      - "127.0.0.1:8798:8798"
+    read_only: true
+    user: "1000:1000"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: 1
+    mem_limit: 256m
+    pids_limit: 64
+    init: true
