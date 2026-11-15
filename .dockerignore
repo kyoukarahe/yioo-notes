@@ -8,7 +8,10 @@
 !src/
 !src/**
 !scripts/
-!scripts/**
+!scripts/*.mjs
+!scripts/deploy.ps1
+!scripts/ci/
+!scripts/ci/**
 !content/
 !content/posts/
 !content/posts/**
