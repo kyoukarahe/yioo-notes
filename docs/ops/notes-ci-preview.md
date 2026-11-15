@@ -24,6 +24,9 @@ verifies its own final release. No final output is shared between renderers.
 3. Docker `preview` stage: copy only verified static output, manifest and the
    small static HTTP server. Run as node, read-only, no capabilities, no
    privilege escalation, 1 CPU/256 MiB/64 PIDs, loopback-bound port 8798.
+   CI uses the same Compose entry point as the README to build/start/stop it,
+   then confirms no project containers remain. It does not substitute a
+   separate CI-only runtime definition for the operator's preview command.
 4. Read back every served file hash. Chromium opens the actual preview and
    clicks index → Korean/English guides, language switch, category, tag,
    related post and TOC; exercises both comparison controls. Verify images,

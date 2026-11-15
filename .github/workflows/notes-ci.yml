@@ -16,6 +16,8 @@ jobs:
     name: Linux / ${{ matrix.renderer }} / Docker + browser
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      NOTES_RENDERER: ${{ matrix.renderer }}
     strategy:
       fail-fast: false
       matrix:
@@ -31,17 +33,17 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run ci:source
       - name: Build and verify the isolated renderer
-        env:
-          RENDERER: ${{ matrix.renderer }}
-        run: docker build --build-arg RENDERER="$RENDERER" -t notes-preview --target preview .
+        run: docker compose -p notes-ci -f compose.preview.yml build
       - name: Serve exactly the verified files
         run: |
-          docker run -d --name notes-preview --read-only --cap-drop ALL --security-opt no-new-privileges --memory 256m --cpus 1 --pids-limit 64 -p 127.0.0.1:8798:8798 notes-preview
+          docker compose -p notes-ci -f compose.preview.yml up -d --no-build
+          CONTAINER=$(docker compose -p notes-ci -f compose.preview.yml ps -q notes-preview)
           mkdir -p dist output/ci
-          docker cp notes-preview:/app/dist/notes dist/notes
-          docker cp notes-preview:/app/release.json output/ci/release.json
-          IMAGE_BYTES=$(docker image inspect notes-preview --format '{{.Size}}')
-          docker inspect notes-preview --format "{\"image\":\"{{.Image}}\",\"imageBytes\":$IMAGE_BYTES,\"memoryLimit\":{{.HostConfig.Memory}},\"cpuNano\":{{.HostConfig.NanoCpus}},\"readOnly\":{{.HostConfig.ReadonlyRootfs}},\"user\":\"{{.Config.User}}\"}" > output/ci/docker.json
+          docker cp "$CONTAINER:/app/dist/notes" dist/notes
+          docker cp "$CONTAINER:/app/release.json" output/ci/release.json
+          IMAGE=$(docker inspect "$CONTAINER" --format '{{.Image}}')
+          IMAGE_BYTES=$(docker image inspect "$IMAGE" --format '{{.Size}}')
+          docker inspect "$CONTAINER" --format "{\"image\":\"{{.Image}}\",\"imageBytes\":$IMAGE_BYTES,\"memoryLimit\":{{.HostConfig.Memory}},\"cpuNano\":{{.HostConfig.NanoCpus}},\"readOnly\":{{.HostConfig.ReadonlyRootfs}},\"user\":\"{{.Config.User}}\"}" > output/ci/docker.json
       - run: npx --no-install playwright install --with-deps chromium
       - run: npm run verify:build
       - name: Actual HTTP and desktop/mobile browser verification
@@ -51,11 +53,12 @@ jobs:
       - name: Stop only this preview
         if: always()
         run: |
-          if docker container inspect notes-preview >/dev/null 2>&1; then
-            docker stats --no-stream notes-preview
-            docker stop notes-preview
-            docker rm notes-preview
+          CONTAINER=$(docker compose -p notes-ci -f compose.preview.yml ps -q notes-preview)
+          if [ -n "$CONTAINER" ]; then
+            docker stats --no-stream "$CONTAINER"
           fi
+          docker compose -p notes-ci -f compose.preview.yml down
+          test -z "$(docker compose -p notes-ci -f compose.preview.yml ps -q)"
       - name: Enforce report allowlist and size limit
         if: always()
         id: artifacts
